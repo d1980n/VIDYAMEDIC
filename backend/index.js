@@ -7,7 +7,7 @@ require('dotenv').config({path: __dirname + '/../.env'})
 
 // Routes
 const GarminRoute = require('./routes/garmin.router'); 
-
+const AuthRoute = require('./routes/auth.router');
 // Connect to mongo
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB'))
@@ -20,7 +20,9 @@ app.use(cookieParser());
 
 // Routing
 app.use('/garminConnect', GarminRoute);
+app.use('/auth', AuthRoute);
 
+// running app
 app.listen(3000, () => {
     console.log('Server is running on port 3000!');
   });
