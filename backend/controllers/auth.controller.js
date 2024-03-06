@@ -1,7 +1,7 @@
 // Import Package
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { errorHandler } = require('../utils/error.js');
+const errorHandler = require('../utils/error.js');
 // Models
 const Person = require('../models/person.model');
 
@@ -20,7 +20,7 @@ const signup = async (req, res, next) => {
 
 
 // Login Function   
-const signin = async (err, req, res, next) => {
+const signin = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const validUser = await Person.findOne({ email });

@@ -51,11 +51,11 @@ export default function Header() {
               Home
             </li>
           </Link>
-          <Link to='/'>
+          <Link to='/profile'>
             {currentUser ? (
               <img
                 className='rounded-full h-7 w-7 object-cover'
-                src={currentUser.avatar}
+                src={currentUser.profilePicture}
                 alt='profile'
               />
             ) : (

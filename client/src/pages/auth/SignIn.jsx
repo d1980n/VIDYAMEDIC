@@ -7,8 +7,6 @@ import {
   signInFailure,
 } from '../../redux/user/userSlice';
 
-
-
 export default function SignIn() {
   const [formData, setFormData] = useState({});
   const { loading, error } = useSelector((state) => state.user);
@@ -24,6 +22,7 @@ export default function SignIn() {
     e.preventDefault();
     try {
       dispatch(signInStart());
+      console.log(JSON.stringify(formData));
       const res = await fetch('http://localhost:3000/auth/signin', {
         method: 'POST',
         headers: {
@@ -38,7 +37,7 @@ export default function SignIn() {
         return;
       }
       dispatch(signInSuccess(data));
-      navigate('/');
+      navigate('/profile');
     } catch (error) {
       dispatch(signInFailure(error.message));
     }
