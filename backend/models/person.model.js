@@ -6,11 +6,10 @@ const personSchema = new mongoose.Schema({
         unique: true,
         type: String,
       },
-    nama:[{
-        depan: String,
-        tengah: String,
-        belakang: String,
-    }],
+    nama:{
+        required: true,
+        type: String,
+      },
     email: {
         required: true,
         unique: true,

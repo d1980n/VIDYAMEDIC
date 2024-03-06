@@ -13,16 +13,11 @@ const consumerKey = process.env.CONS_KEY; // Replace with your consumer key
 const consumerSecret = process.env.CONS_SEC; // Replace with your consumer secret
 const oauthTimestamp = Math.floor(Date.now() / 1000);
 const oauthNonce = crypto.randomBytes(16).toString('hex');
-const TokenTest = "8aedf13d-eb06-4e6e-bad1-48de18c89b7e";
-const TokenSecretTest = "StLwZkLtqjAMPsa2otEEN3PTlBCy28EGGOK";
-const verifierTest = "X4LBDGjR4T";
 
 // Acquire Unauthorized Request Token and Token Secret
 // Controller function to acquire unauthorized request token and token secret
 const acquireRequestToken = async (req, res) => {
     try {
-    
-        
         const url = 'https://connectapi.garmin.com/oauth-service/oauth/request_token';
         
         const oauthParams = {
@@ -85,53 +80,10 @@ const acquireRequestToken = async (req, res) => {
 
 
         //  Acquire User Access Token and Token Secret 
-        // Define the endpoint and request parameters
-        const urlUAT = 'http://connectapi.garmin.com/oauthservice/oauth/access_token';
+     
+        // Signing Requests
 
-        // Construct the signature base string
-        const baseStringParams = {
-            oauth_consumer_key: consumerKey,
-            oauth_nonce: oauthNonce,
-            oauth_signature_method: 'HMAC-SHA1',
-            oauth_timestamp: oauthTimestamp,
-            oauth_token: TokenTest,
-            oauth_verifier: verifierTest,
-            oauth_version: '1.0'
-        };
-
-        const baseStringUAT = `POST&${encodeURIComponent(urlUAT)}&${encodeURIComponent(Object.entries(baseStringParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
-
-        // Generate the signature
-        const signingKeyUAT = encodeURIComponent(oauthTokenSecret) + '&';
-        const signatureUAT = crypto.createHmac('sha1', signingKeyUAT).update(baseStringUAT).digest('base64');
-
-        // Construct the Authorization header
-        const authHeaderParams = {
-            oauth_consumer_key: consumerKey,
-            oauth_nonce: oauthNonce,
-            oauth_signature_method: 'HMAC-SHA1',
-            oauth_timestamp: oauthTimestamp,
-            oauth_token: TokenTest,
-            oauth_verifier: verifierTest,
-            oauth_version: '1.0',
-            oauth_signature: signatureUAT
-        };
-        const authHeader = {
-            'Authorization': `OAuth ${Object.entries(authHeaderParams).map(([key, value]) => `${key}="${encodeURIComponent(value)}"`).join(', ')}`
-        };
-    
-        // Make the HTTP request using Axios
-        const responseUAT = await fetch(urlUAT, {
-            method: 'POST',
-            headers: authHeader
-        });
-
-        if (!responseUAT.ok) {
-            throw new Error('Failed to acquire request token');
-        }
-
-        const dataUAT = await responseUAT.text();
-
+        // Get User ID
 
 
     } catch (error) {
@@ -139,6 +91,8 @@ const acquireRequestToken = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+
 
 
 // get Data using garmin connect
@@ -154,8 +108,9 @@ async function getConnect() {
         await GCClient.login();
         const userProfile = await GCClient.getUserProfile();
         // Get Heart Rate
-        const heartRateData = await GCClient.getHeartRate(new Date('2024-01-18'));
+        const heartRateData = await GCClient.getHeartRate(new Date('2024-03-01'));
         const newData = new GarminModel(heartRateData)
+        console.log(heartRateData);
         newData.save().then(savedData => {
           console.log('Data saved successfully:', savedData);
           // Close the MongoDB connection

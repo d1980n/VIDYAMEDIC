@@ -8,6 +8,8 @@ require('dotenv').config({path: __dirname + '/../.env'})
 // Routes
 const GarminRoute = require('./routes/garmin.router'); 
 const AuthRoute = require('./routes/auth.router');
+const PersonRoute = require('./routes/person.route');
+const DashboardRoute = require('./routes/dashboard.route');
 // Connect to mongo
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB'))
@@ -21,6 +23,8 @@ app.use(cookieParser());
 // Routing
 app.use('/garminConnect', GarminRoute);
 app.use('/auth', AuthRoute);
+app.use('/person', PersonRoute);
+app.use('/dashboard', DashboardRoute);
 
 // running app
 app.listen(3000, () => {

@@ -1,16 +1,15 @@
 // Import Package
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const errorHandler = require('../utils/error.js');
+const { errorHandler } = require('../utils/error.js');
 // Models
 const Person = require('../models/person.model');
 
-
 // Register Function
 const signup = async (req, res, next) => {
-    const { } = req.body;
+    const { nik, nama, email, no_hp, password } = req.body;
     const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new Person({  });
+    const newUser = new Person({ nik, nama, email, no_hp, password: hashedPassword });
     try {
       await newUser.save();
       res.status(201).json('User created successfully!');
@@ -22,7 +21,7 @@ const signup = async (req, res, next) => {
 
 // Login Function   
 const signin = async (req, res, next) => {
-    const { } = req.body;
+    const { email, password } = req.body;
     try {
       const validUser = await Person.findOne({  });
       if (!validUser) return next(errorHandler(404, 'User not found!'));
