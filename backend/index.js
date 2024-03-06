@@ -3,6 +3,8 @@ const express  = require('express');
 const mongoose  = require('mongoose');
 const cookieParser  = require('cookie-parser');
 const path  = require('path');   
+const cors = require('cors');
+
 require('dotenv').config({path: __dirname + '/../.env'})
 
 // Routes
@@ -19,6 +21,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 // Routing
 app.use('/garminConnect', GarminRoute);
