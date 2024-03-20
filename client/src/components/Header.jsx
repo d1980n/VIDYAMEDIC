@@ -51,6 +51,11 @@ export default function Header() {
               Home
             </li>
           </Link>
+          <Link to='/garmin'>
+            <li className='hidden sm:inline text-slate-700 hover:underline'>
+              Konek ke garmin
+            </li>
+          </Link>
           <Link to='/profile'>
             {currentUser ? (
               <img
@@ -62,6 +67,7 @@ export default function Header() {
               <li className=' text-slate-700 hover:underline'> Sign in</li>
             )}
           </Link>
+          
         </ul>
       </div>
     </header>

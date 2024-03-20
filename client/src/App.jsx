@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SignIn from './pages/auth/SignIn';
 import SignUp from './pages/auth/SignUp';
 import Profile from './pages/user/Profile';
+import Garmin from './pages/user/Garmin';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -17,6 +18,7 @@ export default function App() {
       
         <Route element={<PrivateRoute />}>
           <Route path='/profile' element={<Profile />} />
+          <Route path='/garmin' element={<Garmin />} />
         </Route>
       </Routes>
     </BrowserRouter>
