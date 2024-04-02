@@ -4,6 +4,7 @@ const { GarminConnect } = require('garmin-connect');
 const fetch = require('node-fetch');
 const crypto = require('crypto');
 const axios = require('axios');
+const https = require('https');
 const puppeteer = require('puppeteer');
 // Models
 const GarminModel = require('../models/garmin.connect');
@@ -62,52 +63,80 @@ const acquireUnauthorizeToken = async (req, res, next) => {
 }; 
 
 const verifyToken =  async (req, res) => {
-        const  {oauthToken, oauthTokenSecret, verifier}  = req.body;
-        console.log(oauthToken);
-        // try {
-        //     const url = 'https://connectapi.garmin.com/oauth-service/oauth/access_token';
-        //     const requestToken = 'f4097134-39d5-44ba-a6f7-2dd9d5fcc77d'; // Diperoleh dari langkah sebelumnya
-        //     const requestTokenSecret = 'kMrEnqQggHnGHuOKB5Ub3rU8QdRaRH59yjp'; // Diperoleh dari langkah sebelumnya
-        //     const verifier = 'KPRwCJY8pv'; // Diperoleh dari langkah sebelumnya
+    const requestToken = 'dec884fd-96a1-4272-b911-93ed69dff054';
+    const requestTokenSecret = 'UqYHv5l3BQyz12jyf343PxCledstNeFvm3R';
+    const oauthVerifier = 'ySs7rjEOHb';
+    const oauthConsumerKey = consumerKey;
+    const oauthConsumerSecret = consumerSecret;
     
-        //     const oauthParams = {
-        //         oauth_verifier: verifier,
-        //         oauth_version: '1.0',
-        //         oauth_consumer_key: consumerKey,
-        //         oauth_token: requestToken,
-        //         oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-        //         oauth_nonce: crypto.randomBytes(20).toString('hex'),
-        //         oauth_signature_method: 'HMAC-SHA1',
-        //     };
-    
-        //     const baseString = `POST&${encodeURIComponent(url)}&${encodeURIComponent(Object.entries(oauthParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
-    
-        //     const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(requestTokenSecret)}`;
-        //     const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
-    
-        //     oauthParams.oauth_signature = signature;
-    
-        //     const headers = {
-        //         'Authorization': `OAuth ${Object.entries(oauthParams).map(([key, value]) => `${key}="${encodeURIComponent(value)}"`).join(', ')}`
-        //     };
-            
-        //     const response = await axios.post(url, null, { headers });
-    
-        //     if (response.status !== 200) {
-        //         throw new Error('Failed to acquire access token');
-        //     }
-    
-        //     const responseData = response.data;
-        //     const oauthToken = responseData.split('&')[0].split('=')[1];
-        //     const oauthTokenSecret = responseData.split('&')[1].split('=')[1];
-    
-        //     res.status(200).json({ oauthToken, oauthTokenSecret });
-          
-        // } catch (error) {
-        //     console.error('Error acquiring access token:', error);
-        //     res.status(500).send('Internal Server Error');
-        // }
+    acquireUserAccessToken(requestToken, requestTokenSecret, oauthVerifier, oauthConsumerKey, oauthConsumerSecret)
+    .then((response) => {
+        console.log('User Access Token:', response);
+    })
+    .catch((error) => {
+        console.error('Error acquiring user access token:', error);
+    });
+
     };
+
+    function acquireUserAccessToken(requestToken, requestTokenSecret, oauthVerifier, oauthConsumerKey, oauthConsumerSecret) {
+        const oauthTimestamp = Math.floor(Date.now() / 1000);
+        const oauthNonce = Math.random().toString(36).substring(2, 12);
+    
+        const url = 'https://connectapi.garmin.com/oauth-service/oauth/access_token';
+        const method = 'POST';
+    
+        const baseString = `${method}&${encodeURIComponent(url)}&` +
+            `oauth_consumer_key=${oauthConsumerKey}` +
+            `&oauth_nonce=${oauthNonce}` +
+            `&oauth_signature_method=HMAC-SHA1` +
+            `&oauth_timestamp=${oauthTimestamp}` +
+            `&oauth_token=${requestToken}` +
+            `&oauth_verifier=${oauthVerifier}` +
+            `&oauth_version=1.0`;
+    
+        const hmacKey = `${encodeURIComponent(requestTokenSecret)}&${encodeURIComponent(oauthConsumerSecret  )}`;
+    
+        const hmac = crypto.createHmac('sha1', hmacKey);
+        hmac.update(baseString);
+    
+        const oauthSignature = encodeURIComponent(hmac.digest('base64'));
+    
+        const authorizationHeader = `OAuth oauth_nonce="${oauthNonce}", ` +
+            `oauth_signature="${oauthSignature}", ` +
+            `oauth_consumer_key="${oauthConsumerKey}", ` +
+            `oauth_token="${requestToken}", ` +
+            `oauth_timestamp="${oauthTimestamp}", ` +
+            `oauth_verifier="${oauthVerifier}", ` +
+            `oauth_signature_method="HMAC-SHA1", ` +
+            `oauth_version="1.0"`;
+        console.log(authorizationHeader);
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Authorization': authorizationHeader,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+    
+        return new Promise((resolve, reject) => {
+            const req = https.request(url, requestOptions, (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                res.on('end', () => {
+                    resolve(data);
+                });
+            });
+    
+            req.on('error', (error) => {
+                reject(error);
+            });
+    
+            req.end();
+        });
+    }
 
 const acquireRequestToken = async (req, res) => {
     try {
