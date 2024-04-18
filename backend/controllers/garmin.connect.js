@@ -12,8 +12,8 @@ const TokenModel = require('../models/garmin.token');
 // Garmin Developer API
 const consumerKey = process.env.CONS_KEY; // Replace with your consumer key
 const consumerSecret = process.env.CONS_SEC; // Replace with your consumer secret
-const oauthTimestamp = Math.floor(Date.now() / 1000);
-const oauthNonce = crypto.randomBytes(16).toString('hex');
+const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
+const oauthNonce = Math.random().toString(36).substring(2);
 
 // Acquire Unauthorized Request Token and Token Secret
 // Controller function to acquire unauthorized request token and token secret
@@ -63,159 +63,176 @@ const acquireUnauthorizeToken = async (req, res, next) => {
 }; 
 
 const verifyToken =  async (req, res) => {
-    const requestToken = 'dec884fd-96a1-4272-b911-93ed69dff054';
-    const requestTokenSecret = 'UqYHv5l3BQyz12jyf343PxCledstNeFvm3R';
-    const oauthVerifier = 'ySs7rjEOHb';
-    const oauthConsumerKey = consumerKey;
-    const oauthConsumerSecret = consumerSecret;
-    
-    acquireUserAccessToken(requestToken, requestTokenSecret, oauthVerifier, oauthConsumerKey, oauthConsumerSecret)
-    .then((response) => {
-        console.log('User Access Token:', response);
-    })
-    .catch((error) => {
-        console.error('Error acquiring user access token:', error);
-    });
-
-    };
-
-    function acquireUserAccessToken(requestToken, requestTokenSecret, oauthVerifier, oauthConsumerKey, oauthConsumerSecret) {
-        const oauthTimestamp = Math.floor(Date.now() / 1000);
-        const oauthNonce = Math.random().toString(36).substring(2, 12);
-    
-        const url = 'https://connectapi.garmin.com/oauth-service/oauth/access_token';
-        const method = 'POST';
-    
-        const baseString = `${method}&${encodeURIComponent(url)}&` +
-            `oauth_consumer_key=${oauthConsumerKey}` +
-            `&oauth_nonce=${oauthNonce}` +
-            `&oauth_signature_method=HMAC-SHA1` +
-            `&oauth_timestamp=${oauthTimestamp}` +
-            `&oauth_token=${requestToken}` +
-            `&oauth_verifier=${oauthVerifier}` +
-            `&oauth_version=1.0`;
-    
-        const hmacKey = `${encodeURIComponent(requestTokenSecret)}&${encodeURIComponent(oauthConsumerSecret  )}`;
-    
-        const hmac = crypto.createHmac('sha1', hmacKey);
-        hmac.update(baseString);
-    
-        const oauthSignature = encodeURIComponent(hmac.digest('base64'));
-    
-        const authorizationHeader = `OAuth oauth_nonce="${oauthNonce}", ` +
-            `oauth_signature="${oauthSignature}", ` +
-            `oauth_consumer_key="${oauthConsumerKey}", ` +
-            `oauth_token="${requestToken}", ` +
-            `oauth_timestamp="${oauthTimestamp}", ` +
-            `oauth_verifier="${oauthVerifier}", ` +
-            `oauth_signature_method="HMAC-SHA1", ` +
-            `oauth_version="1.0"`;
-        console.log(authorizationHeader);
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Authorization': authorizationHeader,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        };
-    
-        return new Promise((resolve, reject) => {
-            const req = https.request(url, requestOptions, (res) => {
-                let data = '';
-                res.on('data', (chunk) => {
-                    data += chunk;
+    const consumerKey = process.env.CONS_KEY;
+    const consumerSecret = process.env.CONS_SEC;
+    const requestToken =  req.body.oauthToken; // change with data from FE
+    const requestTokenSecret = req.body.oauthTokenSecret; // same
+    const verifier = req.body.verifier; // same
+    console.log(verifier);
+    acquireUserAccessToken(consumerKey, consumerSecret, requestToken, requestTokenSecret, verifier)
+        .then(data => {
+            console.log('User Access Token:', data.oauth_token);
+            console.log('User Access Token Secret:', data.oauth_token_secret);
+            try {
+                const newUserToken = new TokenModel({
+                    oauthToken: data.oauth_token,
+                    oauthTokenSecret: data.oauth_token_secret,
+                    userRef: '65e143047e1864db4e3fe370'
                 });
-                res.on('end', () => {
-                    resolve(data);
-                });
-            });
-    
-            req.on('error', (error) => {
-                reject(error);
-            });
-    
-            req.end();
-        });
-    }
-
-const acquireRequestToken = async (req, res) => {
-    try {
-        const url = 'https://connectapi.garmin.com/oauth-service/oauth/request_token';
         
+                newUserToken.save();
+                console.log('User token saved successfully');
+            } catch (error) {
+                console.error('Error saving user token:', error);
+                throw error;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+};
+
+async function acquireUserAccessToken(consumerKey, consumerSecret, requestToken, requestTokenSecret, verifier) {
+    try {
+        const url = 'https://connectapi.garmin.com/oauth-service/oauth/access_token';
+
         const oauthParams = {
             oauth_consumer_key: consumerKey,
+            oauth_token: requestToken,
             oauth_signature_method: 'HMAC-SHA1',
-            oauth_nonce: oauthNonce,
-            oauth_timestamp: oauthTimestamp,
-            oauth_version: '1.0'
+            oauth_nonce: Math.random().toString(36).substring(2),
+            oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+            oauth_version: '1.0',
+            oauth_verifier: verifier
         };
 
+        // Generate the signature base string
         const baseString = `POST&${encodeURIComponent(url)}&${encodeURIComponent(Object.entries(oauthParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
 
-        const signingKey = `${encodeURIComponent(consumerSecret)}&`;
+        // Generate the signing key
+        const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(requestTokenSecret)}`;
+
+        // Calculate the HMAC-SHA1 signature
         const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
 
+        // Add the signature to the OAuth parameters
         oauthParams.oauth_signature = signature;
 
-        const headers = {
-            'Authorization': `OAuth ${Object.entries(oauthParams).map(([key, value]) => `${key}="${encodeURIComponent(value)}"`).join(', ')}`
-        };
-      
+        // Generate the Authorization header
+        const authorizationHeader = `OAuth ${Object.entries(oauthParams).map(([key, value]) => `${key}="${encodeURIComponent(value)}"`).join(', ')}`;
+
+        // Make the HTTP POST request to acquire the access token
         const response = await fetch(url, {
             method: 'POST',
-            headers: headers,
+            headers: {
+                'Authorization': authorizationHeader
+            }
         });
 
         if (!response.ok) {
-            throw new Error('Failed to acquire request token');
+            throw new Error(`Failed to acquire user access token: ${response.statusText}`);
         }
 
-        const data = await response.text();
-        const [oauthToken, oauthTokenSecret] = data.split('&').map(item => item.split('=')[1]);
-        // Redirect to authorization page with oauthToken
-        // res.redirect(`https://connect.garmin.com/oauthConfirm?oauth_token=${oauthToken}`);
+        // Parse the response
+        const responseData = await response.text();
+        const data = {};
+        responseData.split('&').forEach(param => {
+            const [key, value] = param.split('=');
+            data[key] = value;
+        });
 
-        // curl -X POST http://localhost:3000/garminconnect/acquireToken
-        // Token Testing oauth_token=90ce03e8-4c0b-4f14-9ab0-ccbad8cb7eb1
-        // Verifier Testing oauth_verifier=FWEv47HDOS
-
-
-        // Puppet to auto accept
-        // const browser = await puppeteer.launch({ headless: false }); // Launch browser in non-headless mode for debugging
-        // const page = await browser.newPage();
-    
-        // // Navigate to the Garmin Connect OAuth confirmation page
-        // const oauthCallback = encodeURIComponent('https://your.callback.url'); // Replace with your callback URL
-        // await page.goto(`https://connect.garmin.com/oauthConfirm?oauth_token=${oauthToken}`);
-    
-        // // Wait for the page to load
-        // // await page.waitForNavigation();
-    
-        // Extract the verifier from the redirected URL
-        const redirectURL = page.url();
-        const urlParams = new URLSearchParams(new URL(redirectURL).search);
-        const oauthVerifier = urlParams.get('oauth_verifier');
-    
-        // console.log('OAuth Verifier:', oauthVerifier);
-    
-        // await browser.close();
-
-
-        //  Acquire User Access Token and Token Secret 
-     
-        // Signing Requests
-
-        // Get User ID
-
-
+        return data;
     } catch (error) {
-        console.error('Error acquiring request token:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error acquiring user access token:', error);
+        throw error;
     }
-};
+}
 
+const Signingrequests  =  async (req, res) => {
+    const consumerKey = process.env.CONS_KEY;
+    const consumerSecret = process.env.CONS_SEC;
+    const accessToken = 'ad0a26f6-b3d8-44bd-ae1a-a9b27d458440';
+    const accessTokenSecret = 'NWRfHwtQ86HEjrzmYwSYrKkdWW1T3T6S0se';
+    
+    const url = 'https://healthapi.garmin.com/wellness-api/rest/user/id';
+    const method = 'GET'; // Change method according to your request
+    const oauthParams = {
+        oauth_consumer_key: consumerKey,
+        oauth_token: accessToken,
+        oauth_timestamp: Math.floor(Date.now() / 1000), // Current timestamp in seconds
+        oauth_nonce: Math.random().toString(36).substring(2), // Generate random nonce
+        oauth_version: '1.0',
+    };
 
+    signRequest(url, method, oauthParams, consumerSecret, accessTokenSecret)
+    .then(headers => {
+        console.log('Authorization header:', headers.Authorization);
+        // Make the request using fetch or your preferred HTTP client library
+    })
+    .catch(error => console.error('Error:', error));
 
+}
+
+// Function to sign requests
+async function signRequest(url, method, oauthParams, consumerSecret, tokenSecret) {
+    try {
+        // Set oauth_signature_method
+        oauthParams.oauth_signature_method = 'HMAC-SHA1';
+
+        // Generate Signature Base String (SBS)
+        const baseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(Object.entries(oauthParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
+
+        // Generate signing key
+        const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(tokenSecret)}`;
+
+        // Calculate HMAC-SHA1 signature
+        const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
+
+        // Add signature to oauthParams
+        oauthParams.oauth_signature = signature;
+
+        // Create Authorization header
+        const headers = {
+            'Authorization': `OAuth ${Object.entries(oauthParams).map(([key, value]) => `${key}="${encodeURIComponent(value)}"`).join(', ')}`
+        };
+
+        return headers;
+    } catch (error) {
+        console.error('Error signing request:', error);
+        throw error;
+    }
+}
+
+// Function to simulate a ping notification
+async function simulatePing() {
+    try {
+        const pingData = {
+            epochs: [{
+                userId: process.env.CONS_KEY,
+                userAccessToken: "ad0a26f6-b3d8-44bd-ae1a-a9b27d458440",
+                uploadStartTimeInSeconds: 1444937651,
+                uploadEndTimeInSeconds: 1444937902,
+            }]
+        };
+
+        const response = await fetch('https://apis.garmin.com/wellnessapi/rest/epochs?uploadStartTimeInSeconds=1444937651&uploadEndTimeInSeconds=1444937902', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(pingData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to simulate ping');
+        }
+
+        const responseData = await response.json();
+        console.log('Ping simulated successfully:', responseData);
+    } catch (error) {
+        console.error('Error simulating ping:', error);
+    }
+}
 
 // get Data using garmin connect
 async function getConnect() {
@@ -247,7 +264,8 @@ async function getConnect() {
         
     module.exports = {
         getConnect,
-        acquireRequestToken,
         acquireUnauthorizeToken,
-        verifyToken
+        verifyToken,
+        Signingrequests,
+        simulatePing
     };

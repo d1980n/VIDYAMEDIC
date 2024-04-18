@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
+import { json } from 'express';
 
 
 export default function Profile() {
@@ -48,13 +49,12 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3000/garminConnect/verifyToken', {
+      const res = await fetch('http://localhost:3000/garminConnect/verifyToken', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-       body: JSON.stringify(formData),
-      
+        body: JSON.stringify(formData),
       });
       
       const data = await res.json();
@@ -84,21 +84,24 @@ export default function Profile() {
             type='text'
             id='oauthToken'
             name='oauthToken'
+            placeholder='Oauth Token'
             className='bg-slate-100 rounded-lg p-3'
-            value={formData.oauthToken}
+            value={UnauthorizeToken}
             onChange={handleChange}
           />
              <input
-            type='password'
+            type='text'
             id='oauthTokenSecret'
+            placeholder='Oauth Token Secret'
             name='oauthTokenSecret'
             className='bg-slate-100 rounded-lg p-3'
-            value={formData.oauthTokenSecret}
+            value={UnauthorizeTokenSecret}
             onChange={handleChange}
           />
           <input
             type='text'
             id='verifier'
+            placeholder='Verifier'
             name='verifier'
             className='bg-slate-100 rounded-lg p-3'
             value={formData.verifier}
@@ -109,6 +112,11 @@ export default function Profile() {
           </button>
         </form>
         <br />
+
+        <div className="p-3 max-w-lg mx-auto">
+          <h3>User Access Token: </h3>
+          <h3>User Access Token Secret: </h3>
+        </div>
     </div>
   );
 }
