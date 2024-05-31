@@ -6,11 +6,10 @@ const personSchema = new mongoose.Schema({
         unique: true,
         type: String,
       },
-    nama:[{
-        depan: String,
-        tengah: String,
-        belakang: String,
-    }],
+    nama:{
+        required: true,
+        type: String,
+      },
     email: {
         required: true,
         unique: true,
@@ -35,7 +34,12 @@ const personSchema = new mongoose.Schema({
     password:{
         required: true,
         type: String,
-    }
+    },
+    profilePicture: {
+      type: String,
+      default:
+        'https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg',
+    },
 })
 const Person = mongoose.model("person", personSchema);
 module.exports = Person;

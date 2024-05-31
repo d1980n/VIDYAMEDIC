@@ -7492,7 +7492,8 @@ fieldset:disabled .btn {
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    width: 100%;
+    width: 165%;
+    justify-content: center;
     color: var(--bs-modal-color);
     pointer-events: auto;
     background-color: var(--bs-modal-bg);
@@ -18577,7 +18578,7 @@ table.info td {
 
 table.info th {
     padding-left: 0px;
-    width: 30vh;
+    width: 17vh;
 }
 
 div .photos {
@@ -18615,7 +18616,7 @@ div .photos {
 
 .infos th {
     width: auto;
-    padding-right: 20px;
+    padding-right: 10px;
     /* memberikan jarak 20px antara judul dan isi */
 }
 
@@ -19028,6 +19029,30 @@ input .deksripsi {
 .Rujukbtn {
     display: flex;
     align-items: center;
-    width: 50em;
+    width: 100%;
     gap: 10px;
+}
+
+.Rujukbtn .btn-primary:last-child {
+    margin-left: auto;
+    /* Memindahkan tombol terakhir (Simpan) ke kanan */
+}
+
+.checkbox-label {
+    background-color: transparent !important;
+    font-weight: normal !important;
+    color: inherit !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    justify-content: initial !important;
+    align-items: initial !important;
+    margin-right: 0 !important;
+    cursor: initial !important;
+    transition: none !important;
+    gap: 5px;
+}
+
+.lalala {
+    display: flex;
+    gap: 20px;
 }

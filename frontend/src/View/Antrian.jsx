@@ -8,7 +8,54 @@ import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png'
 function Antrian() {
     
-  
+  const [showModal, setShowModal] = useState(false);
+  const [nomorAntrian, setNomorAntrian] = useState(1); // Nomor antrian awal
+  const [namaLengkap, setNamaLengkap] = useState('');
+  const [fotoKTP, setFotoKTP] = useState(null);
+  const [jenisKelamin, setJenisKelamin] = useState('');
+  const [alamatLengkap, setAlamatLengkap] = useState('');
+  const [daftarPasien, setDaftarPasien] = useState([]);
+
+  const toggleModal = () => {
+      setShowModal(!showModal);
+  };
+
+  const tambahPasien = () => {
+      // Logika untuk menambahkan pasien ke dalam daftar pasien
+      const newPasien = {
+          nomorAntrian,
+          namaLengkap,
+          nomorMR: generateNomorMR(), // Menghasilkan nomor MR otomatis
+          jenisKelamin,
+          alamatLengkap
+      };
+      setDaftarPasien([...daftarPasien, newPasien]);
+      // Atur ulang nilai-nilai form
+      setNomorAntrian(nomorAntrian + 1);
+      setNamaLengkap('');
+      setFotoKTP(null);
+      setJenisKelamin('');
+      setAlamatLengkap('');
+      // Tutup modal
+      toggleModal();
+  };
+
+  const generateNomorMR = () => {
+      // Menghasilkan nomor MR dengan maksimal 7 digit huruf atau angka
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 7; i++) {
+          result += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return result;
+  };
+
+  const hapusPasien = (index) => {
+      // Menghapus pasien dari daftar pasien berdasarkan index
+      const newDaftarPasien = [...daftarPasien];
+      newDaftarPasien.splice(index, 1);
+      setDaftarPasien(newDaftarPasien);
+  };
     
     
     
@@ -166,108 +213,107 @@ function Antrian() {
         <body className="login">
         </body>
         {/* <!--  Row 1 --> */}
-        <div class="row">
-          
-          <div class="col-lg-8 d-flex align-items-stretch" style={{width: '100%'}}>
-            <div class="card w-100">
-              <div class="card-body p-4 width" >
-                <h5 class="card-title fw-semibold mb-4">Antrian Pasien</h5>
-                <div class="table-responsive">
-                  <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-                      <tr>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">No</h6>
-                        </th>
+        
+        <div>
+            <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Pasien</button>
+            <div className="row">
+                <div className="col-lg-8 d-flex align-items-stretch" style={{ width: '100%' }}>
+                    <div className="card w-100">
+                        <div className="card-body p-4 width">
+                            <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
+                                <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Antrian Pasien</h5>
+                                <input type="text" className="form-sels" placeholder="Masukkan nama atau alamat Pasien" style={{ width: '67%' }} />
+                            </div>
 
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Nama Pasien</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Nomor MR</h6>
-                        </th>
-                        <th class="border-bottom-0">
-                          <h6 class="fw-semibold mb-0">Action</h6>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
-                        <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">Sukmiadi Salamarudin supriyatni</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                            <span class="fw-normal">0129830123</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                          <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">2</h6></td>
-                        <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">Sumarti</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">3</h6></td>
-                        <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal">Sukmiadi</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">4</h6></td>
-                        <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal">Sukmiadi</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr>                    
-                    </tbody>
-                  </table>
+                            <div className="table-responsive">
+                                <table className="table text-nowrap mb-0 align-middle">
+                                    <thead className="text-dark fs-4">
+                                        <tr>
+                                            <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">No</h6>
+                                            </th>
+                                            <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Nama Pasien</h6>
+                                            </th>
+                                            <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Nomor MR</h6>
+                                            </th>
+                                            <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Action</h6>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {daftarPasien.map((pasien, index) => (
+                                            <tr key={index}>
+                                                <td className="border-bottom-0"><h6 className="fw-semibold mb-0">{pasien.nomorAntrian}</h6></td>
+                                                <td className="border-bottom-0">
+                                                    <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+                                                </td>
+                                                <td className="border-bottom-0">
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <span className="fw-normal">{pasien.nomorMR}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="border-bottom-0">
+                                                    <button type="button" className="btn btn-primary m-1">Masuk</button>
+                                                    <button type="button" className="btn btn-danger m-1" onClick={() => hapusPasien(index)}>Batal</button>
+                                                    <button type="button" className="btn btn-success m-1">Selesai</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-              </div>
-              
-              
             </div>
-            
-          </div>
-          
+
+            {/* Modal Tambah Pasien */}
+            {showModal && (
+                <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLabel">Tambah Pasien</h5>
+                                <button type="button" className="btn-close" onClick={toggleModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                <form>
+                                    <div className="mb-3">
+                                        <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
+                                        <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="fotoKTP" className="form-label">Foto KTP</label>
+                                        <input type="file" className="form-control" id="fotoKTP" onChange={(e) => setFotoKTP(e.target.files[0])} />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+                                        <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                                            <option value="">Pilih Jenis Kelamin</option>
+                                            <option value="Laki-laki">Laki-laki</option>
+                                            <option value="Perempuan">Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
+                                        <textarea className="form-control" id="alamatLengkap" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+                                <button type="button" className="btn btn-primary" onClick={tambahPasien}>Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showModal && <div className="modal-backdrop fade show"></div>}
         </div>
+       
       </div>
       
     </div>

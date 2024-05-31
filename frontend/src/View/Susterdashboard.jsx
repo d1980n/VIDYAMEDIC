@@ -18,11 +18,16 @@ function Susterdashboard() {
                   </summary>
                   <div>
                     <h5>Pemeriksaan Tanda Vital</h5>
-                    <h7>{entry.tandaVital}</h7>
-                    <h5>Health Record</h5>
-                    <h6>Diagnosa/Anamnesa: <h8 className="fw-light">{entry.diagnosa}</h8></h6>
-                    <h6>Therapy: <h8 className="fw-light">{entry.therapy}</h8></h6>
-                    <h6>Obat: <h8 className="fw-light">{entry.obat}</h8></h6>
+                    <h6>Tekanan Darah Sistolik: <h8 className="fw-light">{entry.TDS}</h8></h6>
+                    <h6>Tekanan Darah Diastolik: <h8 className="fw-light">{entry.TDD}</h8></h6>
+                    <h6>Temperatur: <h8 className="fw-light">{entry.Temp}</h8></h6>
+                    <h6>Nadi: <h8 className="fw-light">{entry.Nadi}</h8></h6>
+                    <h6>Laju Pernafasan: <h8 className="fw-light">{entry.LP}</h8></h6>
+                    <h6>Presentase SpO2: <h8 className="fw-light">{entry.Spot}</h8></h6>
+                    <h6>Tinggi Badan: <h8 className="fw-light">{entry.TB}</h8></h6>
+                    <h6>Berat Badan: <h8 className="fw-light">{entry.BB}</h8></h6>
+                    <h6>LILA: <h8 className="fw-light">{entry.LILA}</h8></h6>
+                    <h6>AVPU: <h8 className="fw-light">{entry.AVPU}</h8></h6>
                   </div>
                 </details>
               </div>
@@ -30,50 +35,70 @@ function Susterdashboard() {
           </div>
         );
       };    
-    const [riwayat, setRiwayat] = useState([
+      const [riwayat, setRiwayat] = useState([
         {
           tanggal: "12 Maret 2039",
           waktu: "08:21",
           tandaVital: "Tekanan Darah Sistolik: 123932180",
-          diagnosa: "Sehat Enak",
-          therapy: "Olahraga kayang",
-          obat: "Minum air hujan"
+          TDS: "",
+          TDD: "",
+          SuhuTubuh: "",
+          Nadi: "",
+          LP: "",
+          SpO2: "",
+          TB: "",
+          BB: "",
+          LILA: "",
+          AVPU: ""
         },
         {
           tanggal: "21 April 2019",
           waktu: "12:21",
           tandaVital: "Tekanan Darah Sistolik: 123932180",
-          diagnosa: "Sehat Enak",
-          therapy: "Olahraga kayang",
-          obat: "Minum air hujan"
+          TDS: "",
+          TDD: "",
+          SuhuTubuh: "",
+          Nadi: "",
+          LP: "",
+          SpO2: "",
+          TB: "",
+          BB: "",
+          LILA: "",
+          AVPU: ""
         },
         {
           tanggal: "17 Agustus 2039",
           waktu: "09:11",
           tandaVital: "Tekanan Darah Sistolik: 123932180",
-          diagnosa: "Sehat Enak",
-          therapy: "Olahraga kayang",
-          obat: "Minum air hujan"
+          TDS: "",
+          TDD: "",
+          SuhuTubuh: "",
+          Nadi: "",
+          LP: "",
+          SpO2: "",
+          TB: "",
+          BB: "",
+          LILA: "",
+          AVPU: ""
         }
-      ]);
-    
-      const [newEntry, setNewEntry] = useState(null);
-    
-      const tambahMR = () => {
+    ]);
+
+    const [newEntry, setNewEntry] = useState(null);
+
+    const tambahMR = () => {
         if (newEntry) {
           setRiwayat([newEntry, ...riwayat]);
           setNewEntry(null);
         }
-      };
-    
-      const handleChange = (e) => {
-        
+    };
+
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setNewEntry(prevState => ({
           ...prevState,
           [name]: value
         }));
-      };
+    };
     
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -480,17 +505,62 @@ function Susterdashboard() {
                       Tambah MR
                     </summary>
     
-                        <div className="form-group">
-                          <input type="text" name="tanggal" className="form-control" placeholder="Tanggal" onChange={handleChange} />
-                          <input type="text" name="waktu" className="form-control" placeholder="Waktu" onChange={handleChange} />
-                          <input type="text" name="tandaVital" className="form-control" placeholder="Tanda Vital" onChange={handleChange} />
-                          <input type="text" name="diagnosa" className="form-control" placeholder="Diagnosa" onChange={handleChange} />
-                          <input type="text" name="therapy" className="form-control" placeholder="Terapi" onChange={handleChange} />
-                          <input type="text" name="obat" className="form-control" placeholder="Obat" onChange={handleChange} />
-                          <button type="submit" className="btn btn-primary" onClick={tambahMR}>
-                          <i className="ti ti-playlist-add"></i> Tambah MR
-                        </button>
-                        </div>
+                    <div className="form-group">
+  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Tekanan Darah Sistolik</h6>
+      <input type="text" name="TDS" className="form-control" placeholder="mmHg" onChange={handleChange}  />
+    </div>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Tekanan Darah Diastolik</h6>
+      <input type="text" name="TDD" className="form-control" placeholder="mmHg" onChange={handleChange} />
+    </div>
+  </div>
+  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Temperatur</h6>
+      <input type="text" name="Temp" className="form-control" placeholder="C" onChange={handleChange} />
+    </div>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Nadi</h6>
+      <input type="text" name="Nadi" className="form-control" placeholder="Nadi" onChange={handleChange} />
+    </div>
+  </div>
+  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Laju Pernafasan</h6>
+      <input type="text" name="LP" className="form-control" placeholder="LP" onChange={handleChange} />
+    </div>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Presentase SpO2</h6>
+      <input type="text" name="Spot" className="form-control" placeholder="Laju Presentase" onChange={handleChange} />
+    </div>
+  </div>
+  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Tinggi Badan</h6>
+      <input type="text" name="TB" className="form-control" placeholder="Cm" onChange={handleChange} />
+    </div>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">Berat Badan</h6>
+      <input type="text" name="BB" className="form-control" placeholder="Kg" onChange={handleChange} />
+    </div>
+  </div>
+  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">LILA</h6>
+      <input type="text" name="LILA" className="form-control" placeholder="LILA" onChange={handleChange} />
+    </div>
+    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+      <h6 className="Tanda fw-bold">AVPU</h6>
+      <input type="text" name="AVPU" className="form-control" placeholder="AVPU" onChange={handleChange} />
+    </div>
+  </div>
+  <button type="submit" className="btn btn-primary" onClick={tambahMR}>
+    <i className="ti ti-playlist-add"></i> Tambah MR
+  </button>
+</div>
+
         
                   </details>
                 </div>
