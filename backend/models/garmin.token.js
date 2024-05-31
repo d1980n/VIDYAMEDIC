@@ -1,31 +1,15 @@
 const mongoose  = require("mongoose");
 
 const TokenSchema = new mongoose.Schema({
-    UnoauthToken: {
+    oauthToken: {
         type: String,
         required: true
     },
-    UnoauthTokenSecret: {
+    oauthTokenSecret: {
         type: String,
         required: true
     },
-    verifier: {
-        type: String,
-        required: true
-    },
-    userId: {
-        type: String,
-        required: true
-    },
-    verifier: {
-        type: String,
-        required: true
-    },
-    authToken: {
-        type: String,
-        required: true
-    },
-    authTokenSecret: {
+    userRef:{
         type: String,
         required: true
     },
