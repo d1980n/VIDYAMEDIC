@@ -1,8 +1,41 @@
 import '../css/login.css';
-import React, { useState ,useEffect } from "react";
+import { useState } from 'react';
 import logologin from '../source/logologin.png'
+import { Link, useNavigate } from 'react-router-dom';
 
 function Login() {
+  const [formData, setFormData] = useState({});
+  const navigate = useNavigate();
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      console.log(JSON.stringify(formData));
+      const res = await fetch('http://localhost:3000/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data);
+      if (data.success === false) {
+ 
+        return;
+      }
+      navigate('/Drdashboard');
+    } catch (error) {
+      
+    }
+  };
+
   return (
     <html className='loginss'>
       <body className="login">
@@ -20,14 +53,14 @@ function Login() {
                 </a>
                 <p class="text-center">Sistem Informasi Manajemen Klinik</p>
                 <p class="text-center mb-0 fw-bold black">Klinik Vidya Medic</p>
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
+                    <input type="email" class="form-control" onChange={handleChange} id="email" aria-describedby="emailHelp"/>
                   </div>
                   <div class="mb-4">
                     <label for="exampleInputPassword1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1"/>
+                    <input type="password" class="form-control" onChange={handleChange} id="password"/>
                   </div>
                   <div class="d-flex align-items-center justify-content-between mb-4">
                     <div class="form-check">
@@ -38,7 +71,7 @@ function Login() {
                     </div>
                     <a class="text-primary fw-bold" href="/Drdashboard">Lupa Password?</a>
                   </div>
-                  <a href="/home" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Masuk</a>
+                  <button href="" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Masuk</button>
                   <p class="text-center fs-4 fw-semi-bold">Atau menggunakan</p>
                   <div class="udin">
                     <span>

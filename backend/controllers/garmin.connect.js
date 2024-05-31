@@ -208,14 +208,15 @@ async function simulatePing() {
     try {
         const pingData = {
             epochs: [{
-                userId: process.env.CONS_KEY,
-                userAccessToken: "ad0a26f6-b3d8-44bd-ae1a-a9b27d458440",
-                uploadStartTimeInSeconds: 1444937651,
-                uploadEndTimeInSeconds: 1444937902,
+                userId: "719b2e07-5f39-4f4e-9ebf-802bb55dde8e",
+                userAccessToken: "907211bd-de4e-49c7-836e-997d39b8e92d",
+                uploadStartTimeInSeconds: 1716443889,
+                uploadEndTimeInSeconds: 1716443892,
+                callbackURL:"https://apis.garmin.com/wellnessapi/rest/epochs?uploadStartTimeInSeconds=1716443889&uploadEndTimeInSeconds=1716443892"
             }]
         };
 
-        const response = await fetch('https://apis.garmin.com/wellnessapi/rest/epochs?uploadStartTimeInSeconds=1444937651&uploadEndTimeInSeconds=1444937902', {
+        const response = await fetch('https://apis.garmin.com/wellnessapi/rest/epochs?uploadStartTimeInSeconds=1716443889&uploadEndTimeInSeconds=1716443892', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'

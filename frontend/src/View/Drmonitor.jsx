@@ -48,6 +48,7 @@ const handleChange = (event) => {
 
 const handleSave = () => {
     // Lakukan penyimpanan data ke database atau proses lainnya di sini
+    
     console.log('Data disimpan:', formData);
 
     // Menampilkan ringkasan data yang disimpan

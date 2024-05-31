@@ -12,6 +12,7 @@ const GarminRoute = require('./routes/garmin.router');
 const AuthRoute = require('./routes/auth.router');
 const PersonRoute = require('./routes/person.route');
 const DashboardRoute = require('./routes/dashboard.route');
+const MedicalRoute = require('./routes/medical.router');
 // Connect to mongo
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB'))
@@ -28,7 +29,7 @@ app.use('/garminConnect', GarminRoute);
 app.use('/auth', AuthRoute);
 app.use('/person', PersonRoute);
 app.use('/dashboard', DashboardRoute);
-
+app.use('/medical', MedicalRoute);
 // running app
 app.listen(3000, () => {
     console.log('Server is running on port 3000!');
