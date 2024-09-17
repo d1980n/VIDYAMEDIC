@@ -7,6 +7,20 @@ import images from '../source/Picture1.png'
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png'
 function Susterdashboard() {
+  const [showModal, setShowModal] = useState(false);
+  const [TDS, setTekananDarahSistolik] = useState('');
+  const [TDD, setTekanandarahDiastolik] = useState('');
+  const [Temperatur, setTemperatur] = useState('');
+  const [Nadi, setNadi] = useState('');
+  const [LP, setLajuPernafasan] = useState('');
+  const [Spot, setSpot] = useState('');
+  const [TB, setTinggiBadan] = useState('');
+  const [BB, setBeratBadan] = useState('');
+  const [LILA, setLILA] = useState('');
+  const [AVPU, setAVPU] = useState('');
+  const [Medicalrecords, setMedicalrecords] = useState([]);
+  const [formData, setFormData] = useState({});
+  
     const renderRiwayat = () => {
         return (
           <div>
@@ -35,6 +49,153 @@ function Susterdashboard() {
           </div>
         );
       };    
+      const handleChange = (e) => {
+        setFormData({
+          ...formData,
+          [e.target.id]: e.target.value,
+        });
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+      
+        // Menyusun data form
+        const formData = {
+          TDS,
+          TDD,
+          Temperatur,
+          Nadi,
+          LP,
+          Spot,
+          TB,
+          BB,
+          LILA,
+          AVPU
+    
+        };
+      
+        // Log data untuk memeriksa
+        console.log('Form Data:', formData);
+      
+        try {
+          const response = await fetch('http://localhost:3000/medicalrecords', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+      console.log('response : ', response);
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Network response was not ok: ${response.statusText}. Server returned: ${errorText}`);
+          }
+      
+          const data = await response.json();
+          console.log('Response Data:', data);
+      
+          if (!data.success) {
+            console.error('Server Error:', data.message);
+            return;
+          }
+      
+          // Reset form setelah pengiriman berhasil
+          setTekananDarahSistolik('');
+          setTekanandarahDiastolik('');
+          setTemperatur('');
+          setNadi('');
+          setLajuPernafasan('');
+          setSpot('');
+          setTinggiBadan('');
+          setBeratBadan('');
+          setLILA('');
+          setAVPU('');
+          setShowModal(false);
+    
+          // Fetch data again after adding a new patient
+          fetchMedicalrecords();
+        } catch (error) {
+          console.error('Error:', error.message);
+        }
+      };
+
+
+      const fetchMedicalrecords = async () => {
+         try {
+    const response = await fetch('http://localhost:3000/medicalrecords/tambah', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Network response was not ok: ${response.statusText}. Server returned: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('Response Data:', data);
+
+    if (!data.message) {
+      console.error('Server Error:', data.message);
+      return;
+    }
+
+    // Reset form fields
+    setTekananDarahSistolik('');
+    setTekanandarahDiastolik('');
+    setTemperatur('');
+    setNadi('');
+    setLajuPernafasan('');
+    setSpot('');
+    setTinggiBadan('');
+    setBeratBadan('');
+    setLILA('');
+    setAVPU('');
+    setShowModal(false);
+
+    // Fetch updated medical records
+    fetchMedicalrecords();
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+  const fetchMedicalrecords = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/medicalrecords');
+      const data = await response.json();
+      if (data.success) {
+        setMedicalrecords(data.patients); // Menyimpan data pasien ke state
+      } else {
+        console.error('Failed to fetch patients:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  };
+
+    // Reset form fields
+    setTekananDarahSistolik('');
+    setTekanandarahDiastolik('');
+    setTemperatur('');
+    setNadi('');
+    setLajuPernafasan('');
+    setSpot('');
+    setTinggiBadan('');
+    setBeratBadan('');
+    setLILA('');
+    setAVPU('');
+    setShowModal(false);
+
+
+};
+
+
+
+
+
+
       const [riwayat, setRiwayat] = useState([
         {
           tanggal: "12 Maret 2039",
@@ -92,13 +253,6 @@ function Susterdashboard() {
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setNewEntry(prevState => ({
-          ...prevState,
-          [name]: value
-        }));
-    };
     
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -286,31 +440,31 @@ function Susterdashboard() {
               
             </div>
             <div class="row" style={{width: '49%', marginRight: "2px"}}>
-  <div class="card overflow-hidden">
-    <div class="card-body p-4">
-      <h5 class="card-title mb-9 fw-semibold">Suster</h5>
-      <div class="row align-items-center">
-        <div class="col-8">
-          <h4 class="fw-semibold mb-3">Helo, Perawat. Sarah Namban</h4>
-          <div class="d-flex align-items-center pb-1">
-            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-              <i class="ti ti-arrow-down-right text-danger"></i>
-            </span>
-            <p class="fs-3 mb-0" style={{marginLeft:'10px'}}>
-              <p class="text-dark me-1 fs-5 mb-0">Jumlah Antrian: <p class="text-dark me-1 fs-4 mb-0">5</p></p>
-              
-            </p>
-          </div>
-        </div>
-      </div>
-      
-    </div>
-  </div>
-</div>
+              <div class="card overflow-hidden">
+                <div class="card-body p-4">
+                  <h5 class="card-title mb-9 fw-semibold">Suster</h5>
+                  <div class="row align-items-center">
+                    <div class="col-8">
+                      <h4 class="fw-semibold mb-3">Helo, Perawat. Sarah Namban</h4>
+                      <div class="d-flex align-items-center pb-1">
+                        <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                          <i class="ti ti-arrow-down-right text-danger"></i>
+                        </span>
+                        <p class="fs-3 mb-0" style={{marginLeft:'10px'}}>
+                          <p class="text-dark me-1 fs-5 mb-0">Jumlah Antrian: <p class="text-dark me-1 fs-4 mb-0">5</p></p>
+                          
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
 
           </div>
-          <div class="row">
-          <div class="col-lg-8 d-flex align-items-strech " >
+          <div class="row" style={{flexWrap:'nowrap'}}>
+          <div class="col-lg-8 d-flex align-items-strech " style={{width:'100%'}} >
             <div class="card w-100" style={{maxHeight: '100%', height:'33.2em'}}>
               <div class="card-body">
                 <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
@@ -321,47 +475,47 @@ function Susterdashboard() {
                 </div>
 
                 <div class="chart">
-                  <div className="photos" max-width="180">
+                  <div className="photos" max-width="10">
                     <br/>
                     <br />  
                     <img src={images2} className="photos"height="auto"/>
                   </div>
                 <div className="details">
                 <table className="info">
-  <tr class="infos">
-    <th>Nama: </th>
-    <td>Yurike Jamals</td>
-  </tr>
-  <tr class="infos">
-    <th>Nomor MR: </th>
-    <td>98217389127</td>
-  </tr>
-  <tr class="infos">
-    <th>Usia: </th>
-    <td>82 Tahun</td>
-  </tr>
-  <tr class="infos">
-    <th>Alamat: </th>
-    <td>Jalan Gatot Subroto IR juanda nomor 17 kelurahan asamadya</td>
-  </tr>
-  <tr class="infos">
-    <th>Jenis Kelamin: </th>
-    <td>Pria</td>
-  </tr>
-  <tr class="infos">
-    <th>Nomor Ponsel: </th>
-    <td>088888888888</td>
-  </tr>
-  <tr class="infos">
-    <th>Golongan Darah: </th>
-    <td>AB</td>
-  </tr>
-  <tr class="infos">
-    <th>Penyakit Turunan: </th>
-    <td>Diabetes</td>
-  </tr>
-  
-</table> 
+                  <tr class="infos">
+                    <th>Nama: </th>
+                    <td>Yurike Jamals</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Nomor MR: </th>
+                    <td>98217389127</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Usia: </th>
+                    <td>82 Tahun</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Alamat: </th>
+                    <td>Jalan Gatot Subroto IR juanda nomor 17 kelurahan asamadya</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Jenis Kelamin: </th>
+                    <td>Pria</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Nomor Ponsel: </th>
+                    <td>088888888888</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Golongan Darah: </th>
+                    <td>AB</td>
+                  </tr>
+                  <tr class="infos">
+                    <th>Penyakit Turunan: </th>
+                    <td>Diabetes</td>
+                  </tr>
+                  
+                </table> 
                 </div>
                 
                 </div>
@@ -377,119 +531,7 @@ function Susterdashboard() {
                 
               </div>
               </div>
-              <div class="card overflow-hidden">
-                  <div class="card-body p-4">
-                    <h5 class="card-title mb-9 fw-semibold">Aktivitas terbaru</h5>
-                    <div class="row align-items-center">
-                      <div class="col-8"  style={{ overflowY: 'auto', maxHeight: '100%', height:'380px'}}>
-                      <ul class="timeline-widget mb-0 position-relative mb-n5">
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Diberikan infus
-                    <div class="timeline-time text-dark">09:30</div>
-                    </div>
-                    
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1 ">Diberikan makan siang
-                    <div class="timeline-time text-dark">12:00 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pengecekan suhu tubuh
-                    <div class="timeline-time text-dark">12:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pasien melakukan pembayaran
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1 ">Pasien keluar dan sudah dinyatakan sembuh 
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  <li class="timeline-item d-flex position-relative overflow-hidden">
-                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                    </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Pembayaran selesai
-                    <div class="timeline-time text-dark">09:30 am</div>
-                    </div>
-                  </li>
-                  
-                </ul>
-                      </div>
-                      <div class="col-4">
-                        <div class="d-flex justify-content-center">
-                          <div id="breakup"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -504,62 +546,63 @@ function Susterdashboard() {
                     <summary>
                       Tambah MR
                     </summary>
-    
+                    <form onSubmit={handleSubmit}>
                     <div className="form-group">
-  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Tekanan Darah Sistolik</h6>
-      <input type="text" name="TDS" className="form-control" placeholder="mmHg" onChange={handleChange}  />
-    </div>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Tekanan Darah Diastolik</h6>
-      <input type="text" name="TDD" className="form-control" placeholder="mmHg" onChange={handleChange} />
-    </div>
-  </div>
-  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Temperatur</h6>
-      <input type="text" name="Temp" className="form-control" placeholder="C" onChange={handleChange} />
-    </div>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Nadi</h6>
-      <input type="text" name="Nadi" className="form-control" placeholder="Nadi" onChange={handleChange} />
-    </div>
-  </div>
-  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Laju Pernafasan</h6>
-      <input type="text" name="LP" className="form-control" placeholder="LP" onChange={handleChange} />
-    </div>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Presentase SpO2</h6>
-      <input type="text" name="Spot" className="form-control" placeholder="Laju Presentase" onChange={handleChange} />
-    </div>
-  </div>
-  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Tinggi Badan</h6>
-      <input type="text" name="TB" className="form-control" placeholder="Cm" onChange={handleChange} />
-    </div>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">Berat Badan</h6>
-      <input type="text" name="BB" className="form-control" placeholder="Kg" onChange={handleChange} />
-    </div>
-  </div>
-  <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">LILA</h6>
-      <input type="text" name="LILA" className="form-control" placeholder="LILA" onChange={handleChange} />
-    </div>
-    <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
-      <h6 className="Tanda fw-bold">AVPU</h6>
-      <input type="text" name="AVPU" className="form-control" placeholder="AVPU" onChange={handleChange} />
-    </div>
-  </div>
-  <button type="submit" className="btn btn-primary" onClick={tambahMR}>
-    <i className="ti ti-playlist-add"></i> Tambah MR
-  </button>
-</div>
+                    <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Tekanan Darah Sistolik</h6>
+                        <input type="text" name="TDS" className="form-control" placeholder="mmHg" value={TDS} onChange={(e) => setTekananDarahSistolik(e.target.value)}  />
+                      </div>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Tekanan Darah Diastolik</h6>
+                        <input type="text" name="TDD" className="form-control" placeholder="mmHg" value={TDD} onChange={(e) => setTekanandarahDiastolik(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Temperatur</h6>
+                        <input type="text" name="Temperatur" className="form-control" placeholder="C" value={Temperatur} onChange={(e) => setTemperatur(e.target.value)} />
+                      </div>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Nadi</h6>
+                        <input type="text" name="Nadi" className="form-control" placeholder="Nadi" value={Nadi} onChange={(e) => setNadi(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Laju Pernafasan</h6>
+                        <input type="text" name="LP" className="form-control" placeholder="LP" value={LP} onChange={(e) => setLajuPernafasan(e.target.value)} />
+                      </div>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Presentase SpO2</h6>
+                        <input type="text" name="Spot" className="form-control" placeholder="Laju Presentase" value={Spot} onChange={(e) => setSpot(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Tinggi Badan</h6>
+                        <input type="text" name="TB" className="form-control" placeholder="Cm" value={TB} onChange={(e) => setTinggiBadan(e.target.value)} />
+                      </div>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">Berat Badan</h6>
+                        <input type="text" name="BB" className="form-control" placeholder="Kg" value={BB} onChange={(e) => setBeratBadan(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="row"style={{ boxShadow: 'none', backgroundColor: 'transparent', padding:'0px'}}>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">LILA</h6>
+                        <input type="text" name="LILA" className="form-control" placeholder="LILA" value={LILA} onChange={(e) => setLILA(e.target.value)} />
+                      </div>
+                      <div className="col-lg-6" style={{ boxShadow: 'none', backgroundColor: 'transparent', paddingBottom:'0px', paddingTop:'0px' }}>
+                        <h6 className="Tanda fw-bold">AVPU</h6>
+                        <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
+                      </div>
+                    </div>
+                    <button type="submit" className="btn btn-primary" onClick={tambahMR}>
+                      <i className="ti ti-playlist-add"></i> Tambah MR
+                    </button>
+                  </div>
+                  </form>
 
         
                   </details>

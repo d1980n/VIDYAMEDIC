@@ -1,6 +1,6 @@
-import MedicalModel from '../models/medicalrecord.model';
+const MedicalModel = require('../models/medicalrecord.model');
 
-const saveMR = async (req, res, next) => {
+const MedicalRoute = async(req, res, next) => {
     try {
         const data = req.body;
         const medicalRecord = new MedicalModel(data);
@@ -13,9 +13,9 @@ const saveMR = async (req, res, next) => {
         console.error(err);
         res.status(500).json({ error: 'Failed to save data' });
     }
-  };
+};
 
 
-  module.exports = {
-    saveMR
+module.exports = {
+    MedicalRoute
 };

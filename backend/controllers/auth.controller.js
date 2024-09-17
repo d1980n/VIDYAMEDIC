@@ -1,56 +1,77 @@
-// Import Package
-const bcryptjs = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const errorHandler = require('../utils/error.js');
-// Models
 const Person = require('../models/person.model');
 
-// Register Function
-const signup = async (req, res, next) => {
-    const { nik, nama, email, no_hp, password } = req.body;
-    const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new Person({ nik, nama, email, no_hp, password: hashedPassword });
+const signin = async(req, res) => {
     try {
-      await newUser.save();
-      res.status(201).json('User created successfully!');
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email and password are required' });
+        }
+
+        const user = await Person.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ success: false, message: 'Invalid password' });
+        }
+
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            token,
+            role: user.role,
+        });
     } catch (error) {
-      next(error);
+        console.error('Error during signin:', error.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-  };
-
-
-// Login Function   
-const signin = async (req, res, next) => {
-  const { email, password } = req.body;
-  try {
-    const validUser = await Person.findOne({ email });
-    if (!validUser) return next(errorHandler(404, 'User not found!'));
-    const validPassword = bcryptjs.compareSync(password, validUser.password);
-    if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
-    const { password: pass, ...rest } = validUser._doc;
-    res
-      .cookie('access_token', token, { httpOnly: true })
-      .status(200)
-      .json(rest);
-  } catch (error) {
-    next(error);
-  }
 };
 
-
-//   SignOut Function
-const signOut = async (req, res, next) => {
+const signup = async(req, res) => {
     try {
-      res.clearCookie('access_token');
-      res.status(200).json('User has been logged out!');
-    } catch (error) {
-      next(error);
-    }
-  };
+        const { nama, nik, no_hp, role, email, password } = req.body;
 
-  module.exports = {
-    signup,
-    signin,
-    signOut
+        if (!nama || !nik || !no_hp || !role || !email || !password) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+
+        const existingUser = await Person.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ success: false, message: 'User already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const newUser = new Person({
+            nama,
+            nik,
+            no_hp,
+            role,
+            email,
+            password: hashedPassword,
+        });
+
+        await newUser.save();
+
+        res.status(201).json({ success: true, message: 'User created successfully' });
+    } catch (error) {
+        console.error('Error during signup:', error.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
 };
+
+const signOut = (req, res) => {
+    // Implement sign out logic here if required
+    res.status(200).json({ success: true, message: 'Signed out successfully' });
+};
+
+module.exports = { signOut, signin, signup };

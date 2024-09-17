@@ -1,23 +1,24 @@
 import * as React from 'react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import Register from './View/Register'
+import Register from './View/Register.jsx'
 import Drmonitor from './View/Drmonitor.jsx'
-import Home from './View/home'
-import RiwayatMedis from './View/RiwayatMedis';
-import Faktorresiko from './View/Faktorresiko';
-import Prediksiresiko from './View/prediksiresiko';
-import Riwayatdeteksi from './View/Riwayatdeteksi';
+import Home from './View/home.jsx'
+import RiwayatMedis from './View/RiwayatMedis.jsx';
+import Faktorresiko from './View/Faktorresiko.jsx';
+import Prediksiresiko from './View/prediksiresiko.jsx';
+import Riwayatdeteksi from './View/Riwayatdeteksi.jsx';
 import Treatment from './View/Treatment.jsx'
-import Rekomendasi from './View/Rekomendasi'
+import Rekomendasi from './View/Rekomendasi.jsx'
 import Drdashboard from './View/Drdashboard.jsx'
 import Antrian from './View/Antrian.jsx';
-import Susterdashboard from './View/Susterdashboard'
+import Susterdashboard from './View/Susterdashboard.jsx'
 import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom';
-import App from './App';
+import App from './App.js';
+import Login from './View/login.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/Register",
     element: <Register/>
+  },
+  {
+    path: "/login",
+    element: <Login/>
   },
   {
     path: "/home",

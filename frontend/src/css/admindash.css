@@ -492,7 +492,8 @@ thead,
 tr {
     border-color: inherit;
     border-style: solid;
-    border-width: 0
+    border-width: 0;
+    justify-content: space-between;
 }
 
 label {
@@ -18625,7 +18626,7 @@ div .photos {
     height: auto;
     margin-left: 10px;
     margin-right: 10px;
-    width: 60%;
+    width: 35%;
 }
 
 .sidebar-nav.scroll-sidebar a.sidebar-link {
