@@ -14,7 +14,7 @@ function Drdashboard() {
       const fetchData = async () => {
           if (searchTerm.trim() !== '') {
               try {
-                 const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
+                  const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
                   const data = await response.json();
                   setSearchResults(data);
               } catch (error) {
@@ -84,62 +84,9 @@ function Drdashboard() {
                         <span><i className="ti ti-heart-rate-monitor"></i></span>
                         <span className="hide-menu">Monitoring</span>
                     </NavLink>
-                    <NavLink 
-                        className={`sidebar-link ${activePage === 'Riwayat Medis' ? 'active' : ''}`} 
-                        to="/RiwayatMedis" 
-                        aria-expanded="false" 
-                        onClick={() => handleSetActivePage('Riwayat Medis')}
-                    >
-                        <span><i className="ti ti-heart"></i></span>
-                        <span className="hide-menu">Riwayat Medis</span>
-                    </NavLink>
-                    <NavLink 
-                        className={`sidebar-link ${activePage === 'Faktor Resiko' ? 'active' : ''}`} 
-                        to="/Faktorresiko" 
-                        aria-expanded="false" 
-                        onClick={() => handleSetActivePage('Faktor Resiko')}
-                    >
-                        <span>
-                  <i class="ti ti-device-heart-monitor"></i>
-                </span>
-                <span class="hide-menu">Faktor Resiko</span>
-                    </NavLink>
-                    <NavLink 
-    className={`sidebar-link ${activePage === 'Prediksi Resiko' ? 'active' : ''}`} 
-    to="/prediksiresiko" 
-    aria-expanded="false" 
-    onClick={() => handleSetActivePage('Prediksi Resiko')}
->
-    <span><i className="ti ti-calculator"></i></span>
-    <span className="hide-menu">Prediksi Resiko</span>
-</NavLink>
-<NavLink 
-    className={`sidebar-link ${activePage === 'Riwayat Deteksi' ? 'active' : ''}`} 
-    to="/riwayatdeteksi" 
-    aria-expanded="false" 
-    onClick={() => handleSetActivePage('Riwayat Deteksi')}
->
-    <span><i className="ti ti-history"></i></span>
-    <span className="hide-menu">Riwayat Deteksi</span>
-</NavLink>
-<NavLink 
-    className={`sidebar-link ${activePage === 'Treatment' ? 'active' : ''}`} 
-    to="/treatment" 
-    aria-expanded="false" 
-    onClick={() => handleSetActivePage('Treatment')}
->
-    <span><i className="ti ti-hand-finger"></i></span>
-    <span className="hide-menu">Treatment</span>
-</NavLink>
-<NavLink 
-    className={`sidebar-link ${activePage === 'Rekomendasi' ? 'active' : ''}`} 
-    to="/rekomendasi" 
-    aria-expanded="false" 
-    onClick={() => handleSetActivePage('Rekomendasi')}
->
-    <span><i className="ti ti-thumb-up"></i></span>
-    <span className="hide-menu">Rekomendasi</span>
-</NavLink>
+                  
+             
+
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}
                 </li>
                 <li className="nav-small-cap">
@@ -168,56 +115,10 @@ function Drdashboard() {
     <div class="body-wrapper">
       {/* <!--  Header Start --> */}
       <header class="app-header">
-        <nav class="navbar navbar-expand-lg navbar-light">
-          <ul class="navbar-nav">
-            <li class="nav-item d-block d-xl-none">
-              <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
-                <i class="ti ti-menu-2"></i>
-              </a>
-              
-            </li>
-            
-            <li class="nav-item">
-              <a class="nav-link nav-icon-hover" href="javascript:void(0)">
-                <i class="ti ti-bell-ringing"></i>
-                <div class="notification bg-primary rounded-circle"></div>
-              </a>
-            </li>
- 
-          </ul>
-          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-            
-            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <li class="nav-item dropdown">
-                
-                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <img src={profiles} alt="" width="35" height="35" class="rounded-circle"/>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                  <div class="message-body">
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-user fs-6"></i>
-                      <p class="mb-0 fs-3">My Profile</p>
-                    </a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-mail fs-6"></i>
-                      <p class="mb-0 fs-3">My Account</p>
-                    </a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-list-check fs-6"></i>
-                      <p class="mb-0 fs-3">My Task</p>
-                    </a>
-                    <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </nav>
+        
       </header>
       {/* <!--  Header End --> */}
-      <div class="container-fluid">
+      <div class="container-fluid" style={{paddingTop: '24px' }}>
         <body className="login">
         </body>
         {/* <!--  Row 1 --> */}

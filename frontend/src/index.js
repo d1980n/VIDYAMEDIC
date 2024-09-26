@@ -13,6 +13,7 @@ import Rekomendasi from './View/Rekomendasi.jsx'
 import Drdashboard from './View/Drdashboard.jsx'
 import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
+import DataPasien from './View/DataPasien.jsx';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
   {
     path: "/Antrian",
     element: <Antrian/>
+  },
+  {
+    path: "/DataPasien",
+    element: <DataPasien/>
   }
 ]);
 
