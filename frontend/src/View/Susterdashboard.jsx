@@ -78,7 +78,7 @@ function Susterdashboard() {
         console.log('Form Data:', formData);
       
         try {
-          const response = await fetch('http://localhost:3000/medicalrecords', {
+          const response = await fetch('http://localhost:3000/medical', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -156,17 +156,17 @@ function Susterdashboard() {
     setAVPU('');
     setShowModal(false);
 
-    // Fetch updated medical records
+
     fetchMedicalrecords();
   } catch (error) {
     console.error('Error:', error.message);
   }
   const fetchMedicalrecords = async () => {
     try {
-      const response = await fetch('http://localhost:3000/medicalrecords');
+      const response = await fetch('http://localhost:3000/medical');
       const data = await response.json();
       if (data.success) {
-        setMedicalrecords(data.patients); // Menyimpan data pasien ke state
+        setMedicalrecords(data.Medicalrecords); // Menyimpan data pasien ke state
       } else {
         console.error('Failed to fetch patients:', data.message);
       }
@@ -599,7 +599,7 @@ function Susterdashboard() {
                       </div>
                     </div>
                     <button type="submit" className="btn btn-primary" onClick={tambahMR}>
-                      <i className="ti ti-playlist-add"></i> Tambah MR
+                      <i className="ti ti-playlist-add"></i> Simpan
                     </button>
                   </div>
                   </form>

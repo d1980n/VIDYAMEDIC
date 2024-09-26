@@ -1,5 +1,5 @@
 // Import
-const mongoose  = require('mongoose');
+const mongoose = require('mongoose');
 const { GarminConnect } = require('garmin-connect');
 const fetch = require('node-fetch');
 const crypto = require('crypto');
@@ -18,19 +18,19 @@ const oauthNonce = Math.random().toString(36).substring(2);
 // Acquire Unauthorized Request Token and Token Secret
 // Controller function to acquire unauthorized request token and token secret
 
-const acquireUnauthorizeToken = async (req, res, next) => {
-    try {
-        const url = 'https://connectapi.garmin.com/oauth-service/oauth/request_token';
-        
-        const oauthParams = {
-            oauth_consumer_key: consumerKey,
-            oauth_signature_method: 'HMAC-SHA1',
-            oauth_nonce: oauthNonce,
-            oauth_timestamp: oauthTimestamp,
-            oauth_version: '1.0'
-        };
+const acquireUnauthorizeToken = async(req, res, next) => {
+        try {
+            const url = 'https://connectapi.garmin.com/oauth-service/oauth/request_token';
 
-        const baseString = `POST&${encodeURIComponent(url)}&${encodeURIComponent(Object.entries(oauthParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
+            const oauthParams = {
+                oauth_consumer_key: consumerKey,
+                oauth_signature_method: 'HMAC-SHA1',
+                oauth_nonce: oauthNonce,
+                oauth_timestamp: oauthTimestamp,
+                oauth_version: '1.0'
+            };
+
+            const baseString = `POST&${encodeURIComponent(url)}&${encodeURIComponent(Object.entries(oauthParams).sort().map(([key, value]) => `${key}=${value}`).join('&'))}`;
 
         const signingKey = `${encodeURIComponent(consumerSecret)}&`;
         const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');

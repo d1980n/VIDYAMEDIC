@@ -5,6 +5,9 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const cors = require('cors');
 
+// Import your models
+const Medical = require('./models/medicalrecord.model');
+
 require('dotenv').config({ path: __dirname + '/../.env' })
 
 // Routes
@@ -14,6 +17,7 @@ const PersonRoute = require('./routes/person.route');
 const DashboardRoute = require('./routes/dashboard.route');
 const MedicalRoute = require('./routes/medical.router');
 const patientRoutes = require('./routes/patients.routes');
+// const MRroutes = require('./routes/medical.router');
 // Connect to mongo
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB'))
@@ -42,6 +46,14 @@ app.get('/patients', async(req, res) => {
     try {
         const patients = await patients.find();
         res.json({ success: true, patients });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+app.get('/medical', async(req, res) => {
+    try {
+        const medicalRecords = await Medical.find();
+        res.json({ success: true, medicalRecords });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

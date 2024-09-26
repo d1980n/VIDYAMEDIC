@@ -19,7 +19,7 @@ function Antrian() {
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({});
   const [antrianStatus, setAntrianStatus] = useState(false);
-  
+  const [nomorMR, setnomorMR] = useState('');
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -79,38 +79,89 @@ function Antrian() {
   };
   const fetchDaftarPasien = async () => {
     try {
-      const response = await fetch('http://localhost:3000/patients');
-      const data = await response.json();
-      console.log("response : ", response);
-      console.log("data pasien: ", data.patients);
-      if (data.success) {
-        const filteredPatients = data.patients.filter(patient => patient.antrianStatus.status === true);
-        setDaftarPasien(filteredPatients);
-      } else {
-        console.error('Failed to fetch patients:', data.message);
-      }
+        const response = await fetch('http://localhost:3000/patients');
+        const data = await response.json();
+
+        if (response.ok) { // Check if the response is successful
+            const filteredPatients = data.patients.filter(patient => 
+                patient.antrianStatus && 
+                patient.antrianStatus.status === true && 
+                patient.is_active !== true // Exclude patients with is_active = true
+            );
+            setDaftarPasien(filteredPatients); // Save the filtered patients to state
+        } else {
+            console.error('Failed to fetch patients:', data.message);
+        }
     } catch (error) {
-      console.error('Error fetching patients:', error);
-      // Handle the error gracefully, e.g., display an error message to the user
+        console.error('Error fetching patients:', error);
+        // Handle error appropriately, e.g., displaying an error message to the user
     }
-  };
+};
+  
   useEffect(() => {
     fetchDaftarPasien();
   }, []);
+
+  // ===============================================================================================================================
   
-  const handleSearch = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/patients?nomorMR=${searchTerm}`);
-      const data = await response.json();
-      if (response.ok) {
-        setDaftarPasien(data.patients);
-      } else {
-        console.error('Error:', data.message);
+  const [targetPasien, setTargetPasien] = useState(null); // State untuk menyimpan pasien yang dicari
+
+  const handleInputChange = async (e) => {
+    const searchTerm = e.target.value;
+  
+    if (searchTerm) {
+      try {
+        // Pencarian berdasarkan nomor MR
+        const response = await fetch(`http://localhost:3000/patients/search?term=${searchTerm}`);
+        const data = await response.json();
+  
+        if (response.ok && data.patients.length > 0) {
+          setTargetPasien(data.patients[0]); // Menyimpan pasien yang cocok ke state
+        } else {
+          setTargetPasien(null); // Jika tidak ada pasien, kosongkan state
+        }
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        setTargetPasien(null);
       }
-    } catch (error) {
-      console.error('Error fetching patients:', error);
+    } else {
+      setTargetPasien(null); // Jika search field kosong, hapus target
     }
   };
+
+  const updateAntrianStatus = async () => {
+    console.log(targetPasien);
+    if (targetPasien) {
+        try {
+            const response = await fetch(`http://localhost:3000/patients/${targetPasien.nomorMR}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ antrianStatus: { status: true } }), // Sesuai dengan backend
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('Status antrian berhasil diperbarui:', data);
+            } else {
+                console.error('Error updating antrian status:', data.message);
+            }
+        } catch (error) {
+            console.error('Error updating antrian status:', error);
+        }
+    } else {
+        console.log('Pasien tidak ditemukan');
+    }
+};
+
+
+
+  
+     
+
+  
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -121,29 +172,61 @@ function Antrian() {
 
 
 
-  const cancelPasien = async (index, nomorMR) => {
-    const newDaftarPasien = [...daftarPasien];
-    newDaftarPasien.splice(index, 1);
-    setDaftarPasien(newDaftarPasien);
-    try {
-        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
-        });
+// Fungsi untuk membatalkan antrian pasien
+const cancelPasien = async (index, nomorMR) => {
+  const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index, 1);
+  setDaftarPasien(newDaftarPasien);
+  
+  try {
+      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nomorMR }),
+      });
 
-        if (!response.ok) {
-            throw new Error('Gagal membatalkan antrian pasien');
-        }
+      const data = await response.json();
+      
+      if (!response.ok) {
+          throw new Error(data.message || 'Gagal membatalkan antrian pasien');
+      }
 
-        const data = await response.json();
-        console.log('Antrian dibatalkan:', data);
-    } catch (error) {
-        console.error('Error:', error);
-    }
+      console.log('Antrian dibatalkan:', data);
+  } catch (error) {
+      console.error('Error:', error.message);
+  }
 };
+
+// Fungsi untuk memperbarui status antrian suster
+const susterAntri = async (index, nomorMR) => {
+  const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+  setDaftarPasien(newDaftarPasien);
+
+  try {
+      const response = await fetch(`http://localhost:3000/patients/susterAntri`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+      }
+
+      console.log('Status antrian suster berhasil diperbarui:', data);
+  } catch (error) {
+      console.error('Error:', error.message);
+  }
+};
+
+
 
 
   useEffect(() => {
@@ -279,8 +362,37 @@ function Antrian() {
                       <div className="card-body p-4 width">
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
                           <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Antrian Pasien</h5>
-                          <input type="text" className="form-sels" placeholder="Masukkan nama atau alamat Pasien" style={{ width: '67%' }} />
-                          <button type="button" className="btn btn-primary m-1">Antri</button>
+                          <input
+                                type="text"
+                                id="search-input"
+                                className="form-sels"
+                                placeholder="Masukkan nomor MR"
+                                style={{ width: '67%' }}
+                                onChange={handleInputChange} 
+                                // Memanggil fungsi pencarian saat pengguna mengetik
+                              />
+                              {targetPasien && (
+                                <div className="patient-info">
+                                  <p>Nama: {targetPasien.namaLengkap}</p>
+                                  <p>Nomor MR: {targetPasien.nomorMR}</p>
+                                  <p>Nomor Telepon: {targetPasien.phone_number}</p>
+                               
+                                </div>
+                              )} 
+                              <button 
+                                type="button" 
+                                className="btn btn-secondary m-1" 
+                                onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
+                                disabled={!targetPasien} // Disable tombol jika pasien tidak ditemukan
+                              >
+                                Update Antri
+                              </button>
+
+                          
+
+            
+
+                         
                         </div>
                         <div className="table-responsive">
                           <table className="table text-nowrap mb-0 align-middle">
@@ -302,22 +414,22 @@ function Antrian() {
                             </thead>
                             <tbody>
                             {daftarPasien.map((pasien, index) => (
-    <tr key={pasien.nomorMR}>
-      <td>{index + 1}</td>
-      <td className="border-bottom-0">
-        <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
-      </td>
-      <td className="border-bottom-0">
-        <div className="d-flex align-items-center gap-2">
-          <span className="fw-normal">{pasien.nomorMR}</span>
-        </div>
-      </td>
-      <td className="border-bottom-0">
-        <button type="button" className="btn btn-primary m-1">Masuk</button>
-        <button type="button" className="btn btn-danger m-1" onClick={() => cancelPasien(index)}>Batal</button>
-      </td>
-    </tr>
-))}
+                                <tr key={pasien.nomorMR}>
+                                  <td>{index + 1}</td>
+                                  <td className="border-bottom-0">
+                                    <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <div className="d-flex align-items-center gap-2">
+                                      <span className="fw-normal">{pasien.nomorMR}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <button type="button" className="btn btn-primary m-1" onClick={() => susterAntri(index, pasien.nomorMR)}>Masuk</button>
+                                    <button type="button" className="btn btn-danger m-1" onClick={() => cancelPasien(index, pasien.nomorMR)}>Batal</button>
+                                  </td>
+                                </tr>
+                            ))}
 
                         </tbody>
 

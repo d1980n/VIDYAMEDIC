@@ -4,7 +4,7 @@ const antrianStatusSchema = new mongoose.Schema({
     status: {
         type: Boolean,
         required: true,
-        default: false,
+        default: true,
     },
     waktuAntrian: {
         type: Date,
@@ -14,6 +14,11 @@ const antrianStatusSchema = new mongoose.Schema({
     keterangan: {
         type: String,
         default: '',
+    },
+    susterAntriStatus: {
+        type: Boolean,
+        require: true,
+        default: false,
     }
 });
 

@@ -1,9 +1,9 @@
-const MedicalModel = require('../models/medicalrecord.model');
+const Medical = require('../models/medicalrecord.model');
 
 const MedicalRoute = async(req, res, next) => {
     try {
         const data = req.body;
-        const medicalRecord = new MedicalModel(data);
+        const medicalRecord = new Medical(data);
 
         // Save the document to the database
         const savedRecord = await medicalRecord.save();
@@ -15,7 +15,18 @@ const MedicalRoute = async(req, res, next) => {
     }
 };
 
+// GET: Retrieve all medical records
+const getAllMedicalRecords = async(req, res) => {
+    try {
+        const medicalRecords = await Medical.find(); // Use your Medical model here
+        res.json({ success: true, medicalRecords });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 
 module.exports = {
-    MedicalRoute
+    MedicalRoute,
+    getAllMedicalRecords
 };

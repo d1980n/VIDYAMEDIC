@@ -1,4 +1,4 @@
-const MedicalRecord = require('../models/suster.model');
+const MedicalRecord = require('../models/medicalrecord.model');
 
 // Menambahkan rekam medis baru
 exports.tambahRekamMedis = async(req, res) => {

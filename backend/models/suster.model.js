@@ -1,23 +1,22 @@
 const mongoose = require('mongoose');
 
-const MedicalRecordSchema = new mongoose.Schema({
+const medicalRecordSchema = new mongoose.Schema({
     nomorMR: {
         type: String,
         required: true
     },
-    TDS: String, // Tekanan Darah Sistolik
-    TDD: String, // Tekanan Darah Diastolik
-    Temp: String, // Temperatur
-    Nadi: String, // Nadi
-    LP: String, // Laju Pernafasan
-    Spot: String, // Presentase SpO2
-    TB: String, // Tinggi Badan
-    BB: String, // Berat Badan
-    LILA: String, // Lingkar Lengan Atas
-    AVPU: String, // Respons AVPU
+    TDS: String,
+    TDD: String,
+    Temp: String,
+    Nadi: String,
+    LP: String,
+    Spot: String,
+    TB: String,
+    BB: String,
+    LILA: String,
+    AVPU: String,
 
 });
 
-const MedicalRecord = mongoose.model('medicalrecords', MedicalRecordSchema);
-
+const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);
 module.exports = MedicalRecord;

@@ -14,7 +14,7 @@ function Drdashboard() {
       const fetchData = async () => {
           if (searchTerm.trim() !== '') {
               try {
-                  const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
+                 const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
                   const data = await response.json();
                   setSearchResults(data);
               } catch (error) {
