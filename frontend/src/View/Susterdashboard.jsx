@@ -195,7 +195,7 @@ function Susterdashboard() {
                               <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">Nomor MR</h6>
                               </th>
-                              <th class="border-bottom-0">
+                              <th style={{width: '18rem'}} class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">Action</h6>
                               </th>
                             </tr>
@@ -216,14 +216,12 @@ function Susterdashboard() {
                                 </td>
                                 <td class="border-bottom-0">
                                   <button type="button" class="btn btn-primary m-1">
-                                    Masuk
+                                    Periksa
                                   </button>
                                   <button type="button" class="btn btn-danger m-1">
                                     Batal
                                   </button>
-                                  <button type="button" class="btn btn-success m-1">
-                                    Selesai
-                                  </button>
+                                 
                                 </td>
                               </tr>
                             ))}
