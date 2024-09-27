@@ -414,8 +414,8 @@ const susterAntri = async (index, nomorMR) => {
                                 <th className="border-bottom-0">
                                   <h6 className="fw-semibold mb-0">Nomor MR</h6>
                                 </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Action</h6>
+                                <th style={{width: '10rem'}} className="border-bottom-0">
+                                  <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
                                 </th>
                               </tr>
                             </thead>
