@@ -373,7 +373,7 @@ const susterAntri = async (index, nomorMR) => {
                                 type="text"
                                 id="search-input"
                                 className="form-sels"
-                                placeholder="Masukkan nomor MR"
+                                placeholder="Masukkan nama atau nomor MR atau nomor telepon"
                                 style={{ width: '67%' }}
                                 onChange={handleInputChange} 
                                 // Memanggil fungsi pencarian saat pengguna mengetik
@@ -496,7 +496,8 @@ const susterAntri = async (index, nomorMR) => {
                     </div>
                   </div>
                 )}
-                {showModal && <div className="modal-backdrop fade show"></div>}
+                {showModal && <div className="modal-backdrop fade show">
+                  </div>}
               </div>
             </div>
           </div>

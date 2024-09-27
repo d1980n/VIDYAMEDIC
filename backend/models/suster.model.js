@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 
 const medicalRecordSchema = new mongoose.Schema({
     nomorMR: {
         type: String,
-        required: true
+        required: true,
     },
     TDS: String,
     TDD: String,
-    Temp: String,
+    Temperatur: String,
     Nadi: String,
     LP: String,
     Spot: String,
@@ -15,8 +16,12 @@ const medicalRecordSchema = new mongoose.Schema({
     BB: String,
     LILA: String,
     AVPU: String,
-
+    WaktuMedicalCheck: {
+        type: Date,
+        required: true,
+        default: () => moment.tz("Asia/Jakarta").toDate(), // Menggunakan timezone Jakarta
+    },
 });
 
-const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);
+const MedicalRecord = mongoose.model('medicalrecords', medicalRecordSchema);
 module.exports = MedicalRecord;

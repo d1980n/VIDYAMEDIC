@@ -1,33 +1,35 @@
-const MedicalRecord = require('../models/medicalrecord.model');
+const MedicalRecord = require('../models/suster.model');
 
 // Menambahkan rekam medis baru
-exports.tambahRekamMedis = async(req, res) => {
-    try {
-        const { nomorMR, TDS, TDD, Temp, Nadi, LP, Spot, TB, BB, LILA, AVPU } = req.body;
+const tambahMR = async(req, res) => {
+    const { nomorMR, TDS, TDD, Temperatur, Nadi, LP, Spot, TB, BB, LILA, AVPU } = req.body;
 
-        // Membuat rekam medis baru
-        const newRecord = new MedicalRecord({
+    try {
+        const newMedicalRecord = new MedicalRecord({
             nomorMR,
             TDS,
             TDD,
-            Temp,
+            Temperatur,
             Nadi,
             LP,
             Spot,
             TB,
             BB,
             LILA,
-            AVPU
+            AVPU,
         });
 
-        // Simpan rekam medis ke database
-        await newRecord.save();
-
-        res.status(201).json({ message: 'Rekam medis berhasil ditambahkan', data: newRecord });
+        const savedMedicalRecord = await newMedicalRecord.save();
+        console.log('Pasien berhasil disimpan:', savedMedicalRecord);
+        res.status(201).json(savedMedicalRecord);
     } catch (error) {
-        res.status(500).json({ message: 'Gagal menambahkan rekam medis', error: error.message });
+        console.error('Error saat menyimpan pasien:', error);
+        res.status(500).json({ message: 'Gagal menyimpan rekam medis', error: error.message });
     }
 };
+
+
+
 
 // Mendapatkan semua rekam medis berdasarkan nomor MR
 exports.getRekamMedisByNomorMR = async(req, res) => {
@@ -44,4 +46,8 @@ exports.getRekamMedisByNomorMR = async(req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Gagal mendapatkan rekam medis', error: error.message });
     }
+};
+
+module.exports = {
+    tambahMR,
 };

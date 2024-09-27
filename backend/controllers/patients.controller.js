@@ -97,7 +97,7 @@ const cancelAntrian = async(req, res) => {
         console.log(nomorMR);
 
         // Update hanya 'antrianStatus.status' menjadi false
-        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, { $set: { 'antrianStatus.status': false } }, { new: true } // Mengembalikan data yang sudah diupdate
+        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, { $set: { 'antrianStatus.status': false, 'antrianStatus.susterAntriStatus': false } }, { new: true } // Mengembalikan data yang sudah diupdate
         );
 
         if (!pasien) {
