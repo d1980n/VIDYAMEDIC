@@ -145,6 +145,7 @@ function Antrian() {
 
             if (response.ok) {
                 console.log('Status antrian berhasil diperbarui:', data);
+                window.location.reload(); 
             } else {
                 console.error('Error updating antrian status:', data.message);
             }
@@ -192,6 +193,9 @@ const cancelPasien = async (index, nomorMR) => {
       if (!response.ok) {
           throw new Error(data.message || 'Gagal membatalkan antrian pasien');
       }
+      else{
+        window.location.reload(); 
+      }
 
       console.log('Antrian dibatalkan:', data);
   } catch (error) {
@@ -218,6 +222,9 @@ const susterAntri = async (index, nomorMR) => {
 
       if (!response.ok) {
           throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+      }
+      else{
+        window.location.reload(); 
       }
 
       console.log('Status antrian suster berhasil diperbarui:', data);
