@@ -64,6 +64,20 @@ function Susterdashboard() {
     setAVPU('');
   };
   
+  const isFormEmpty = () => {
+    return (
+      !TDS &&
+      !TDD &&
+      !Temperatur &&
+      !Nadi &&
+      !LP &&
+      !Spot &&
+      !TB &&
+      !BB &&
+      !LILA &&
+      !AVPU
+    );
+  };
   
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
@@ -76,57 +90,111 @@ function Susterdashboard() {
   };
   const [showOverlay, setShowOverlay] = useState(false);
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
     
-    if (window.confirm("Apakah Anda sudah yakin?")) {
-        const formData = {
-            nomorMR: selectedNomorMR,
-            TDS,
-            TDD,
-            Temperatur,
-            Nadi,
-            LP,
-            Spot,
-            TB,
-            BB,
-            LILA,
-            AVPU,
-        };
+//     // Menampilkan konfirmasi kepada pengguna
+//     if (window.confirm("Apakah Anda sudah yakin?")) {
+//         // Data yang akan dikirim dalam format JSON
+//         const formData = {
+//             nomorMR: selectedNomorMR,
+//             TDS,   // Tekanan Darah Sistolik
+//             TDD,   // Tekanan Darah Diastolik
+//             Temperatur,
+//             Nadi,
+//             LP,    // Laju Pernafasan
+//             Spot,
+//             TB,    // Tinggi Badan
+//             BB,    // Berat Badan
+//             LILA,
+//             AVPU,
+//         };
 
-        try {
-            const response = await fetch('http://localhost:3000/medical/tambah', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
+//         try {
+//             // Mengirimkan request POST ke server
+//             const response = await fetch('http://localhost:3000/medical/tambah', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify(formData),
+//             });
 
-            console.log('Response Status:', response.status); 
-            const contentType = response.headers.get('content-type');
+//             // Menampilkan status respons di console
+//             console.log('Response Status:', response.status);
+//             const contentType = response.headers.get('content-type');
 
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                console.log('Response Data:', data);
-                // Reset form dan refresh daftar pasien setelah berhasil
-                if (data.success) {
-                    setShowModal(false); // Tutup modal setelah sukses
-                    resetForm(); // Reset input
-                    setIsConfirmed(false); // Set konfirmasi
-                    fetchDaftarPasien();
-                }
-            } else {
-                const text = await response.text(); 
-                console.error('Error: Response is not JSON. Response text:', text);
-            }
-        } catch (error) {
-            console.error('Error:', error.message);
-        }
-    }
+//             if (contentType && contentType.includes('application/json')) {
+//                 const data = await response.json();  // Mendapatkan respons dalam format JSON
+//                 console.log('Response Data:', data);
+
+//                 // Jika data berhasil ditambahkan
+//                 if (data.success) {
+//                     setShowModal(false); // Tutup modal setelah berhasil
+//                     resetForm(); // Reset input form
+//                     setIsConfirmed(false); // Reset checkbox konfirmasi
+//                     fetchDaftarPasien();  // Refresh daftar pasien tanpa reload halaman
+//                 }
+//             } else {
+//                 const text = await response.text(); // Jika respons bukan JSON, tampilkan teks
+//                 console.error('Error: Response is not JSON. Response text:', text);
+//             }
+//         } catch (error) {
+//             // Tangkap error dan tampilkan pesan error di console
+//             console.error('Error:', error.message);
+//         }
+//     }
+// };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Remove the window.confirm line
+  const formData = {
+      nomorMR: selectedNomorMR,
+      TDS,
+      TDD,
+      Temperatur,
+      Nadi,
+      LP,
+      Spot,
+      TB,
+      BB,
+      LILA,
+      AVPU,
+  };
+
+  try {
+      const response = await fetch('http://localhost:3000/medical/tambah', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+      });
+
+      console.log('Response Status:', response.status); 
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('Response Data:', data);
+          
+          // Reset form dan refresh daftar pasien setelah berhasil
+    
+              setShowModal(false); // Tutup modal setelah sukses
+              resetForm(); // Reset input
+              fetchDaftarPasien();  
+              console.log('well');  
+           
+      } else {
+          const text = await response.text(); 
+          console.error('Error: Response is not JSON. Response text:', text);
+      }
+  } catch (error) {
+      console.error('Error:', error.message);
+  }
 };
-
-  
   
   
   
@@ -166,12 +234,12 @@ function Susterdashboard() {
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    {/* <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Data Pasien</span>
-                    </NavLink>
+                    </NavLink> */}
 
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}
                   </li>
@@ -370,7 +438,7 @@ function Susterdashboard() {
 
                                 <div className="modal-footer">
                                   <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                                  <button type="submit" className="btn btn-primary">
+                                  <button type="submit" className="btn btn-primary" disabled={isFormEmpty()}>
                                     <i className="ti ti-playlist-add"></i> Tambah MR
                                   </button>
                                   {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
