@@ -19,7 +19,24 @@ const antrianStatusSchema = new mongoose.Schema({
         type: Boolean,
         require: true,
         default: false,
+    },
+    dokterAntriStatus: {
+        type: Boolean,
+        require: true,
+        default: false,
+    },
+    dokterPeriksaStatus: {
+        type: Boolean,
+        require: true,
+        default: false,
+    },
+    panggilStatus: {
+        type: Boolean,
+        require: true,
+        default: false,
     }
+
+
 });
 
 const patientSchema = new mongoose.Schema({

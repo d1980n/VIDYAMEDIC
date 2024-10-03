@@ -9,21 +9,24 @@ import images2 from "../source/img2.png";
 function Susterdashboard() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [TDS, setTekananDarahSistolik] = useState('');
-  const [TDD, setTekanandarahDiastolik] = useState('');
-  const [Temperatur, setTemperatur] = useState('');
-  const [Nadi, setNadi] = useState('');
-  const [LP, setLajuPernafasan] = useState('');
-  const [Spot, setSpot] = useState('');
-  const [TB, setTinggiBadan] = useState('');
-  const [BB, setBeratBadan] = useState('');
-  const [LILA, setLILA] = useState('');
-  const [AVPU, setAVPU] = useState('');
+  const [TDS, setTekananDarahSistolik] = useState("");
+  const [TDD, setTekanandarahDiastolik] = useState("");
+  const [Temperatur, setTemperatur] = useState("");
+  const [Nadi, setNadi] = useState("");
+  const [LP, setLajuPernafasan] = useState("");
+  const [Spot, setSpot] = useState("");
+  const [TB, setTinggiBadan] = useState("");
+  const [BB, setBeratBadan] = useState("");
+  const [LILA, setLILA] = useState("");
+  const [AVPU, setAVPU] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const [selectedNomorMR, setSelectedNomorMR] = useState('');
+  const [selectedNomorMR, setSelectedNomorMR] = useState("");
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [mergedData, setMergedData] = useState([]);
+
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -126,8 +129,75 @@ function Susterdashboard() {
     }
 };
 
-  
-  
+useEffect(() => {
+  const mergeData = () => {
+    const merged = daftarPasien.map((pasien) => {
+      const medicalRecord = medicalRecords.find(record => record.nomorMR === pasien.nomorMR);
+      return { ...pasien, ...medicalRecord }; // Gabungkan data pasien dan medical record
+    });
+    setMergedData(merged); // Simpan hasil gabungan data
+  };
+
+  if (medicalRecords.length > 0 && daftarPasien.length > 0) {
+    mergeData();
+  }
+}, [medicalRecords, daftarPasien]);
+
+const fetchMedical = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/medical");
+    const data = await response.json();
+    console.log("response : ", response);
+    console.log("data pasien: ", data.medicalRecords);
+
+    if (data.success) {
+      setMedicalRecords(data.medicalRecords); // Simpan data medical records
+    } else {
+      console.error("Failed to fetch patients:", data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching patients:", error);
+  }
+};
+
+
+// Panggil fetchMedical saat komponen di-mount
+useEffect(() => {
+  fetchMedical();
+  fetchDaftarPasien();
+}, []);
+
+
+
+const dokterAntri = async (index, nomorMR) => {
+  const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+  setDaftarPasien(newDaftarPasien);
+
+  try {
+      const response = await fetch(`http://localhost:3000/patients/dokterAntri`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          throw new Error(data.message || 'Gagal memperbarui status antrian dokter');
+      }
+      else{
+        window.location.reload(); 
+      }
+
+      console.log('Status antrian dokter berhasil diperbarui:', data);
+  } catch (error) {
+      console.error('Error:', error.message);
+  }
+};
+
   
   
   
@@ -274,7 +344,7 @@ function Susterdashboard() {
                             </tr>
                           </thead>
                           <tbody>
-                            {daftarPasien.map((pasien, index) => (
+                            {mergedData.map((pasien, index,) => (
                               <tr key={pasien.nomorMR}>
                                 <td class="border-bottom-0">
                                   <h6 class="fw-semibold mb-0">{index + 1}</h6>
@@ -287,18 +357,18 @@ function Susterdashboard() {
                                     <span class="fw-normal">{pasien.nomorMR}</span>
                                   </div>
                                 </td>
-                                <td class="border-bottom-0">
-                                <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(pasien.nomorMR)}>
+                                <td class="border-bottom-0"> 
+                                  <button type="button " className="btn btn-primary m-1 " 
+                                  onClick={() => toggleModal(pasien.nomorMR)}
+                                  disabled={pasien.statusMR}>
                                     Periksa
-                                  </button>
-                                  <button type="button" className="btn btn-danger m-1">
-                                    Batal
-                                  </button>
-                                 
+                                  </button >
+                                  {pasien.statusMR && <button className="btn btn-success" onClick={() => dokterAntri(index, pasien.nomorMR)}>Masuk</button>}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
+
                         </table>
                       </div>
                       {showModal && (

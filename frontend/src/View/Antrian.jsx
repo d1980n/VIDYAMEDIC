@@ -133,7 +133,7 @@ function Antrian() {
     console.log(targetPasien);
     if (targetPasien) {
         try {
-            const response = await fetch(`http://localhost:3000/patients/${targetPasien.nomorMR}`, {
+            const response = await fetch(`http://localhost:3000/patients/update/${targetPasien.nomorMR}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

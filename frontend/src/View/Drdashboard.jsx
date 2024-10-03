@@ -9,6 +9,7 @@ import images2 from '../source/img2.png'
 function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [daftarPasien, setDaftarPasien] = useState([]);
   
   useEffect(() => {
       const fetchData = async () => {
@@ -38,6 +39,63 @@ function Drdashboard() {
       setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
+
+  const susterAntri = async (index, nomorMR) => {
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+    setDaftarPasien(newDaftarPasien);
+  
+    try {
+        const response = await fetch(`http://localhost:3000/patients/susterAntri`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+        });
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+        }
+        else{
+          window.location.reload(); 
+        }
+  
+        console.log('Status antrian suster berhasil diperbarui:', data);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  };
+  const cancelPasien = async (index, nomorMR) => {
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1);
+    setDaftarPasien(newDaftarPasien);
+    
+    try {
+        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }),
+        });
+  
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal membatalkan antrian pasien');
+        }
+        else{
+          window.location.reload(); 
+        }
+  
+        console.log('Antrian dibatalkan:', data);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  };
     
   return (
     <html className='Admin'>
@@ -203,70 +261,23 @@ function Drdashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
-                        <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">Sukmiadi Salamarudin supriyatni</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                            <span class="fw-normal">0129830123</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                          <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">2</h6></td>
-                        <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">Sumarti</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">3</h6></td>
-                        <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal">Sukmiadi</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr> 
-                      <tr>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">4</h6></td>
-                        <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal">Sukmiadi</p>
-                        </td>
-                        <td class="border-bottom-0">
-                          <div class="d-flex align-items-center gap-2">
-                          <span class="fw-normal">0129830</span>
-                          </div>
-                        </td>
-                        <td class="border-bottom-0">
-                        <button type="button" class="btn btn-primary m-1" >Masuk</button>
-                          <button type="button" class="btn btn-danger m-1" >Batal</button>
-                          <button type="button" class="btn btn-success m-1" >Selesai</button>
-                        </td>
-                      </tr>                    
+                    {daftarPasien.map((pasien, index) => (
+                                <tr key={pasien.nomorMR}>
+                                  <td>{index + 1}</td>
+                                  <td className="border-bottom-0">
+                                    <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <div className="d-flex align-items-center gap-2">
+                                      <span className="fw-normal">{pasien.nomorMR}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <button type="button" className="btn btn-primary m-1" onClick={() => susterAntri(index, pasien.nomorMR)}>Masuk</button>
+                                    <button type="button" className="btn btn-danger m-1" onClick={() => cancelPasien(index, pasien.nomorMR)}>Batal</button>
+                                  </td>
+                                </tr>
+                            ))}
                     </tbody>
                   </table>
                 </div>

@@ -9,6 +9,7 @@ import images2 from '../source/img2.png'
 function Drmonitor() {
   const [showLabOverlay, setShowLabOverlay] = useState(false);
   const [showXRayOverlay, setShowXRayOverlay] = useState(false);
+  const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({
     Anamnesis: '',
     Diagnosa: '',
