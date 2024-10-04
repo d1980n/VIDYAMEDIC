@@ -57,22 +57,7 @@ function Susterdashboard() {
  
 
   // Fetch data dari API
-  const fetchMedical = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/medical");
-      const data = await response.json();
-      console.log("response : ", response);
-      console.log("data pasien: ", data.medicalRecords);
 
-      if (data.success) {
-        setMedicalRecords(data.medicalRecords); // Simpan data medical records
-      } else {
-        console.error("Failed to fetch patients:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    }
-  };
 
   useEffect(() => {
     const mergeData = () => {

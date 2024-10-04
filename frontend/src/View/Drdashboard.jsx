@@ -10,7 +10,6 @@ function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const [daftarPasien, setDaftarPasien] = useState([]);
   
   useEffect(() => {
       const fetchData = async () => {
