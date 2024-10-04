@@ -115,6 +115,52 @@ const dokterAntri = async(req, res) => {
         res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status antrian dokter', error });
     }
 };
+
+const dokterPeriksa = async(req, res) => {
+    const { nomorMR } = req.body; // Mengambil nomorMR dari body request
+
+    try {
+        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, {
+                $set: {
+                    'antrianStatus.dokterPeriksaStatus': true // Menyetel status antrian menjadi false
+                }
+            }, // Update properti susterAntriStatus
+            { new: true } // Mengembalikan data yang sudah diupdate
+        );
+
+        if (!pasien) {
+            return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
+        }
+
+        res.json({ success: true, message: 'Status periksa dokter berhasil diperbarui', pasien });
+    } catch (error) {
+        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter', error });
+    }
+};
+const statusSelesai = async(req, res) => {
+    const { nomorMR } = req.body; // Mengambil nomorMR dari body request
+
+    try {
+        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, {
+                $set: {
+                    'antrianStatus.dokterPeriksaStatus': false,
+                    'antrianStatus.susterPeriksaStatus': false,
+                    'antrianStatus.dokterAntriStatus': false,
+                    'antrianStatus.status': false,
+                }
+            }, // Update properti susterAntriStatus
+            { new: true } // Mengembalikan data yang sudah diupdate
+        );
+
+        if (!pasien) {
+            return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
+        }
+
+        res.json({ success: true, message: 'Status periksa dokter berhasil diperbarui', pasien });
+    } catch (error) {
+        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter', error });
+    }
+};
 // Controller untuk membatalkan antrian pasien
 const cancelAntrian = async(req, res) => {
     try {
@@ -205,4 +251,6 @@ module.exports = {
     updateAntrianStatus,
     susterAntri,
     dokterAntri,
+    dokterPeriksa,
+    statusSelesai,
 };
