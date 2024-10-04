@@ -6,7 +6,8 @@ import "../css/admindash.css";
 import images from "../source/Picture1.png";
 import { NavLink } from "react-router-dom";
 import images2 from "../source/img2.png";
-function Susterdashboard() {
+
+function SuperAdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [TDS, setTekananDarahSistolik] = useState('');
@@ -160,17 +161,29 @@ function Susterdashboard() {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Dashboard" ? "active" : ""}`} to="/Susterdashboard" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                    <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
-                      <span className="hide-menu">Data Pasien</span>
+                      <span className="hide-menu">Data Dokter</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                      <span>
+                        <i className="ti ti-layout-dashboard"></i>
+                      </span>
+                      <span className="hide-menu">Data Suster</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                      <span>
+                        <i className="ti ti-layout-dashboard"></i>
+                      </span>
+                      <span className="hide-menu">Data Admin</span>
                     </NavLink>
 
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}
@@ -401,4 +414,4 @@ function Susterdashboard() {
     </html>
   );
 }
-export default Susterdashboard;
+export default SuperAdminDashboard;
