@@ -10,6 +10,7 @@ function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [daftarPasien, setDaftarPasien] = useState([]);
+  const [daftarPasien, setDaftarPasien] = useState([]);
   
   useEffect(() => {
       const fetchData = async () => {
@@ -61,6 +62,63 @@ function Drdashboard() {
       setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
+
+  const susterAntri = async (index, nomorMR) => {
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+    setDaftarPasien(newDaftarPasien);
+  
+    try {
+        const response = await fetch(`http://localhost:3000/patients/susterAntri`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+        });
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+        }
+        else{
+          window.location.reload(); 
+        }
+  
+        console.log('Status antrian suster berhasil diperbarui:', data);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  };
+  const cancelPasien = async (index, nomorMR) => {
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1);
+    setDaftarPasien(newDaftarPasien);
+    
+    try {
+        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }),
+        });
+  
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal membatalkan antrian pasien');
+        }
+        else{
+          window.location.reload(); 
+        }
+  
+        console.log('Antrian dibatalkan:', data);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  };
     
   return (
     <html className='Admin'>

@@ -27,6 +27,7 @@ function Susterdashboard() {
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [mergedData, setMergedData] = useState([]);
 
+
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
     setSelectedNomorMR(nomorMR);
@@ -227,8 +228,80 @@ function Susterdashboard() {
     } catch (error) {
       console.error("Error:", error.message);
     }
+};
+
+useEffect(() => {
+  const mergeData = () => {
+    const merged = daftarPasien.map((pasien) => {
+      const medicalRecord = medicalRecords.find(record => record.nomorMR === pasien.nomorMR);
+      return { ...pasien, ...medicalRecord }; // Gabungkan data pasien dan medical record
+    });
+    setMergedData(merged); // Simpan hasil gabungan data
   };
 
+  if (medicalRecords.length > 0 && daftarPasien.length > 0) {
+    mergeData();
+  }
+}, [medicalRecords, daftarPasien]);
+
+const fetchMedical = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/medical");
+    const data = await response.json();
+    console.log("response : ", response);
+    console.log("data pasien: ", data.medicalRecords);
+
+    if (data.success) {
+      setMedicalRecords(data.medicalRecords); // Simpan data medical records
+    } else {
+      console.error("Failed to fetch patients:", data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching patients:", error);
+  }
+};
+
+
+// Panggil fetchMedical saat komponen di-mount
+useEffect(() => {
+  fetchMedical();
+  fetchDaftarPasien();
+}, []);
+
+
+
+const dokterAntri = async (index, nomorMR) => {
+  const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+  setDaftarPasien(newDaftarPasien);
+
+  try {
+      const response = await fetch(`http://localhost:3000/patients/dokterAntri`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          throw new Error(data.message || 'Gagal memperbarui status antrian dokter');
+      }
+      else{
+        window.location.reload(); 
+      }
+
+      console.log('Status antrian dokter berhasil diperbarui:', data);
+  } catch (error) {
+      console.error('Error:', error.message);
+  }
+};
+
+  
+  
+  
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
@@ -391,11 +464,12 @@ function Susterdashboard() {
                                   disabled={pasien.statusMR}>
                                     Periksa
                                   </button >
-                                  {pasien.statusMR && <button className="btn btn-success">Masuk</button>}
+                                  {pasien.statusMR && <button className="btn btn-success" onClick={() => dokterAntri(index, pasien.nomorMR)}>Masuk</button>}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
+
                         </table>
                       </div>
                       {showModal && (
