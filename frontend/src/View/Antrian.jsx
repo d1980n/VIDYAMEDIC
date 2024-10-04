@@ -24,9 +24,9 @@ function Antrian() {
   const [nomorMR, setnomorMR] = useState('');
   const location = useLocation();
   const query = new URLSearchParams(location.search);
-  // const clientId = query.get('id'); 
-  // const [clientData, setClientData] = useState(null);
-  // const [error, setError] = useState(null); 
+  const clientId = query.get('id'); 
+  const [clientData, setClientData] = useState(null);
+  const [error, setError] = useState(null); 
 
 
 
@@ -307,38 +307,38 @@ const susterAntri = async (index, nomorMR) => {
   }, []);
 
 
-  // useEffect(() => {
-  //   const fetchClientData = async () => {
-  //     // Jika clientId tidak ada, set error dan keluar
-  //     if (!clientId) {
-  //       setError('Client ID tidak ditemukan');
-  //       return;
-  //     }
+  useEffect(() => {
+    const fetchClientData = async () => {
+      // Jika clientId tidak ada, set error dan keluar
+      if (!clientId) {
+        setError('Client ID tidak ditemukan');
+        return;
+      }
 
-  //     try {
-  //       const response = await fetch(`http://localhost:3008/api/data/${clientId}`);
-  //       if (!response.ok) {
-  //         throw new Error('Gagal mengambil data klien');
-  //       }
-  //       const data = await response.json();
-  //       setClientData(data);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     }
-  //   };
+      try {
+        const response = await fetch(`http://localhost:3008/api/data/${clientId}`);
+        if (!response.ok) {
+          throw new Error('Gagal mengambil data klien');
+        }
+        const data = await response.json();
+        setClientData(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
 
-  //   fetchClientData();
-  // }, [clientId]); // Dependency array untuk memicu fetch saat clientId berubah
+    fetchClientData();
+  }, [clientId]); // Dependency array untuk memicu fetch saat clientId berubah
 
-  // // Cek error
-  // if (error) {
-  //   return <div>Error: {error}</div>;
-  // }
+  // Cek error
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
-  // // Cek apakah data klien sudah ada
-  // if (!clientData) {
-  //   return <div>Loading...</div>;
-  // }
+  // Cek apakah data klien sudah ada
+  if (!clientData) {
+    return <div>Loading...</div>;
+  }
 
 
   return (
@@ -351,11 +351,11 @@ const susterAntri = async (index, nomorMR) => {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                {/* {clientData.image ? (
+                {clientData.image ? (
         <img src={`http://localhost:3008/${clientData.image}`} alt={clientData.nama} />
       ) : (
         <div>Image not found</div>
-      )} */}
+      )}
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>

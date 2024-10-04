@@ -9,27 +9,31 @@ import images2 from "../source/img2.png";
 function Susterdashboard() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [TDS, setTekananDarahSistolik] = useState('');
-  const [TDD, setTekanandarahDiastolik] = useState('');
-  const [Temperatur, setTemperatur] = useState('');
-  const [Nadi, setNadi] = useState('');
-  const [LP, setLajuPernafasan] = useState('');
-  const [Spot, setSpot] = useState('');
-  const [TB, setTinggiBadan] = useState('');
-  const [BB, setBeratBadan] = useState('');
-  const [LILA, setLILA] = useState('');
-  const [AVPU, setAVPU] = useState('');
+  const [TDS, setTekananDarahSistolik] = useState("");
+  const [TDD, setTekanandarahDiastolik] = useState("");
+  const [Temperatur, setTemperatur] = useState("");
+  const [Nadi, setNadi] = useState("");
+  const [LP, setLajuPernafasan] = useState("");
+  const [Spot, setSpot] = useState("");
+  const [TB, setTinggiBadan] = useState("");
+  const [BB, setBeratBadan] = useState("");
+  const [LILA, setLILA] = useState("");
+  const [AVPU, setAVPU] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const [selectedNomorMR, setSelectedNomorMR] = useState('');
+  const [selectedNomorMR, setSelectedNomorMR] = useState("");
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [mergedData, setMergedData] = useState([]);
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
-    setSelectedNomorMR(nomorMR); 
+    setSelectedNomorMR(nomorMR);
   };
-  
+
+ 
+
   const fetchDaftarPasien = async () => {
     try {
       const response = await fetch("http://localhost:3000/patients");
@@ -47,110 +51,139 @@ function Susterdashboard() {
       // Handle the error gracefully, e.g., display an error message to the user
     }
   };
+
+
+ 
+
+  // Fetch data dari API
+  const fetchMedical = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/medical");
+      const data = await response.json();
+      console.log("response : ", response);
+      console.log("data pasien: ", data.medicalRecords);
+
+      if (data.success) {
+        setMedicalRecords(data.medicalRecords); // Simpan data medical records
+      } else {
+        console.error("Failed to fetch patients:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
+
   useEffect(() => {
+    const mergeData = () => {
+      const merged = daftarPasien.map((pasien) => {
+        const medicalRecord = medicalRecords.find(record => record.nomorMR === pasien.nomorMR);
+        return { ...pasien, ...medicalRecord }; // Gabungkan data pasien dan medical record
+      });
+      setMergedData(merged); // Simpan hasil gabungan data
+    };
+
+    if (medicalRecords.length > 0 && daftarPasien.length > 0) {
+      mergeData();
+    }
+  }, [medicalRecords, daftarPasien]);
+
+  // Panggil fetchMedical saat komponen di-mount
+  useEffect(() => {
+    fetchMedical();
     fetchDaftarPasien();
   }, []);
+
+
   
   const resetForm = () => {
-    setTekananDarahSistolik('');
-    setTekanandarahDiastolik('');
-    setTemperatur('');
-    setNadi('');
-    setLajuPernafasan('');
-    setSpot('');
-    setTinggiBadan('');
-    setBeratBadan('');
-    setLILA('');
-    setAVPU('');
+    setTekananDarahSistolik("");
+    setTekanandarahDiastolik("");
+    setTemperatur("");
+    setNadi("");
+    setLajuPernafasan("");
+    setSpot("");
+    setTinggiBadan("");
+    setBeratBadan("");
+    setLILA("");
+    setAVPU("");
   };
-  
+
   const isFormEmpty = () => {
-    return (
-      !TDS &&
-      !TDD &&
-      !Temperatur &&
-      !Nadi &&
-      !LP &&
-      !Spot &&
-      !TB &&
-      !BB &&
-      !LILA &&
-      !AVPU
-    );
+    return !TDS && !TDD && !Temperatur && !Nadi && !LP && !Spot && !TB && !BB && !LILA && !AVPU;
   };
-  
+
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
   };
   const [activePage, setActivePage] = useState("");
-  
+
   // Fungsi untuk menetapkan halaman aktif
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
-  
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-    
-//     // Menampilkan konfirmasi kepada pengguna
-//     if (window.confirm("Apakah Anda sudah yakin?")) {
-//         // Data yang akan dikirim dalam format JSON
-//         const formData = {
-//             nomorMR: selectedNomorMR,
-//             TDS,   // Tekanan Darah Sistolik
-//             TDD,   // Tekanan Darah Diastolik
-//             Temperatur,
-//             Nadi,
-//             LP,    // Laju Pernafasan
-//             Spot,
-//             TB,    // Tinggi Badan
-//             BB,    // Berat Badan
-//             LILA,
-//             AVPU,
-//         };
 
-//         try {
-//             // Mengirimkan request POST ke server
-//             const response = await fetch('http://localhost:3000/medical/tambah', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify(formData),
-//             });
+  //   const handleSubmit = async (e) => {
+  //     e.preventDefault();
 
-//             // Menampilkan status respons di console
-//             console.log('Response Status:', response.status);
-//             const contentType = response.headers.get('content-type');
+  //     // Menampilkan konfirmasi kepada pengguna
+  //     if (window.confirm("Apakah Anda sudah yakin?")) {
+  //         // Data yang akan dikirim dalam format JSON
+  //         const formData = {
+  //             nomorMR: selectedNomorMR,
+  //             TDS,   // Tekanan Darah Sistolik
+  //             TDD,   // Tekanan Darah Diastolik
+  //             Temperatur,
+  //             Nadi,
+  //             LP,    // Laju Pernafasan
+  //             Spot,
+  //             TB,    // Tinggi Badan
+  //             BB,    // Berat Badan
+  //             LILA,
+  //             AVPU,
+  //         };
 
-//             if (contentType && contentType.includes('application/json')) {
-//                 const data = await response.json();  // Mendapatkan respons dalam format JSON
-//                 console.log('Response Data:', data);
+  //         try {
+  //             // Mengirimkan request POST ke server
+  //             const response = await fetch('http://localhost:3000/medical/tambah', {
+  //                 method: 'POST',
+  //                 headers: {
+  //                     'Content-Type': 'application/json',
+  //                 },
+  //                 body: JSON.stringify(formData),
+  //             });
 
-//                 // Jika data berhasil ditambahkan
-//                 if (data.success) {
-//                     setShowModal(false); // Tutup modal setelah berhasil
-//                     resetForm(); // Reset input form
-//                     setIsConfirmed(false); // Reset checkbox konfirmasi
-//                     fetchDaftarPasien();  // Refresh daftar pasien tanpa reload halaman
-//                 }
-//             } else {
-//                 const text = await response.text(); // Jika respons bukan JSON, tampilkan teks
-//                 console.error('Error: Response is not JSON. Response text:', text);
-//             }
-//         } catch (error) {
-//             // Tangkap error dan tampilkan pesan error di console
-//             console.error('Error:', error.message);
-//         }
-//     }
-// };
+  //             // Menampilkan status respons di console
+  //             console.log('Response Status:', response.status);
+  //             const contentType = response.headers.get('content-type');
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  //             if (contentType && contentType.includes('application/json')) {
+  //                 const data = await response.json();  // Mendapatkan respons dalam format JSON
+  //                 console.log('Response Data:', data);
 
-  // Remove the window.confirm line
-  const formData = {
+  //                 // Jika data berhasil ditambahkan
+  //                 if (data.success) {
+  //                     setShowModal(false); // Tutup modal setelah berhasil
+  //                     resetForm(); // Reset input form
+  //                     setIsConfirmed(false); // Reset checkbox konfirmasi
+  //                     fetchDaftarPasien();  // Refresh daftar pasien tanpa reload halaman
+  //                 }
+  //             } else {
+  //                 const text = await response.text(); // Jika respons bukan JSON, tampilkan teks
+  //                 console.error('Error: Response is not JSON. Response text:', text);
+  //             }
+  //         } catch (error) {
+  //             // Tangkap error dan tampilkan pesan error di console
+  //             console.error('Error:', error.message);
+  //         }
+  //     }
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Remove the window.confirm line
+    const formData = {
       nomorMR: selectedNomorMR,
       TDS,
       TDD,
@@ -162,43 +195,40 @@ const handleSubmit = async (e) => {
       BB,
       LILA,
       AVPU,
-  };
+    };
 
-  try {
-      const response = await fetch('http://localhost:3000/medical/tambah', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
+    try {
+      const response = await fetch("http://localhost:3000/medical/tambah", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      console.log('Response Status:', response.status); 
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          console.log('Response Data:', data);
-          
-          // Reset form dan refresh daftar pasien setelah berhasil
-    
-              setShowModal(false); // Tutup modal setelah sukses
-              resetForm(); // Reset input
-              fetchDaftarPasien();  
-              console.log('well');  
-           
+      console.log("Response Status:", response.status);
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Response Data:", data);
+
+        // Reset form dan refresh daftar pasien setelah berhasil
+
+        setShowModal(false); // Tutup modal setelah sukses
+        resetForm(); // Reset input
+        fetchDaftarPasien();
+        console.log("well");
+        window.location.reload();
       } else {
-          const text = await response.text(); 
-          console.error('Error: Response is not JSON. Response text:', text);
+        const text = await response.text();
+        console.error("Error: Response is not JSON. Response text:", text);
       }
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
-};
-  
-  
-  
-  
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
@@ -336,13 +366,13 @@ const handleSubmit = async (e) => {
                               <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">Nomor MR</h6>
                               </th>
-                              <th style={{width: '18rem'}} class="border-bottom-0">
+                              <th style={{ width: "18rem" }} class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">Action</h6>
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {daftarPasien.map((pasien, index) => (
+                            {mergedData.map((pasien, index,) => (
                               <tr key={pasien.nomorMR}>
                                 <td class="border-bottom-0">
                                   <h6 class="fw-semibold mb-0">{index + 1}</h6>
@@ -355,14 +385,13 @@ const handleSubmit = async (e) => {
                                     <span class="fw-normal">{pasien.nomorMR}</span>
                                   </div>
                                 </td>
-                                <td class="border-bottom-0">
-                                <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(pasien.nomorMR)}>
+                                <td class="border-bottom-0"> 
+                                  <button type="button " className="btn btn-primary m-1 " 
+                                  onClick={() => toggleModal(pasien.nomorMR)}
+                                  disabled={pasien.statusMR}>
                                     Periksa
-                                  </button>
-                                  <button type="button" className="btn btn-danger m-1">
-                                    Batal
-                                  </button>
-                                 
+                                  </button >
+                                  {pasien.statusMR && <button className="btn btn-success">Masuk</button>}
                                 </td>
                               </tr>
                             ))}
@@ -370,17 +399,19 @@ const handleSubmit = async (e) => {
                         </table>
                       </div>
                       {showModal && (
-                        <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
+                        <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
                           <div className="modal-dialog">
                             <div className="modal-content">
                               <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">Tambah Pengukuran Medis</h5>
+                                <h5 className="modal-title" id="exampleModalLabel">
+                                  Tambah Pengukuran Medis
+                                </h5>
                                 <button type="button" className="btn-close" onClick={toggleModal}></button>
                               </div>
                               <form onSubmit={handleSubmit}>
                                 <div className="modal-body">
                                   {/* Input pengukuran medis */}
-                                  <div className="row" style={{ padding: '0px' }}>
+                                  <div className="row" style={{ padding: "0px" }}>
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">Tekanan Darah Sistolik</h6>
                                       <input type="text" name="TDS" className="form-control" placeholder="mmHg" value={TDS} onChange={(e) => setTekananDarahSistolik(e.target.value)} />
@@ -391,7 +422,7 @@ const handleSubmit = async (e) => {
                                     </div>
                                   </div>
 
-                                  <div className="row" style={{ padding: '0px' }}>
+                                  <div className="row" style={{ padding: "0px" }}>
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">Temperatur</h6>
                                       <input type="text" name="Temperatur" className="form-control" placeholder="C" value={Temperatur} onChange={(e) => setTemperatur(e.target.value)} />
@@ -402,7 +433,7 @@ const handleSubmit = async (e) => {
                                     </div>
                                   </div>
 
-                                  <div className="row" style={{ padding: '0px' }}>
+                                  <div className="row" style={{ padding: "0px" }}>
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">Laju Pernafasan</h6>
                                       <input type="text" name="LP" className="form-control" placeholder="LP" value={LP} onChange={(e) => setLajuPernafasan(e.target.value)} />
@@ -413,7 +444,7 @@ const handleSubmit = async (e) => {
                                     </div>
                                   </div>
 
-                                  <div className="row" style={{ padding: '0px' }}>
+                                  <div className="row" style={{ padding: "0px" }}>
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">Tinggi Badan</h6>
                                       <input type="text" name="TB" className="form-control" placeholder="Cm" value={TB} onChange={(e) => setTinggiBadan(e.target.value)} />
@@ -424,7 +455,7 @@ const handleSubmit = async (e) => {
                                     </div>
                                   </div>
 
-                                  <div className="row" style={{ padding: '0px' }}>
+                                  <div className="row" style={{ padding: "0px" }}>
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">LILA</h6>
                                       <input type="text" name="LILA" className="form-control" placeholder="LILA" value={LILA} onChange={(e) => setLILA(e.target.value)} />
@@ -437,7 +468,9 @@ const handleSubmit = async (e) => {
                                 </div>
 
                                 <div className="modal-footer">
-                                  <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+                                  <button type="button" className="btn btn-secondary" onClick={toggleModal}>
+                                    Tutup
+                                  </button>
                                   <button type="submit" className="btn btn-primary" disabled={isFormEmpty()}>
                                     <i className="ti ti-playlist-add"></i> Tambah MR
                                   </button>
@@ -449,7 +482,6 @@ const handleSubmit = async (e) => {
                         </div>
                       )}
                       {showModal && <div className="modal-backdrop fade show"></div>}
-
                     </div>
                   </div>
                 </div>

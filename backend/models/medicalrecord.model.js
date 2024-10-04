@@ -21,7 +21,10 @@ const medicalRecordSchema = new mongoose.Schema({
         required: true,
         default: () => moment.tz("Asia/Jakarta").toDate(), // Menggunakan timezone Jakarta
     },
-
+    statusMR: {
+        type: Boolean,
+        default: false,
+    },
 });
 const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);
 module.exports = MedicalRecord;
