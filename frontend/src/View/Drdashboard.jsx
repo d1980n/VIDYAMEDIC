@@ -10,6 +10,7 @@ function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [daftarPasien, setDaftarPasien] = useState([]);
+  const [daftarPasien, setDaftarPasien] = useState([]);
   
   useEffect(() => {
       const fetchData = async () => {
@@ -28,6 +29,28 @@ function Drdashboard() {
 
       fetchData();
   }, [searchTerm]);
+
+  const fetchDaftarPasien = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/patients");
+      const data = await response.json();
+      console.log("response : ", response);
+      console.log("data pasien: ", data.patients);
+      if (data.success) {
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true);
+        setDaftarPasien(filteredPatients);
+      } else {
+        console.error("Failed to fetch patients:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      // Handle the error gracefully, e.g., display an error message to the user
+    }
+  };
+  useEffect(() => {
+    fetchDaftarPasien();
+  }, []);
+
 
   const handleChange = (event) => {
       setSearchTerm(event.target.value);
@@ -261,24 +284,34 @@ function Drdashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                    {daftarPasien.map((pasien, index) => (
-                                <tr key={pasien.nomorMR}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">{pasien.nomorMR}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-primary m-1" onClick={() => susterAntri(index, pasien.nomorMR)}>Masuk</button>
-                                    <button type="button" className="btn btn-danger m-1" onClick={() => cancelPasien(index, pasien.nomorMR)}>Batal</button>
-                                  </td>
-                                </tr>
+                            {daftarPasien.map((pasien, index,) => (
+                              <tr key={pasien.nomorMR}>
+                                <td class="border-bottom-0">
+                                  <h6 class="fw-semibold mb-0">{index + 1}</h6>
+                                </td>
+                                <td class="border-bottom-0">
+                                  <p class="mb-0 fw-normal">{pasien.namaLengkap}</p>
+                                </td>
+                                <td class="border-bottom-0">
+                                  <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-normal">{pasien.nomorMR}</span>
+                                  </div>
+                                </td>
+                                <td class="border-bottom-0"> 
+                                  <button type="button " className="btn btn-primary m-1 ">
+                                    Periksa
+                                  </button >
+                               
+                                </td>
+                                <td class="border-bottom-0"> 
+                                  <button type="button " className="btn  btn-success m-1 ">
+                                    Selesai
+                                  </button >
+                               
+                                </td>
+                              </tr>
                             ))}
-                    </tbody>
+                          </tbody>
                   </table>
                 </div>
                 
