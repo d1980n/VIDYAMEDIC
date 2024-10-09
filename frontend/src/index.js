@@ -24,6 +24,7 @@ import {
 } from 'react-router-dom';
 import App from './App.js';
 import Login from './View/login.jsx';
+import Target from './View/Target.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -100,6 +101,10 @@ const router = createBrowserRouter([
   {
     path: "/DataAdmin",
     element: <DataAdmin/>
+  },
+  {
+    path: "/Target",
+    element: <Target/>
   }
 ]);
 

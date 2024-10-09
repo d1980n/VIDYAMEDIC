@@ -6,6 +6,8 @@ import "../css/admindash.css";
 import images from "../source/Picture1.png";
 import { NavLink } from "react-router-dom";
 import images2 from "../source/img2.png";
+import Swal from 'sweetalert2';
+
 function Susterdashboard() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -165,55 +167,85 @@ function Susterdashboard() {
   //     }
   // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    // Remove the window.confirm line
-    const formData = {
-      nomorMR: selectedNomorMR,
-      TDS,
-      TDD,
-      Temperatur,
-      Nadi,
-      LP,
-      Spot,
-      TB,
-      BB,
-      LILA,
-      AVPU,
-    };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:3000/medical/tambah", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+  const formData = {
+    nomorMR: selectedNomorMR,
+    TDS,
+    TDD,
+    Temperatur,
+    Nadi,
+    LP,
+    Spot,
+    TB,
+    BB,
+    LILA,
+    AVPU,
+  };
 
-      console.log("Response Status:", response.status);
-      const contentType = response.headers.get("content-type");
+  // Tampilkan alert konfirmasi sebelum submit
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data akan disimpan, pastikan semua informasi sudah benar.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, simpan!',
+    cancelButtonText: 'Batal'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch("http://localhost:3000/medical/tambah", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log("Response Data:", data);
+        console.log("Response Status:", response.status);
+        const contentType = response.headers.get("content-type");
 
-        // Reset form dan refresh daftar pasien setelah berhasil
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          console.log("Response Data:", data);
 
-        setShowModal(false); // Tutup modal setelah sukses
-        resetForm(); // Reset input
-        fetchDaftarPasien();
-        console.log("well");
-        window.location.reload();
-      } else {
-        const text = await response.text();
-        console.error("Error: Response is not JSON. Response text:", text);
+          // Tampilkan alert sukses setelah submit berhasil
+          Swal.fire({
+            title: 'Success!',
+            text: 'Data berhasil disimpan!',
+            icon: 'success',
+            confirmButtonText: 'OK',
+          });
+
+          // Reset form dan refresh daftar pasien setelah berhasil
+          setShowModal(false); // Tutup modal setelah sukses
+          resetForm(); // Reset input
+          fetchDaftarPasien();
+          console.log("well");
+          window.location.reload();
+        } else {
+          const text = await response.text();
+          console.error("Error: Response is not JSON. Response text:", text);
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+
+        // Jika terjadi error, tampilkan alert error
+        Swal.fire({
+          title: 'Error!',
+          text: 'Gagal menyimpan data, coba lagi!',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
       }
-    } catch (error) {
-      console.error("Error:", error.message);
     }
+  });
 };
+
 
 useEffect(() => {
   const mergeData = () => {
