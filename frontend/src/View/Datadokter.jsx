@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
@@ -16,249 +17,187 @@ function DataDokter() {
   const [phone_number, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [konfpassword, setKonfPassword] = useState('');
+  const [ttl, setTtl] = useState('');
+  const [poli, setPoli] = useState('');
   const [role, setRole] = useState('');
-  const [daftarPasien, setDaftarPasien] = useState([]);
+  const [kodeDok, setKodeDok] = useState('');
+  const [daftarDokter, setDaftarDokter] = useState([]);
   const [formData, setFormData] = useState({});
   const toggleModal = () => {
     setShowModal(!showModal);
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+//   const handleChange = (e) => {
+//     setFormData({
+//       ...formData,
+//       [e.target.id]: e.target.value,
+//     });
+//   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Menyusun data form
-    const formData = {
-      namaLengkap,
-      jenisKelamin,
-      alamatLengkap,
-      email,
-      password,
-      konfpassword,
-      role,
-      phone_number,
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
 
-    };
-  
-    // Log data untuk memeriksa
-    console.log('Form Data:', formData);
-  
+//     // Remove the window.confirm line
+//     const formData = {
+//       namaLengkap,
+//       jenisKelamin,
+//       alamatLengkap,
+//       phone_number,
+//       email,
+//       password,
+//       role,
+//       poli
+//     };
 
+//     try {
+//       const response = await fetch("http://localhost:3000/medical/tambah", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(formData),
+//       });
 
-    try {
-      const response = await fetch('http://localhost:3000/patients/tambah', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-  
-  
-      const data = await response.json();
-      console.log('Response Data:', data);
-  
-      // Reset form setelah pengiriman berhasil
-      setNamaLengkap('');
-      setJenisKelamin('');
-      setAlamatLengkap('');
-      setPhoneNumber('');
-      setEmail('');
-      setPassword('');
-      setKonfPassword('');
-      setRole('Dokter');
-      setShowModal(false);
-  
-      // Fetch data again after adding a new patient
-      fetchDaftarPasien();
-    } catch (error) {
-      console.error('Error:', error.message);
-    }
-  };
-  const fetchDaftarPasien = async () => {
-    try {
-        const response = await fetch('http://localhost:3000/patients');
-        const data = await response.json();
+//       console.log("Response Status:", response.status);
+//       const contentType = response.headers.get("content-type");
 
-        if (response.ok) { // Check if the response is successful
-            const filteredPatients = data.patients.filter(patient => 
-                patient.antrianStatus && 
-                patient.antrianStatus.status === true && 
-                patient.is_active !== true // Exclude patients with is_active = true
-            );
-            setDaftarPasien(filteredPatients); // Save the filtered patients to state
-        } else {
-            console.error('Failed to fetch patients:', data.message);
-        }
-    } catch (error) {
-        console.error('Error fetching patients:', error);
-        // Handle error appropriately, e.g., displaying an error message to the user
-    }
+//       if (contentType && contentType.includes("application/json")) {
+//         const data = await response.json();
+//         console.log("Response Data:", data);
+
+//         // Reset form dan refresh daftar pasien setelah berhasil
+
+//         setShowModal(false); // Tutup modal setelah sukses
+//         resetForm(); // Reset input
+//         fetchDaftarDokter();
+//         console.log("well");
+//         window.location.reload();
+//       } else {
+//         const text = await response.text();
+//         console.error("Error: Response is not JSON. Response text:", text);
+//       }
+//     } catch (error) {
+//       console.error("Error:", error.message);
+//     }
+// };
+
+//   const fetchDaftarDokter = async () => {
+//     try {
+//         const response = await fetch('http://localhost:3000/doctor');
+//         const data = await response.json();
+
+//         if (response.ok) { // Check if the response is successful
+//           const data = await response.json();
+//           console.log("Response Data:", data);
+//             // Save the filtered patients to state
+//         } else {
+//             console.error('Failed to fetch dokter:', data.message);
+//         }
+//     } catch (error) {
+//         console.error('Error fetching dokter:', error);
+//         // Handle error appropriately, e.g., displaying an error message to the user
+//     }
+// };
+  
+//   useEffect(() => {
+//     fetchDaftarDokter();
+//   }, []);
+
+const [confirmPassword, setConfirmPassword] = useState('');
+const [error, setError] = useState('');
+
+// Fungsi untuk membuat kode dokter otomatis dengan awalan "D" dan 3 angka acak
+const generateKodeDokter = () => {
+  const randomNumber = Math.floor(100 + Math.random() * 900); // Menghasilkan angka acak antara 100 dan 999
+  return `D${randomNumber}`;
 };
-  
+
+const resetForm = () => {
+  setNamaLengkap("");
+  setJenisKelamin("");
+  setAlamatLengkap("");
+  setPhoneNumber("");
+  setPoli("");
+  setEmail("");
+  setPassword("");
+  setConfirmPassword("");
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Validasi jika password dan konfirmasi password tidak cocok
+  if (password !== confirmPassword) {
+    setError('Password dan konfirmasi password tidak cocok');
+    return;
+  }
+
+  // Pastikan kode_dok dan role diisi secara otomatis
+  const finalKodeDok = kodeDok || generateKodeDokter();
+  const finalRole = role || 'Dokter';
+
+  // Menyusun data form
+  const formData = {
+    kodeDok: finalKodeDok,
+    namaLengkap,
+    jenisKelamin,
+    email,
+    phone_number,
+    role: finalRole,
+    alamatLengkap,
+    ttl,
+    poli,
+    password
+  };
+
+  // Log data untuk memeriksa
+  console.log('Form Data:', formData);
+
+  try {
+    const response = await fetch('http://localhost:5000/api/dokter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+
+    const data = await response.json();
+    console.log('Response Data:', data);
+
+    // Reset form dan refresh daftar pasien setelah berhasil
+    setShowModal(false); // Tutup modal setelah sukses
+    resetForm(); // Reset input
+    console.log("well");
+    window.location.reload();
+ } catch (error) {
+   alert('Terjadi kesalahan saat menambahkan dokter: ' + error.message);
+ }
+};
+
+const [dokters, setDokters] = useState([]);
+
   useEffect(() => {
-    fetchDaftarPasien();
+    const fetchDokters = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/dokter');
+        setDokters(response.data);
+      } catch (error) {
+        alert('Error fetching dokter data: ' + error.message);
+      }
+    };
+
+    fetchDokters();
   }, []);
 
   // ===============================================================================================================================
-  
-  const [targetPasien, setTargetPasien] = useState(null); // State untuk menyimpan pasien yang dicari
-
-  const handleInputChange = async (e) => {
-    const searchTerm = e.target.value;
-  
-    if (searchTerm) {
-      try {
-        // Pencarian berdasarkan nomor MR
-        const response = await fetch(`http://localhost:3000/patients/search?term=${searchTerm}`);
-        const data = await response.json();
-  
-        if (response.ok && data.patients.length > 0) {
-          setTargetPasien(data.patients[0]); // Menyimpan pasien yang cocok ke state
-        } else {
-          setTargetPasien(null); // Jika tidak ada pasien, kosongkan state
-        }
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-        setTargetPasien(null);
-      }
-    } else {
-      setTargetPasien(null); // Jika search field kosong, hapus target
-    }
-  };
-
-  const updateAntrianStatus = async () => {
-    console.log(targetPasien);
-    if (targetPasien) {
-        try {
-            const response = await fetch(`http://localhost:3000/patients/${targetPasien.nomorMR}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ antrianStatus: { status: true } }), // Sesuai dengan backend
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log('Status antrian berhasil diperbarui:', data);
-                window.location.reload(); 
-            } else {
-                console.error('Error updating antrian status:', data.message);
-            }
-        } catch (error) {
-            console.error('Error updating antrian status:', error);
-        }
-    } else {
-        console.log('Pasien tidak ditemukan');
-    }
-};
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isOverlayVisible, setOverlayVisible] = useState(false);
-  const toggleOverlay = () => {
-    setOverlayVisible(!isOverlayVisible);
-  };
-
-
-
-// Fungsi untuk membatalkan antrian pasien
-const cancelPasien = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1);
-  setDaftarPasien(newDaftarPasien);
-  
-  try {
-      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nomorMR }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-          throw new Error(data.message || 'Gagal membatalkan antrian pasien');
-      }
-      else{
-        window.location.reload(); 
-      }
-
-      console.log('Antrian dibatalkan:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
-};
-
-// Fungsi untuk memperbarui status antrian suster
-const susterAntri = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
-  setDaftarPasien(newDaftarPasien);
-
-  try {
-      const response = await fetch(`http://localhost:3000/patients/susterAntri`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-          throw new Error(data.message || 'Gagal memperbarui status antrian suster');
-      }
-      else{
-        window.location.reload(); 
-      }
-
-      console.log('Status antrian suster berhasil diperbarui:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
-};
-
-
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (searchTerm.trim() !== '') {
-        try {
-          const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
-          const data = await response.json();
-          setSearchResults(data);
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      } else {
-        setSearchResults([]);
-      }
-    };
-
-    fetchData();
-  }, [searchTerm]);
 
   const [activePage, setActivePage] = useState('');
 
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
-
-  const [showOverlay, setShowOverlay] = useState(false);
 
   return (
     <html className='Admin'>
@@ -388,22 +327,12 @@ const susterAntri = async (index, nomorMR) => {
                                 className="form-sels"
                                 placeholder="Masukkan nama atau email"
                                 style={{ width: '67%' }}
-                                onChange={handleInputChange} 
                                 // Memanggil fungsi pencarian saat pengguna mengetik
                               />
-                              {targetPasien && (
-                                <div className="patient-info">
-                                  <p>Nama: {targetPasien.namaLengkap}</p>
-                                  <p>Nomor MR: {targetPasien.nomorMR}</p>
-                                  <p>Nomor Telepon: {targetPasien.phone_number}</p>
-                               
-                                </div>
-                              )} 
+                              
                               <button 
                                 type="button" 
                                 className="btn btn-secondary m-1" 
-                                onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
-                                disabled={!targetPasien} // Disable tombol jika pasien tidak ditemukan
                               >
                                 Update Antri
                               </button>
@@ -431,20 +360,20 @@ const susterAntri = async (index, nomorMR) => {
                               </tr>
                             </thead>
                             <tbody>
-                            {daftarPasien.map((pasien, index) => (
-                                <tr key={pasien.nomorMR}>
+                            {dokters.map((dokter, index) => (
+                                <tr key={dokter.kode_dok}>
                                   <td>{index + 1}</td>
                                   <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">Dr. Dymas, Sp. A</p>
+                                    <p className="mb-0 fw-normal">{dokter.namaLengkap}</p>
                                   </td>
                                   <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">dymasnih@mail.com</span>
+                                    <div className="d-flex align-items-center gap-2"> 
+                                      <span className="fw-normal">{dokter.email}</span>
                                     </div>
                                   </td>
                                   <td className="border-bottom-0">
                                     <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">161223</span>
+                                      <span className="fw-normal">{dokter.password}</span>
                                     </div>
                                   </td>
                                   <td className="border-bottom-0">
@@ -464,63 +393,71 @@ const susterAntri = async (index, nomorMR) => {
                 </div>
 
                 {showModal && (
-                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
-                    <div className="modal-dialog">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
-                          <button type="button" className="btn-close" onClick={toggleModal}></button>
-                        </div>
-                        <form onSubmit={handleSubmit}>
-                          <div className="modal-body">
-                            <div className="mb-3">
-                              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-                              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} />
-                            </div>
-                            {/* <div className="mb-3">
-                              <label htmlFor="fotoKTP" className="form-label">Foto KTP</label>
-                              <input type="file" className="form-control" id="fotoKTP" onChange={(e) => setFotoKTP(e.target.files[0])} />
-                            </div> */}
-                            <div className="mb-3">
-                              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-                              <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                              <option value="Select">Select</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                              </select>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-                              <textarea className="form-control" id="alamatLengkap" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-                              <input type="text" className="form-control" id="phone_number" onChange={(e) => setPhoneNumber(e.target.value)}/>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="email" className="form-label">Alamat Email</label>
-                              <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="password" className="form-label">Password</label>
-                              <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="konfPassword" className="form-label">Konfirmasi Password</label>
-                              <input type="password" className="form-control" id="konfPassword" value={konfpassword} onChange={(e) => setKonfPassword(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                            <button type="submit" className="btn btn-primary">Simpan</button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {showModal && <div className="modal-backdrop fade show">
-                  </div>}
+  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block', zIndex: 1050 }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
+          <button type="button" className="btn-close" onClick={toggleModal}></button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            <div className="mb-3">
+              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
+              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} autoFocus />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+              <select className="form-select" id="jenisKelamin" name="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                <option value="Select">Select</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
+              <textarea className="form-control" id="alamatLengkap" name="alamat" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
+              <input type="text" className="form-control" id="phone_number" name="no_hp" value={phone_number} onChange={(e) => setPhoneNumber(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">Alamat Email</label>
+              <input type="text" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="ttl" className="form-label">Tanggal Lahir</label>
+              <input type="date" className="form-control" id="ttl" name="ttl" value={ttl} onChange={(e) => setTtl(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="poli" className="form-label">Poli</label>
+              <input type="text" className="form-control" id="poli" name="poli" value={poli} onChange={(e) => setPoli(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">Password</label>
+              <input type="password" className="form-control" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password</label>
+              <input type="password" className="form-control" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </div>
+          </div>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Menampilkan pesan error jika ada */}
+
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+            <button type="submit" className="btn btn-primary">Tambah Dokter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
+{showModal && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>}
+
+
               </div>
             </div>
           </div>
