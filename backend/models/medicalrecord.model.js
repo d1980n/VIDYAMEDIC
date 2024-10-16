@@ -16,6 +16,14 @@ const medicalRecordSchema = new mongoose.Schema({
     BB: String,
     LILA: String,
     AVPU: String,
+    Keluhan: String,
+    Anamnesis: String,
+    Diagnosa: String,
+    StatusLokalis: String,
+    Penunjang: String,
+    RTP: String,
+    Lab: String,
+    Xray: String,
     WaktuMedicalCheck: {
         type: Date,
         required: true,
@@ -24,6 +32,11 @@ const medicalRecordSchema = new mongoose.Schema({
     statusMR: {
         type: Boolean,
         default: false,
+    },
+    StatusMRPeriksa: {
+        type: Boolean,
+        default: false,
+        required: true,
     },
 });
 const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);

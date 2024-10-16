@@ -34,7 +34,7 @@ const antrianStatusSchema = new mongoose.Schema({
         type: Boolean,
         require: true,
         default: false,
-    }
+    },
 
 
 });

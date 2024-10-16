@@ -3,6 +3,7 @@ import profiles from '../source/user-1.jpg'
 import logo from '../source/logo.png'
 import '../css/login.css';
 import '../css/admindash.css'
+import { useNavigate } from 'react-router-dom';
 import images from '../source/Picture1.png'
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png'
@@ -10,7 +11,9 @@ function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const [daftarPasien, setDaftarPasien] = useState([]);
+  const navigate = useNavigate();
+  const [isPeriksaSelesai, setIsPeriksaSelesai] = useState(false);
+  
   
   useEffect(() => {
       const fetchData = async () => {
@@ -37,7 +40,8 @@ function Drdashboard() {
       console.log("response : ", response);
       console.log("data pasien: ", data.patients);
       if (data.success) {
-        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true);
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true && 
+        patient.antrianStatus.dokterPeriksaStatus === false);
         setDaftarPasien(filteredPatients);
       } else {
         console.error("Failed to fetch patients:", data.message);
@@ -91,6 +95,37 @@ function Drdashboard() {
         console.error('Error:', error.message);
     }
   };
+  const dokterPeriksa = async (index, nomorMR) => {
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+    setDaftarPasien(newDaftarPasien);
+  
+    try {
+        const response = await fetch(`http://localhost:3000/patients/dokterPeriksa`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+        });
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+        }
+        if (data.dokterPeriksaStatus === true) {
+          setIsPeriksaSelesai(true); // Mengubah state isPeriksaSelesai
+        }
+        else{
+           navigate('/Drmonitor');
+        }
+  
+        console.log('Status antrian suster berhasil diperbarui:', data);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  };
   const cancelPasien = async (index, nomorMR) => {
     const newDaftarPasien = [...daftarPasien];
     newDaftarPasien.splice(index, 1);
@@ -119,7 +154,7 @@ function Drdashboard() {
         console.error('Error:', error.message);
     }
   };
-    
+
   return (
     <html className='Admin'>
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -157,13 +192,19 @@ function Drdashboard() {
                         <span className="hide-menu">Dashboard</span>
                     </NavLink>
                     <NavLink 
-                        className={`sidebar-link ${activePage === 'Monitoring' ? 'active' : ''}`} 
-                        to="/Drmonitor" 
-                        aria-expanded="false" 
-                        onClick={() => handleSetActivePage('Monitoring')}
+                      className={`sidebar-link ${'Dashboard' ? 'disabled-link ' : ''}`} 
+                      to="/Drmonitor" 
+                      aria-expanded="false" 
+                      onClick={(e) => {
+                        if (activePage === 'Monitoring') {
+                          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
+                        } else {
+                          handleSetActivePage('Monitoring'); // Jalankan fungsi jika tidak disabled
+                        }
+                      }}
                     >
-                        <span><i className="ti ti-heart-rate-monitor"></i></span>
-                        <span className="hide-menu">Monitoring</span>
+                      <span><i className="ti ti-heart-rate-monitor"></i></span>
+                      <span className="hide-menu">Monitoring</span>
                     </NavLink>
                   
              
@@ -298,15 +339,23 @@ function Drdashboard() {
                                   </div>
                                 </td>
                                 <td class="border-bottom-0"> 
-                                  <button type="button " className="btn btn-primary m-1 ">
-                                    Periksa
-                                  </button >
+                                {!isPeriksaSelesai ? (
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary m-1"
+                                      onClick={() => dokterPeriksa(index, pasien.nomorMR)} // Menjalankan dokterPeriksa
+                                    >
+                                      Periksa
+                                    </button>
+                                  ) : (
+                                    // Jika periksa selesai, tampilkan NavLink yang membawa ke /Drmonitor
+                                    <NavLink to="/Drmonitor" className="btn btn-success m-1">
+                                      Pergi ke Monitor Dokter
+                                    </NavLink>
+                                  )}
                                
                                 </td>
                                 <td class="border-bottom-0"> 
-                                  <button type="button " className="btn  btn-success m-1 ">
-                                    Selesai
-                                  </button >
                                
                                 </td>
                               </tr>

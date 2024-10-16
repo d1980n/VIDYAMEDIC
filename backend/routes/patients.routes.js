@@ -16,7 +16,7 @@ router.put('/susterAntri', susterAntri);
 router.put('/update/:nomorMR', updateAntrianStatus);
 router.put('/dokterAntri', dokterAntri);
 router.put('/dokterPeriksa', dokterPeriksa);
-router.put('/statusSelesai', statusSelesai)
+router.post('/statusSelesai', statusSelesai);
 
 
 

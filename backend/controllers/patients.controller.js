@@ -1,4 +1,5 @@
 const Patient = require('../models/patient.model');
+const MedicalRecord = require('../models/suster.model');
 
 const tambahPasien = async(req, res, next) => {
     const {
@@ -120,47 +121,101 @@ const dokterPeriksa = async(req, res) => {
     const { nomorMR } = req.body; // Mengambil nomorMR dari body request
 
     try {
+        // Update antrianStatus.dokterPeriksaStatus pada collection Patient
         const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, {
                 $set: {
-                    'antrianStatus.dokterPeriksaStatus': true // Menyetel status antrian menjadi false
+                    'antrianStatus.dokterPeriksaStatus': true
                 }
-            }, // Update properti susterAntriStatus
-            { new: true } // Mengembalikan data yang sudah diupdate
+            }, { new: true } // Mengembalikan data yang sudah diupdate
         );
 
         if (!pasien) {
             return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
         }
 
-        res.json({ success: true, message: 'Status periksa dokter berhasil diperbarui', pasien });
+        // Update statusMR menjadi true pada collection medicalrecords
+        const updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({ nomorMR: nomorMR }, {
+                $set: {
+                    'statusMRPeriksa': true
+                }
+            }, { new: true } // Mengembalikan data yang sudah diupdate
+        );
+
+        if (!updatedMedicalRecord) {
+            return res.status(404).json({ message: 'Medical record untuk nomorMR ini tidak ditemukan' });
+        }
+
+        // Mengirimkan response sukses
+        res.json({
+            success: true,
+            message: 'Status periksa dokter dan statusMRPeriksa berhasil diperbarui',
+            pasien,
+            medicalRecord: updatedMedicalRecord
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter', error });
+        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter atau statusMRPeriksa', error });
     }
 };
+
 const statusSelesai = async(req, res) => {
-    const { nomorMR } = req.body; // Mengambil nomorMR dari body request
-
+    console.log('Request diterima di /statusSelesai', req.body); // Menambahkan log ini
     try {
-        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, {
+        // Cek apakah statusMRPeriksa === true dikirim
+        if (req.body.statusMRPeriksa === true) {
+            // Cari semua rekam medis dengan statusMRPeriksa === true
+            const medicalRecords = await MedicalRecord.find({ statusMRPeriksa: true });
+
+            if (medicalRecords.length === 0) {
+                return res.status(404).json({ message: 'Tidak ada rekam medis dengan statusMRPeriksa === true yang ditemukan' });
+            }
+
+            // Ekstrak semua nomorMR dari hasil pencarian rekam medis
+            const nomorMRs = medicalRecords.map(record => record.nomorMR);
+
+            // Update status pasien berdasarkan nomorMR yang ditemukan
+            const updatedPatients = await Patient.updateMany({ nomorMR: { $in: nomorMRs } }, {
                 $set: {
-                    'antrianStatus.dokterPeriksaStatus': false,
-                    'antrianStatus.susterPeriksaStatus': false,
-                    'antrianStatus.dokterAntriStatus': false,
                     'antrianStatus.status': false,
+                    'antrianStatus.susterAntriStatus': false,
+                    'antrianStatus.dokterAntriStatus': false,
+                    'antrianStatus.dokterPeriksaStatus': false,
                 }
-            }, // Update properti susterAntriStatus
-            { new: true } // Mengembalikan data yang sudah diupdate
-        );
+            }, { new: true });
 
-        if (!pasien) {
-            return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
+            // Cek apakah ada pasien yang diperbarui
+            if (updatedPatients.matchedCount === 0) {
+                return res.status(404).json({ message: 'Tidak ada pasien yang ditemukan untuk diperbarui' });
+            }
+
+            // Update statusMRPeriksa dan statusMR di MedicalRecord
+            const updatedMedicalRecords = await MedicalRecord.updateMany({ nomorMR: { $in: nomorMRs } }, {
+                $set: {
+                    statusMRPeriksa: false,
+                    statusMR: false
+                }
+            }, { new: true });
+
+            // Cek apakah rekam medis berhasil diperbarui
+            if (updatedMedicalRecords.matchedCount === 0) {
+                return res.status(404).json({ message: 'Tidak ada rekam medis yang diperbarui' });
+            }
+
+            // Kirim respons sukses dalam format JSON
+            res.status(200).json({ success: true, message: 'Status periksa dan rekam medis berhasil diperbarui' });
+        } else {
+            res.status(400).json({ success: false, message: 'statusMRPeriksa tidak valid' });
         }
-
-        res.json({ success: true, message: 'Status periksa dokter berhasil diperbarui', pasien });
     } catch (error) {
-        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter', error });
+        // Tangani error dengan mengirimkan respons JSON
+        console.error('Error during status update:', error); // Menambahkan log ini
+        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status', error: error.message });
     }
 };
+
+
+
+
+
 // Controller untuk membatalkan antrian pasien
 const cancelAntrian = async(req, res) => {
     try {

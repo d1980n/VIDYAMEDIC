@@ -19,6 +19,7 @@ function Susterdashboard() {
   const [BB, setBeratBadan] = useState("");
   const [LILA, setLILA] = useState("");
   const [AVPU, setAVPU] = useState("");
+  const [Keluhan, setKeluhan] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [selectedNomorMR, setSelectedNomorMR] = useState("");
   const [isInputDisabled, setIsInputDisabled] = useState(false);
@@ -57,27 +58,13 @@ function Susterdashboard() {
  
 
   // Fetch data dari API
-  const fetchMedical = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/medical");
-      const data = await response.json();
-      console.log("response : ", response);
-      console.log("data pasien: ", data.medicalRecords);
-
-      if (data.success) {
-        setMedicalRecords(data.medicalRecords); // Simpan data medical records
-      } else {
-        console.error("Failed to fetch patients:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    }
-  };
+  
 
   useEffect(() => {
     const mergeData = () => {
       const merged = daftarPasien.map((pasien) => {
         const medicalRecord = medicalRecords.find(record => record.nomorMR === pasien.nomorMR);
+        
         return { ...pasien, ...medicalRecord }; // Gabungkan data pasien dan medical record
       });
       setMergedData(merged); // Simpan hasil gabungan data
@@ -107,6 +94,7 @@ function Susterdashboard() {
     setBeratBadan("");
     setLILA("");
     setAVPU("");
+    setKeluhan("");
   };
 
   const isFormEmpty = () => {
@@ -196,6 +184,7 @@ function Susterdashboard() {
       BB,
       LILA,
       AVPU,
+      Keluhan,
     };
 
     try {
@@ -445,7 +434,7 @@ const dokterAntri = async (index, nomorMR) => {
                             </tr>
                           </thead>
                           <tbody>
-                            {mergedData.map((pasien, index,) => (
+                            {mergedData.map((pasien, index) => (
                               <tr key={pasien.nomorMR}>
                                 <td class="border-bottom-0">
                                   <h6 class="fw-semibold mb-0">{index + 1}</h6>
@@ -537,6 +526,10 @@ const dokterAntri = async (index, nomorMR) => {
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">AVPU</h6>
                                       <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
+                                    </div>
+                                    <div className="col-lg-6">
+                                      <h6 className="fw-bold">Keluhan</h6>
+                                      <textarea type="text" name="Keluhan" placeholder="Keluhan" className="form-sels" value={Keluhan} onChange={(e) => setKeluhan(e.target.value)} />
                                     </div>
                                   </div>
                                 </div>

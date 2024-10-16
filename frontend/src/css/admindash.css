@@ -237,44 +237,45 @@ hr {
     opacity: 0.25
 }
 
-.AntrianBox{
+.AntrianBox {
     display: flex;
 }
 
 .popup {
     position: absolute;
-    top: 5.8rem; /* Menempatkan popup di bawah elemen pencarian */
+    top: 5.8rem;
+    /* Menempatkan popup di bawah elemen pencarian */
     left: 1.7;
     background-color: white;
-  
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10000; /* Pastikan popup berada di atas elemen lain */
-    width: 37.3rem; /* Atur lebar sesuai kebutuhan */
+    z-index: 10000;
+    /* Pastikan popup berada di atas elemen lain */
+    width: 37.3rem;
+    /* Atur lebar sesuai kebutuhan */
     max-height: 200px;
-    min-width: 0px; /* Batasi tinggi untuk scroll */
-    overflow-y: auto; /* Tambahkan scroll jika terlalu banyak hasil */
-  }
-  
-  .search_list {
+    min-width: 0px;
+    /* Batasi tinggi untuk scroll */
+    overflow-y: auto;
+    /* Tambahkan scroll jika terlalu banyak hasil */
+}
+
+.search_list {
     padding: 10px;
     cursor: pointer;
     display: flex;
     gap: 1.8rem;
-    
-    
-  }
+}
 
-  .search_list p {
+.search_list p {
     min-width: 10rem;
     max-width: 10rem;
-  }
+}
 
-  
-  .search_list:hover {
-    background-color: #f0f0f0; /* Ganti latar belakang saat hover */
-  }
-  
+.search_list:hover {
+    background-color: #f0f0f0;
+    /* Ganti latar belakang saat hover */
+}
 
 .h1,
 .h2,
@@ -19095,4 +19096,15 @@ input .deksripsi {
 .lalala {
     display: flex;
     gap: 20px;
+}
+
+.disabled-link {
+    color: var(--bs-btn-disabled-color);
+    pointer-events: none;
+    background-color: var(--bs-btn-disabled-bg);
+    border-color: var(--bs-btn-disabled-border-color);
+    opacity: var(--bs-btn-disabled-opacity);
+    -webkit-box-shadow: none;
+    opacity: 0.5;
+    /* box-shadow: none cursor: url('/assets/stop-icon.png'), auto; */
 }
