@@ -19098,13 +19098,111 @@ input .deksripsi {
     gap: 20px;
 }
 
-.disabled-link {
-    color: var(--bs-btn-disabled-color);
-    pointer-events: none;
-    background-color: var(--bs-btn-disabled-bg);
-    border-color: var(--bs-btn-disabled-border-color);
-    opacity: var(--bs-btn-disabled-opacity);
-    -webkit-box-shadow: none;
-    opacity: 0.5;
-    /* box-shadow: none cursor: url('/assets/stop-icon.png'), auto; */
+
+/* Container for the two columns */
+
+.container-target {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+}
+
+
+/* Left side (Antrian) */
+
+.left-side {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    /* Mengatur kolom untuk menumpuk */
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Right side (YouTube video) */
+
+.right-side {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+
+
+/* Styling for the card */
+
+.card-target {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 80%;
+    margin-bottom: 20px;
+    /* Jarak antara card dan antrian selanjutnya */
+}
+
+
+/* Next queue styling */
+
+.next-queue {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 80%;
+    text-align: center;
+}
+
+
+/* Title styling */
+
+.title-target {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+
+/* Next title styling */
+
+.next-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+
+/* Number styling */
+
+.number-target {
+    font-size: 62px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+
+/* Waiting message styling */
+
+.waiting-target {
+    font-size: 18px;
+    color: #888;
+}
+
+
+/* Queue list styling */
+
+.queue-list {
+    list-style-type: none;
+    /* Menghilangkan bullet point */
+    padding: 0;
+    /* Menghilangkan padding */
+}
+
+.queue-item {
+    font-size: 18px;
+    margin: 5px 0;
+    /* Jarak antar item antrian */
 }

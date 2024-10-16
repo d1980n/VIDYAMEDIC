@@ -10,6 +10,6 @@ router.get('/medical', getAllMedicalRecords);
 router.post('/medicalRecord', MedicalRoute);
 
 router.post('/tambah', tambahMR);
-router.put('/updateMRS', updateMedicalRecord);
+router.put('/updateMR', updateMedicalRecord);
 
 module.exports = router;

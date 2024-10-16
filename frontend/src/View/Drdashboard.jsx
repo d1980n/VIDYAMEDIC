@@ -11,9 +11,8 @@ function Drdashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const navigate = useNavigate();
-  const [isPeriksaSelesai, setIsPeriksaSelesai] = useState(false);
-  
+  const [isPeriksaSelesai, setIsPeriksaSelesai] = useState([]);
+  const navigate = useNavigate(); 
   
   useEffect(() => {
       const fetchData = async () => {
@@ -112,7 +111,7 @@ function Drdashboard() {
         const data = await response.json();
   
         if (!response.ok) {
-            throw new Error(data.message || 'Gagal memperbarui status antrian suster');
+            throw new Error(data.message || 'Gagal memperbarui status antrian dokter');
         }
         if (data.dokterPeriksaStatus === true) {
           setIsPeriksaSelesai(true); // Mengubah state isPeriksaSelesai
@@ -339,7 +338,7 @@ function Drdashboard() {
                                   </div>
                                 </td>
                                 <td class="border-bottom-0"> 
-                                {!isPeriksaSelesai ? (
+                                {/* {!isPeriksaSelesai ? ( */}
                                     <button
                                       type="button"
                                       className="btn btn-primary m-1"
@@ -347,12 +346,12 @@ function Drdashboard() {
                                     >
                                       Periksa
                                     </button>
-                                  ) : (
+                                  {/* ) : (
                                     // Jika periksa selesai, tampilkan NavLink yang membawa ke /Drmonitor
                                     <NavLink to="/Drmonitor" className="btn btn-success m-1">
-                                      Pergi ke Monitor Dokter
-                                    </NavLink>
-                                  )}
+                                     Pergi ke Monitor Dokter
+                                   </NavLink>
+                                 )} */}
                                
                                 </td>
                                 <td class="border-bottom-0"> 

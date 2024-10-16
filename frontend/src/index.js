@@ -14,12 +14,17 @@ import Drdashboard from './View/Drdashboard.jsx'
 import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
 import DataPasien from './View/DataPasien.jsx';
+import DataDokter from './View/Datadokter.jsx';
+import DataSuster from './View/Datasuster.jsx';
+import DataAdmin from './View/Dataadmin.jsx';
+import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom';
 import App from './App.js';
 import Login from './View/login.jsx';
+import Target from './View/Target.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -80,6 +85,26 @@ const router = createBrowserRouter([
   {
     path: "/DataPasien",
     element: <DataPasien/>
+  },
+  {
+    path: "/SuperAdmin",
+    element: <SuperAdminDashboard/>
+  },
+  {
+    path: "/DataDokter",
+    element: <DataDokter/>
+  },
+  {
+    path: "/DataSuster",
+    element: <DataSuster/>
+  },
+  {
+    path: "/DataAdmin",
+    element: <DataAdmin/>
+  },
+  {
+    path: "/Target",
+    element: <Target/>
   }
 ]);
 

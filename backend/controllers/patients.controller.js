@@ -170,10 +170,10 @@ const statusSelesai = async(req, res) => {
             }
 
             // Ekstrak semua nomorMR dari hasil pencarian rekam medis
-            const nomorMRs = medicalRecords.map(record => record.nomorMR);
+            const nomorMR = medicalRecords.map(record => record.nomorMR);
 
             // Update status pasien berdasarkan nomorMR yang ditemukan
-            const updatedPatients = await Patient.updateMany({ nomorMR: { $in: nomorMRs } }, {
+            const updatedPatients = await Patient.updateMany({ nomorMR: { $in: nomorMR } }, {
                 $set: {
                     'antrianStatus.status': false,
                     'antrianStatus.susterAntriStatus': false,
@@ -188,7 +188,7 @@ const statusSelesai = async(req, res) => {
             }
 
             // Update statusMRPeriksa dan statusMR di MedicalRecord
-            const updatedMedicalRecords = await MedicalRecord.updateMany({ nomorMR: { $in: nomorMRs } }, {
+            const updatedMedicalRecords = await MedicalRecord.updateMany({ nomorMR: { $in: nomorMR } }, {
                 $set: {
                     statusMRPeriksa: false,
                     statusMR: false

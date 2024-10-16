@@ -7,6 +7,7 @@ import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
 import { useLocation } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 
 function Antrian() {
@@ -27,8 +28,88 @@ function Antrian() {
   const clientId = query.get('id'); 
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 5;
+  const [soundQueue, setSoundQueue] = useState([
+    { id: '0', name: '0', file: '0.mp3' },
+    { id: '1', name: '1', file: '1.mp3' },
+    { id: '2', name: '2', file: '2.mp3' },
+    { id: '3', name: '3', file: '3.mp3' },
+    { id: '4', name: '4', file: '4.mp3' },
+    { id: '5', name: '5', file: '5.mp3' },
+    { id: '6', name: '6', file: '6.mp3' },
+    { id: '7', name: '7', file: '7.mp3' },
+    { id: '8', name: '8', file: '8.mp3' },
+    { id: '9', name: '9', file: '9.mp3' }
+  ]);
 
 
+  const handleCancelation = (message, index, nomorMR, namaLengkap) => {
+    console.log('handleCancelation called');
+    Swal.fire({
+      title: 'Batal Antrian',
+      text: `Apakah anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Iya',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cancelPasien(index, nomorMR); // Jalankan fungsi saat user mengonfirmasi "Iya"
+        Swal.fire(
+          'Terkonfirmasi!',
+          'Berhasil membatalkan antrian',
+          'success'
+        );
+      }
+    });
+  };
+  
+  const handleValidation = (message, index, nomorMR, namaLengkap) => {
+    Swal.fire({
+      title: 'Pasien Masuk',
+      text: `Apakah pasien dengan nama ${namaLengkap} sudah masuk?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Iya',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        susterAntri(index, nomorMR); // Jalankan fungsi saat user mengonfirmasi "Iya"
+        Swal.fire(
+          'Terkonfirmasi!',
+          `Pasien dengan nama ${namaLengkap} telah masuk.`,
+          'success'
+        );
+      }
+    });
+  };
+  const handleCallPatient = (index, nomorMR, namaLengkap, sound) => {
+    Swal.fire({
+      title: 'Panggil Pasien',
+      text: `Apakah ingin memanggil pasien dengan nomor urut ${index + 1}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Iya',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Pass the `sound` object to sendSoundIdToTarget
+        sendSoundIdToTarget(sound); // Run this function when the user confirms
+        Swal.fire(
+          'Terkonfirmasi!',
+          `Pasien dengan nama ${namaLengkap} telah dipanggil.`,
+          'success'
+        );
+      }
+    });
+  };
 
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -53,41 +134,110 @@ function Antrian() {
       alamatLengkap,
       email,
       phone_number,
-
     };
   
-    // Log data untuk memeriksa
-    console.log('Form Data:', formData);
-  
+    // Show SweetAlert with the user's input data for confirmation
+    Swal.fire({
+      title: 'Konfirmasi Data Pasien',
+      html: `
+    
+   
+     
+      <div className="" style="display: flex; justify-content:center; width:100%;  ">
+     <div className="" style="display:flex; margin-left: 0px; padding-left:0px; justify-content:start; width:80%;">
+       <p style= "min-width:9rem; display:flex; justify-item:start; max-width:8rem;"><strong>Nama Lengkap</strong></p>
+       <p style= "min-width:2rem; max-width:2rem;"><strong>:</strong></p>
+       
+       <p style= "min-width: 14rem; justify-content:start; display:flex; max-width: 14rem;"> ${namaLengkap}</p>
+     </div>
+     </div>
+      <div className="" style="display: flex; justify-content:center; width:100%;  ">
+     <div className="" style="display:flex; margin-left: 0px; padding-left:0px; justify-content:start; width:80%;">
+       <p style= "min-width:9rem; display:flex; justify-item:start; max-width:8rem;"><strong>Jenis Kelamin</strong></p>
+       <p style= "min-width:2rem; max-width:2rem;"><strong>:</strong></p>
+       
+       <p style= "min-width: 14rem; justify-content:start; display:flex;  max-width: 14rem;"> ${jenisKelamin}</p>
+     </div>
+     </div>
+      <div className="" style="display: flex; justify-content:center; width:100%;  ">
+     <div className="" style="display:flex; margin-left: 0px; padding-left:0px; justify-content:start; width:80%;">
+       <p style= "min-width:9rem; display:flex; justify-item:start; max-width:8rem;"><strong>Alamat</strong></p>
+       <p style= "min-width:2rem; max-width:2rem;"><strong>:</strong></p>
+       
+       <p style= "min-width: 14rem; justify-content:start; display:flex; max-width: 14rem;"> ${alamatLengkap}</p>
+     </div>
+     </div>
+     <div className="" style="display: flex; justify-content:center; width:100%;  ">
+     <div className="" style="display:flex; margin-left: 0px; padding-left:0px; justify-content:start; width:80%;">
+       <p style= "min-width:9rem; display:flex; justify-item:start; max-width:8rem;"><strong>Nomor Telepon</strong></p>
+       <p style= "min-width:2rem; max-width:2rem;"><strong>:</strong></p>
+       
+       <p style= "min-width: 14rem; justify-content:start; display:flex; max-width: 14rem;"> ${phone_number}</p>
+     </div>
+     </div>
+     <div className="" style="display: flex; justify-content:center; width:100%;  ">
+     <div className="" style="display:flex; margin-left: 0px; padding-left:0px; justify-content:start; width:80%;">
+       <p style= "min-width:9rem; display:flex; justify-item:start; max-width:8rem;"><strong>Email</strong></p>
+       <p style= "min-width:2rem; max-width:2rem;"><strong>:</strong></p>
+       
+       <p style= "min-width: 14rem; justify-content:start; display:flex; max-width: 14rem;"> ${email}</p>
+     </div>
+     </div>
 
-
-    try {
-      const response = await fetch('http://localhost:3000/patients/tambah', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
   
+    
+      `,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Simpan',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Send form data to the backend after confirmation
+          const response = await fetch('http://localhost:3000/patients/tambah', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
   
-      const data = await response.json();
-      console.log('Response Data:', data);
+          const data = await response.json();
+          console.log('Response Data:', data);
   
-      // Reset form setelah pengiriman berhasil
-      setNomorAntrian(nomorAntrian + 1);
-      setNamaLengkap('');
-      setJenisKelamin('');
-      setAlamatLengkap('');
-      setPhoneNumber('');
-      setEmail('');
-      setShowModal(false);
+          // Reset form after successful submission
+          setNomorAntrian(nomorAntrian + 1);
+          setNamaLengkap('');
+          setJenisKelamin('');
+          setAlamatLengkap('');
+          setPhoneNumber('');
+          setEmail('');
+          setShowModal(false);
   
-      // Fetch data again after adding a new patient
-      fetchDaftarPasien();
-    } catch (error) {
-      console.error('Error:', error.message);
-    }
+          // Fetch data again after adding a new patient
+          fetchDaftarPasien();
+  
+          // Show success alert
+          Swal.fire(
+            'Berhasil!',
+            'Data pasien berhasil disimpan.',
+            'success'
+          );
+        } catch (error) {
+          console.error('Error:', error.message);
+  
+          // Show error alert
+          Swal.fire(
+            'Gagal!',
+            'Terjadi kesalahan saat menyimpan data pasien.',
+            'error'
+          );
+        }
+      }
+    });
   };
   const fetchDaftarPasien = async () => {
     try {
@@ -288,6 +438,24 @@ const susterAntri = async (index, nomorMR) => {
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
+  const indexOfLastPatient = currentPage * patientsPerPage;
+  const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+  const currentPatients = daftarPasien.slice(indexOfFirstPatient, indexOfLastPatient);
+
+
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(daftarPasien.length / patientsPerPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
 
   const [showOverlay, setShowOverlay] = useState(false);
 
@@ -330,7 +498,7 @@ const susterAntri = async (index, nomorMR) => {
   //   fetchClientData();
   // }, [clientId]); // Dependency array untuk memicu fetch saat clientId berubah
 
-  // Cek error
+  // // Cek error
   // if (error) {
   //   return <div>Error: {error}</div>;
   // }
@@ -339,6 +507,28 @@ const susterAntri = async (index, nomorMR) => {
   // if (!clientData) {
   //   return <div>Loading...</div>;
   // }
+
+  
+  const sendSoundIdToTarget = (sound) => {
+    // Mengirimkan ID dan file suara ke API
+    fetch('http://localhost:3000/api/antrian', { // ganti URL dengan URL API kamu
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: sound.id,
+        sound: sound.file
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('ID dan sound berhasil dikirim:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  };
 
 
   return (
@@ -508,28 +698,53 @@ const susterAntri = async (index, nomorMR) => {
                               </tr>
                             </thead>
                             <tbody>
-                            {daftarPasien.map((pasien, index) => (
-                                <tr key={pasien.nomorMR}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">{pasien.nomorMR}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-primary m-1" onClick={() => susterAntri(index, pasien.nomorMR)}>Masuk</button>
-                                    <button type="button" className="btn btn-danger m-1" onClick={() => cancelPasien(index, pasien.nomorMR)}>Batal</button>
-                                  </td>
-                                </tr>
-                            ))}
+                            {currentPatients.map((pasien, index) => (
+    <tr key={pasien.nomorMR}>
+      <td>{index + 1}</td>
+      <td className="border-bottom-0">
+        <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+      </td>
+      <td className="border-bottom-0">
+        <div className="d-flex align-items-center gap-2">
+          <span className="fw-normal">{pasien.nomorMR}</span>
+        </div>
+      </td>
+      <td className="border-bottom-0">
+        <button type="button" className="btn btn-primary m-1" onClick={() => handleValidation('Pasien Masuk', index, pasien.nomorMR, pasien.namaLengkap)}>
+          Masuk
+        </button>
+        <button type="button" className="btn btn-danger m-1" onClick={() => handleCancelation('Batal Antrian', index, pasien.nomorMR, pasien.namaLengkap)}>
+          Batal
+        </button>
+
+        {/* Display 'Panggil' button if the patient's sound is available */}
+        {soundQueue[index] && (
+          
+          <button 
+          type="button" 
+          className="btn btn-success m-1" 
+          onClick={() => handleCallPatient(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}>
+          Panggil
+        </button>
+        
+          
+        )}
+      </td>
+    </tr>
+  ))}
 
                         </tbody>
 
 
                           </table>
+                          <div className="pagination-controls mt-3">
+                  <button className="btn btn-secondary mx-2" onClick={prevPage} disabled={currentPage === 1}>
+                    Previous
+                  </button>
+                  <button className="btn btn-secondary" onClick={nextPage} disabled={currentPage === Math.ceil(daftarPasien.length / patientsPerPage)}>
+                    Next
+                  </button>
+</div>
                         </div>
                       </div>
                     </div>

@@ -24,7 +24,6 @@ function Drmonitor() {
   const [RTP, setRTP] = useState("");
   const [DiagnosaICD11, setDiagnosaICD11] = useState("");
   const [Rujukan, setRujukan] = useState("");
-  
  
 
 const [labSelections, setLabSelections] = useState([]);
@@ -177,15 +176,17 @@ const handleUpdateStatus = async () => {
               alert('Gagal memperbarui status periksa: ' + data.message);
           }
       } else {
-          const errorText = await response.text(); // Ambil teks dari respons
+          const errorText = await response.text(); // Ambil teks dari respons jika bukan JSON
           console.error('Respons bukan JSON:', errorText);
           alert('Terjadi kesalahan. Respons bukan JSON valid: ' + errorText);
       }
+  
   } catch (error) {
       console.error('Error updating status:', error);
       alert('Terjadi kesalahan saat memperbarui status.');
   }
 };
+
 
 
 
@@ -636,7 +637,8 @@ const handleUpdateStatus = async () => {
                     <button  type="submit" className="btn btn-primary">
                         Simpan
                     </button>
-                    <button  type="button" className="btn btn-primary" onClick={handleUpdateStatus}>
+                  
+                <button  type="button" className="btn btn-primary" onClick={handleUpdateStatus}>
                         Selesai
                     </button>
                 </div>

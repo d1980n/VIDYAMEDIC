@@ -70,3 +70,20 @@ app.use((err, req, res, next) => {
         message,
     });
 });
+
+let soundData = null; // Menyimpan data suara sementara
+// POST /api/antrian: menerima ID suara dan file
+app.post('/api/antrian', (req, res) => {
+    const { id, sound } = req.body;
+    soundData = { id, sound };
+    res.json({ message: 'Sound ID and file received', soundData });
+  });
+  
+  // GET /api/target: mengembalikan ID dan file suara yang dikirim
+  app.get('/api/target', (req, res) => {
+    if (soundData) {
+      res.json(soundData);
+    } else {
+      res.status(404).json({ message: 'No sound data available' });
+    }
+  });
