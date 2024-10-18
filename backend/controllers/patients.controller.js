@@ -190,8 +190,10 @@ const statusSelesai = async(req, res) => {
             // Update statusMRPeriksa dan statusMR di MedicalRecord
             const updatedMedicalRecords = await MedicalRecord.updateMany({ nomorMR: { $in: nomorMR } }, {
                 $set: {
-                    statusMRPeriksa: false,
-                    statusMR: false
+                    statusMRPeriksa: false
+                },
+                $unset: {
+                    statusMR: ""
                 }
             }, { new: true });
 

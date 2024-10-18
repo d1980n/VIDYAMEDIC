@@ -3,8 +3,10 @@ import profiles from '../source/user-1.jpg'
 import logo from '../source/logo.png'
 import '../css/login.css';
 import '../css/admindash.css'
+import { useNavigate } from 'react-router-dom';
 import images from '../source/Picture1.png'
 import { NavLink } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Pastikan SweetAlert sudah diimport
 import images2 from '../source/img2.png'
 function Drmonitor() {
     const [filteredRecords, setFilteredRecords] = useState([]);
@@ -24,6 +26,8 @@ function Drmonitor() {
   const [RTP, setRTP] = useState("");
   const [DiagnosaICD11, setDiagnosaICD11] = useState("");
   const [Rujukan, setRujukan] = useState("");
+  const [medicalRec, setMedicalRec] = useState([]);
+  const navigate = useNavigate()
  
 
 const [labSelections, setLabSelections] = useState([]);
@@ -122,71 +126,255 @@ const toggleXRayOverlay = () => {
     }
 };
 
+
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
   const formData = {
-      Anamnesis,
-      Diagnosa,
-      Xray,
-      StatusLokalis,
-      Penunjang,
-      RTP,
-      DiagnosaICD11,
-      Rujukan
+    Anamnesis,
+    Diagnosa,
+    Xray,
+    StatusLokalis,
+    Penunjang,
+    RTP,
+    DiagnosaICD11,
+    Rujukan
   };
 
-  try {
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data akan diperbarui, pastikan semua informasi sudah benar.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, perbarui!',
+    cancelButtonText: 'Batal'
+  });
+
+  if (result.isConfirmed) {
+    try {
       const response = await fetch('http://localhost:3000/medical/updateMR', {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-          const data = await response.json();
-          console.log("Data berhasil diperbarui:", data);
+        const data = await response.json();
+        console.log("Data berhasil diperbarui:", data);
+
+        // Tampilkan alert sukses setelah submit berhasil
+        Swal.fire({
+          title: 'Sukses!',
+          text: 'Data berhasil diperbarui!',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+
+        // Hapus atau komentari baris di bawah ini jika tidak menggunakan resetForm
+        // resetForm();
       } else {
-          console.error("Error:", response.statusText);
+        console.error("Error:", response.statusText);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Gagal memperbarui data, coba lagi!',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
       }
-  } catch (error) {
+    } catch (error) {
       console.error("Error:", error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Terjadi kesalahan, coba lagi!',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   }
 };
 
+
+
 const handleUpdateStatus = async () => {
-  try {
+  // Menampilkan konfirmasi menggunakan SweetAlert
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Status periksa semua pasien akan diperbarui.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, perbarui!',
+    cancelButtonText: 'Batal'
+  });
+
+  if (result.isConfirmed) {
+    try {
       const response = await fetch('http://localhost:3000/patients/statusSelesai', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ statusMRPeriksa: true }), // Kirim hanya statusMRPeriksa ke backend
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ statusMRPeriksa: true }), // Kirim hanya statusMRPeriksa ke backend
       });
 
       // Periksa apakah respons adalah JSON
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-          const data = await response.json(); // Hanya parse jika JSON
-          if (data.success) {
-              alert('Status periksa semua pasien berhasil diperbarui!');
-          } else {
-              alert('Gagal memperbarui status periksa: ' + data.message);
-          }
+        const data = await response.json(); // Hanya parse jika JSON
+        if (data.success) {
+          // Tampilkan pesan sukses menggunakan SweetAlert
+          await Swal.fire({
+            title: 'Berhasil!',
+            text: 'Status periksa semua pasien berhasil diperbarui!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+
+          // Redirect ke /drdashboard setelah berhasil
+          navigate('/drdashboard');
+        } else {
+          await Swal.fire({
+            title: 'Gagal!',
+            text: 'Gagal memperbarui status periksa: ' + data.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
       } else {
-          const errorText = await response.text(); // Ambil teks dari respons jika bukan JSON
-          console.error('Respons bukan JSON:', errorText);
-          alert('Terjadi kesalahan. Respons bukan JSON valid: ' + errorText);
+        const errorText = await response.text(); // Ambil teks dari respons jika bukan JSON
+        console.error('Respons bukan JSON:', errorText);
+        await Swal.fire({
+          title: 'Kesalahan!',
+          text: 'Respons bukan JSON valid: ' + errorText,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
       }
-  
-  } catch (error) {
+    } catch (error) {
       console.error('Error updating status:', error);
-      alert('Terjadi kesalahan saat memperbarui status.');
+      await Swal.fire({
+        title: 'Kesalahan!',
+        text: 'Terjadi kesalahan saat memperbarui status.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
   }
 };
+const [filteredPatient, setFilteredPatient] = useState(null);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch data from /medical API
+      const medicalResponse = await fetch('http://localhost:3000/medical');
+      const medicalData = await medicalResponse.json();
 
+
+      console.log('Medical Data:', medicalData); // Lihat data yang diterima dari API
+
+      // Cek apakah medicalRecords ada dan merupakan array
+      if (medicalData.success && Array.isArray(medicalData.medicalRecords)) {
+        console.log('Medical Records:', medicalData.medicalRecords); // Lihat rekaman medis yang diterima
+
+        // Mencari rekaman medis dengan statusMRPeriksa = true
+        const medicalRecord = medicalData.medicalRecords.find(record => record.statusMRPeriksa === true);
+        console.log('Filtered Medical Record:', medicalRecord); // Lihat rekaman medis yang terfilter
+
+        if (medicalRecord) {
+          // Fetch data from /patients API
+          const patientsResponse = await fetch('http://localhost:3000/patients');
+          const patientsData = await patientsResponse.json();
+          console.log('Patients Data:', patientsData); // Lihat data pasien
+
+          // Cek apakah patientsData adalah array
+          if (Array.isArray(patientsData.patients)) {
+            // Mencari pasien dengan nomor MR yang cocok dari rekaman medis
+            const matchedPatient = patientsData.patients.find(patient => patient.nomorMR === medicalRecord.nomorMR);
+            console.log('Matched Patient:', matchedPatient); // Lihat jika pasien ditemukan
+
+            // Set the filtered patient to state
+            if (matchedPatient) {
+              setFilteredPatient(matchedPatient);
+            } else {
+              console.log('No matching patient found');
+            }
+          } else {
+            console.error('Patients data is not an array:', patientsData);
+          }
+        } else {
+          console.log('No medical record with statusMRPeriksa = true found');
+        }
+      } else {
+        console.log('Invalid medical data structure or no medical records found');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
+
+const [isDisabled, setIsDisabled] = useState(false);
+const [activePagee, setActivePagee] = useState('');
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch data from /medical API
+      const medicalResponse = await fetch('http://localhost:3000/medical');
+      const medicalData = await medicalResponse.json();
+
+      // Cek apakah medicalRecords ada dan merupakan array
+      if (medicalData.success && Array.isArray(medicalData.medicalRecords)) {
+        // Mencari jika ada statusMRPeriksa = true
+        const hasMRPeriksaTrue = medicalData.medicalRecords.some(record => record.statusMRPeriksa === true);
+        setIsDisabled(hasMRPeriksaTrue); // Set state disabled
+      }
+    } catch (error) {
+      console.error('Error fetching medical data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
+useEffect(() => {
+  // Fetch data dari API
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/medical');
+      const data = await response.json();
+
+      // Log respons API untuk debugging
+      console.log('API Response:', data);
+      
+      // Pastikan bahwa data.medicalRecords memang ada dan merupakan array
+      if (data && data.medicalRecords && Array.isArray(data.medicalRecords)) {
+        // Temukan entri pertama yang memiliki statusMRPeriksa: true
+        const foundRecord = data.medicalRecords.find(record => record.statusMRPeriksa === true);
+        
+        if (foundRecord) {
+          console.log('Found Record:', foundRecord);
+          setMedicalRec(foundRecord);
+        } else {
+          console.log('No records with statusMRPeriksa: true found.');
+        }
+      } else {
+        console.error('Unexpected API response structure');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
 
 
 
@@ -220,21 +408,21 @@ const handleUpdateStatus = async () => {
                     <span className="hide-menu">Home</span>
                 </li>
                 <li className="sidebar-item">
-                <NavLink 
-                      className={`sidebar-link ${'Dashboard' ? 'disabled-link ' : ''}`} 
-                      to="/Drdashboard" 
-                      aria-expanded="false" 
-                      onClick={(e) => {
-                        if (activePage === 'Dashboard') {
-                          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
-                        } else {
-                          handleSetActivePage('Dashboard'); // Jalankan fungsi jika tidak disabled
-                        }
-                      }}
-                    >
-                      <span><i className="ti ti-layout-dashboard"></i></span>
-                      <span className="hide-menu">Dashboard</span>
-                    </NavLink>
+                <NavLink
+      className={`sidebar-link ${isDisabled ? 'disabled-link' : ''}`}
+      to="/Drdashboard"
+      aria-expanded="false"
+      onClick={(e) => {
+        if (isDisabled) {
+          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
+        } else {
+          handleSetActivePage('Dashboard'); // Jalankan fungsi jika tidak disabled
+        }
+      }}
+    >
+      <span><i className="ti ti-layout-dashboard"></i></span>
+      <span className="hide-menu">Dashboard</span>
+    </NavLink>
                     <NavLink 
                         className={`sidebar-link ${activePage === 'Monitoring' ? 'active' : ''}`} 
                         to="/Drmonitor" 
@@ -298,14 +486,15 @@ const handleUpdateStatus = async () => {
                     <img src={images2} className="photos"height="auto"/>
                   </div>
                 <div className="details">
+                {filteredPatient ? (
                 <table className="info">
   <tr class="infos">
     <th>Nama: </th>
-    <td>Yurike Jamals</td>
+    <td>{filteredPatient.namaLengkap}</td>
   </tr>
   <tr class="infos">
     <th>Nomor MR: </th>
-    <td>98217389127</td>
+    <td> {filteredPatient.nomorMR}</td>
   </tr>
   <tr class="infos">
     <th>Usia: </th>
@@ -313,15 +502,15 @@ const handleUpdateStatus = async () => {
   </tr>
   <tr class="infos">
     <th>Alamat: </th>
-    <td>Jalan Gatot Subroto IR juanda nomor 17 kelurahan asamadya</td>
+    <td>{filteredPatient.alamatLengkap}</td>
   </tr>
   <tr class="infos">
     <th>Jenis Kelamin: </th>
-    <td>Pria</td>
+    <td>{filteredPatient.jenisKelamin}</td>
   </tr>
   <tr class="infos">
     <th>Nomor Ponsel: </th>
-    <td>088888888888</td>
+    <td>{filteredPatient.phone_number}</td>
   </tr>
   <tr class="infos">
     <th>Golongan Darah: </th>
@@ -333,6 +522,9 @@ const handleUpdateStatus = async () => {
   </tr>
   
 </table> 
+ ) : (
+  <p>No patient data found with statusMRPeriksa = true</p>
+)}
                 </div>
                 
                 </div>
@@ -580,19 +772,23 @@ const handleUpdateStatus = async () => {
 		<summary className="fw-semibold">
 			12 Maret 2039 <br/><h8 className="fw-light">08:21</h8>
 		</summary>
+    {medicalRec ? (
 		<div>
       <h5>Pemeriksaan Tanda Vital</h5>
-      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Temperatur: <h8 className="fw-light">12</h8></h6>
-      <h6>Laju Pernafasan: <h8 className="fw-light">12</h8></h6>
-      <h6>Presentase SpO2: <h8 className="fw-light">12</h8></h6>
-      <h6>Tinggi Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>Berat Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>LILA: <h8 className="fw-light">12</h8></h6>
-      <h6>AVPU: <h8 className="fw-light">12</h8></h6>
+      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">{medicalRec.TDS}</h8></h6>
+      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">{medicalRec.TDD}</h8></h6>
+      <h6>Temperatur: <h8 className="fw-light">{medicalRec.Temperatur}</h8></h6>
+      <h6>Laju Pernafasan: <h8 className="fw-light">{medicalRec.LP}</h8></h6>
+      <h6>Presentase SpO2: <h8 className="fw-light">{medicalRec.Spot}</h8></h6>
+      <h6>Tinggi Badan: <h8 className="fw-light">{medicalRec.TB}</h8></h6>
+      <h6>Berat Badan: <h8 className="fw-light">{medicalRec.BB}</h8></h6>
+      <h6>LILA: <h8 className="fw-light">{medicalRec.LILA}</h8></h6>
+      <h6>AVPU: <h8 className="fw-light">{medicalRec.AVPU}</h8></h6>
 
 		</div>
+     ) : (
+      <p>No medical record with statusMRPeriksa: true found.</p>
+    )}
 	</details>
 </div>
               </div>

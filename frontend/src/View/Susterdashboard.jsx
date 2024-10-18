@@ -43,9 +43,10 @@ function Susterdashboard() {
       const response = await fetch("http://localhost:3000/patients");
       const data = await response.json();
       console.log("response : ", response);
-      console.log("data pasien: ", data.patients);
       if (data.success) {
         const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
+console.log("filteredPatients: ", filteredPatients); // Log untuk melihat hasil filter
+
         setDaftarPasien(filteredPatients);
       } else {
         console.error("Failed to fetch patients:", data.message);
@@ -55,6 +56,8 @@ function Susterdashboard() {
       // Handle the error gracefully, e.g., display an error message to the user
     }
   };
+
+  
 
 
  
@@ -82,6 +85,7 @@ function Susterdashboard() {
     fetchMedical();
     fetchDaftarPasien();
   }, []);
+  console.log("mergedData: ", mergedData); // Tambahkan log ini sebelum return JSX
 
 
   
@@ -270,7 +274,6 @@ const fetchMedical = async () => {
     const response = await fetch("http://localhost:3000/medical");
     const data = await response.json();
     console.log("response : ", response);
-    console.log("data pasien: ", data.medicalRecords);
 
     if (data.success) {
       setMedicalRecords(data.medicalRecords); // Simpan data medical records
@@ -291,33 +294,69 @@ useEffect(() => {
 
 
 
-const dokterAntri = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
-  setDaftarPasien(newDaftarPasien);
+// ... kode lainnya ...
 
-  try {
+const dokterAntri = async (index, nomorMR) => {
+  // Tampilkan popup konfirmasi sebelum melanjutkan
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Pasien akan dimasukkan ke dalam antrian dokter.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, Masuk!',
+    cancelButtonText: 'Batal'
+  });
+
+  if (result.isConfirmed) {
+    // Jika pengguna mengonfirmasi, hapus pasien dari daftar
+    const newDaftarPasien = [...daftarPasien];
+    newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+    setDaftarPasien(newDaftarPasien);
+
+    try {
       const response = await fetch(`http://localhost:3000/patients/dokterAntri`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-          throw new Error(data.message || 'Gagal memperbarui status antrian dokter');
+        throw new Error(data.message || 'Gagal memperbarui status antrian dokter');
       }
 
       console.log('Status antrian dokter berhasil diperbarui:', data);
-  } catch (error) {
+
+      // Tampilkan alert sukses setelah memperbarui status antrian
+      Swal.fire({
+        title: 'Success!',
+        text: 'Pasien berhasil dimasukkan ke antrian dokter.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+
+      // Jika perlu, panggil fetchDaftarPasien untuk memperbarui daftar pasien
+      fetchDaftarPasien();
+    } catch (error) {
       console.error('Error:', error.message);
+
+      // Jika terjadi error, tampilkan alert error
+      Swal.fire({
+        title: 'Error!',
+        text: 'Gagal memperbarui status antrian dokter, coba lagi!',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   }
 };
 
-  
+
   
   
   const handleTambahMRClick = () => {
@@ -463,30 +502,52 @@ const dokterAntri = async (index, nomorMR) => {
                             </tr>
                           </thead>
                           <tbody>
-                            {mergedData.map((pasien, index) => (
-                              <tr key={pasien.nomorMR}>
-                                <td class="border-bottom-0">
-                                  <h6 class="fw-semibold mb-0">{index + 1}</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <p class="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-normal">{pasien.nomorMR}</span>
-                                  </div>
-                                </td>
-                                <td class="border-bottom-0"> 
-                                  <button type="button " className="btn btn-primary m-1 " 
-                                  onClick={() => toggleModal(pasien.nomorMR)}
-                                  disabled={pasien.statusMR}>
-                                    Periksa
-                                  </button >
-                                  {pasien.statusMR && <button className="btn btn-success" onClick={() => dokterAntri(index, pasien.nomorMR)}>Masuk</button>}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
+  {daftarPasien.length > 0 ? (
+    daftarPasien.map((pasien, index) => {
+      // Ambil semua medical record untuk pasien ini
+      const patientMedicalRecords = medicalRecords.filter(record => record.nomorMR === pasien.nomorMR);
+      const hasStatusMRTrue = patientMedicalRecords.some(record => record.statusMR === true); // Cek jika ada yang true
+
+      return (
+        <tr key={pasien.nomorMR}>
+          <td className="border-bottom-0">
+            <h6 className="fw-semibold mb-0">{index + 1}</h6>
+          </td>
+          <td className="border-bottom-0">
+            <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+          </td>
+          <td className="border-bottom-0">
+            <div className="d-flex align-items-center gap-2">
+              <span className="fw-normal">{pasien.nomorMR}</span>
+            </div>
+          </td>
+          <td className="border-bottom-0"> 
+            <button type="button" className="btn btn-primary m-1" 
+              onClick={() => toggleModal(pasien.nomorMR)}
+              disabled={hasStatusMRTrue}> {/* Tombol dinonaktifkan jika ada medical record dengan statusMR true */}
+              Periksa
+            </button>
+            {hasStatusMRTrue && ( // Cek statusMR untuk menampilkan tombol "Masuk"
+              <button className="btn btn-success" onClick={() => dokterAntri(index, pasien.nomorMR)}>
+                Masuk
+              </button>
+            )}
+          </td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+    </tr>
+  )}
+</tbody>
+
+
+
+
+
+
 
                         </table>
                       </div>
