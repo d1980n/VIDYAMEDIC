@@ -3,23 +3,32 @@ import profiles from '../source/user-1.jpg'
 import logo from '../source/logo.png'
 import '../css/login.css';
 import '../css/admindash.css'
+import { useNavigate } from 'react-router-dom';
 import images from '../source/Picture1.png'
 import { NavLink } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Pastikan SweetAlert sudah diimport
 import images2 from '../source/img2.png'
 function Drmonitor() {
+    const [filteredRecords, setFilteredRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
   const [showLabOverlay, setShowLabOverlay] = useState(false);
   const [showXRayOverlay, setShowXRayOverlay] = useState(false);
   const [daftarPasien, setDaftarPasien] = useState([]);
-  const [formData, setFormData] = useState({
-    Anamnesis: '',
-    Diagnosa: '',
-    Xray:'',
-    StatusLokalis: '',
-    PemeriksaanPenunjang: '',
-    RencanaTerapi: '',
-    DiagnosaICD11: '',
-    Rujukan: '',
-});
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [selectedNomorMR, setSelectedNomorMR] = useState("");
+  const [statusMR, setStatusMR] = useState("");
+  const [Anamnesis, setAnamnesis] = useState("");
+  const [Diagnosa, setDiagnosa] = useState("");
+  const [Xray, setXray] = useState("");
+  const [Lab, setLab] = useState("");
+  const [StatusLokalis, setStatusLokalis] = useState("");
+  const [Penunjang, setPenunjang] = useState("");
+  const [RTP, setRTP] = useState("");
+  const [DiagnosaICD11, setDiagnosaICD11] = useState("");
+  const [Rujukan, setRujukan] = useState("");
+  const [medicalRec, setMedicalRec] = useState([]);
+  const navigate = useNavigate()
+ 
 
 const [labSelections, setLabSelections] = useState([]);
 
@@ -33,28 +42,8 @@ const handleLabChange = (event) => {
   }
 };
 
-const handleSaveLab = () => {
-  setFormData({ ...formData, Rujukan: labSelections.join(', ') });
-  toggleLabOverlay();
-};
 const [summary, setSummary] = useState(null);
 
-const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData(prevData => ({
-        ...prevData,
-        [name]: value
-    }));
-};
-
-const handleSave = () => {
-    // Lakukan penyimpanan data ke database atau proses lainnya di sini
-    
-    console.log('Data disimpan:', formData);
-
-    // Menampilkan ringkasan data yang disimpan
-    setSummary(formData);
-};
 const toggleLabOverlay = () => {
   setShowLabOverlay(!showLabOverlay);
 };
@@ -113,7 +102,285 @@ const toggleXRayOverlay = () => {
       setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
-    
+
+  const fetchMedical = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/medical");
+        const data = await response.json();
+        console.log("Response: ", response);
+        console.log("Data pasien: ", data.medicalRecords);
+
+        if (data.success) {
+            // Set all records to state
+            setMedicalRecords(data.medicalRecords);
+            // Filter records where statusMRPeriksa === true
+            const recordsWithStatusTrue = data.medicalRecords.filter(record => record.statusMRPeriksa === true);
+            setFilteredRecords(recordsWithStatusTrue); // Simpan data yang sesuai filter
+        } else {
+            console.error("Failed to fetch patients:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching patients:", error);
+    } finally {
+        setLoading(false);
+    }
+};
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = {
+    Anamnesis,
+    Diagnosa,
+    Xray,
+    StatusLokalis,
+    Penunjang,
+    RTP,
+    DiagnosaICD11,
+    Rujukan
+  };
+
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data akan diperbarui, pastikan semua informasi sudah benar.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, perbarui!',
+    cancelButtonText: 'Batal'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch('http://localhost:3000/medical/updateMR', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Data berhasil diperbarui:", data);
+
+        // Tampilkan alert sukses setelah submit berhasil
+        Swal.fire({
+          title: 'Sukses!',
+          text: 'Data berhasil diperbarui!',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+
+        // Hapus atau komentari baris di bawah ini jika tidak menggunakan resetForm
+        // resetForm();
+      } else {
+        console.error("Error:", response.statusText);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Gagal memperbarui data, coba lagi!',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Terjadi kesalahan, coba lagi!',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  }
+};
+
+
+
+const handleUpdateStatus = async () => {
+  // Menampilkan konfirmasi menggunakan SweetAlert
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Status periksa semua pasien akan diperbarui.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, perbarui!',
+    cancelButtonText: 'Batal'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch('http://localhost:3000/patients/statusSelesai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ statusMRPeriksa: true }), // Kirim hanya statusMRPeriksa ke backend
+      });
+
+      // Periksa apakah respons adalah JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json(); // Hanya parse jika JSON
+        if (data.success) {
+          // Tampilkan pesan sukses menggunakan SweetAlert
+          await Swal.fire({
+            title: 'Berhasil!',
+            text: 'Status periksa semua pasien berhasil diperbarui!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+
+          // Redirect ke /drdashboard setelah berhasil
+          navigate('/drdashboard');
+        } else {
+          await Swal.fire({
+            title: 'Gagal!',
+            text: 'Gagal memperbarui status periksa: ' + data.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      } else {
+        const errorText = await response.text(); // Ambil teks dari respons jika bukan JSON
+        console.error('Respons bukan JSON:', errorText);
+        await Swal.fire({
+          title: 'Kesalahan!',
+          text: 'Respons bukan JSON valid: ' + errorText,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      await Swal.fire({
+        title: 'Kesalahan!',
+        text: 'Terjadi kesalahan saat memperbarui status.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  }
+};
+const [filteredPatient, setFilteredPatient] = useState(null);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch data from /medical API
+      const medicalResponse = await fetch('http://localhost:3000/medical');
+      const medicalData = await medicalResponse.json();
+
+
+      console.log('Medical Data:', medicalData); // Lihat data yang diterima dari API
+
+      // Cek apakah medicalRecords ada dan merupakan array
+      if (medicalData.success && Array.isArray(medicalData.medicalRecords)) {
+        console.log('Medical Records:', medicalData.medicalRecords); // Lihat rekaman medis yang diterima
+
+        // Mencari rekaman medis dengan statusMRPeriksa = true
+        const medicalRecord = medicalData.medicalRecords.find(record => record.statusMRPeriksa === true);
+        console.log('Filtered Medical Record:', medicalRecord); // Lihat rekaman medis yang terfilter
+
+        if (medicalRecord) {
+          // Fetch data from /patients API
+          const patientsResponse = await fetch('http://localhost:3000/patients');
+          const patientsData = await patientsResponse.json();
+          console.log('Patients Data:', patientsData); // Lihat data pasien
+
+          // Cek apakah patientsData adalah array
+          if (Array.isArray(patientsData.patients)) {
+            // Mencari pasien dengan nomor MR yang cocok dari rekaman medis
+            const matchedPatient = patientsData.patients.find(patient => patient.nomorMR === medicalRecord.nomorMR);
+            console.log('Matched Patient:', matchedPatient); // Lihat jika pasien ditemukan
+
+            // Set the filtered patient to state
+            if (matchedPatient) {
+              setFilteredPatient(matchedPatient);
+            } else {
+              console.log('No matching patient found');
+            }
+          } else {
+            console.error('Patients data is not an array:', patientsData);
+          }
+        } else {
+          console.log('No medical record with statusMRPeriksa = true found');
+        }
+      } else {
+        console.log('Invalid medical data structure or no medical records found');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
+
+const [isDisabled, setIsDisabled] = useState(false);
+const [activePagee, setActivePagee] = useState('');
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // Fetch data from /medical API
+      const medicalResponse = await fetch('http://localhost:3000/medical');
+      const medicalData = await medicalResponse.json();
+
+      // Cek apakah medicalRecords ada dan merupakan array
+      if (medicalData.success && Array.isArray(medicalData.medicalRecords)) {
+        // Mencari jika ada statusMRPeriksa = true
+        const hasMRPeriksaTrue = medicalData.medicalRecords.some(record => record.statusMRPeriksa === true);
+        setIsDisabled(hasMRPeriksaTrue); // Set state disabled
+      }
+    } catch (error) {
+      console.error('Error fetching medical data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
+useEffect(() => {
+  // Fetch data dari API
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/medical');
+      const data = await response.json();
+
+      // Log respons API untuk debugging
+      console.log('API Response:', data);
+      
+      // Pastikan bahwa data.medicalRecords memang ada dan merupakan array
+      if (data && data.medicalRecords && Array.isArray(data.medicalRecords)) {
+        // Temukan entri pertama yang memiliki statusMRPeriksa: true
+        const foundRecord = data.medicalRecords.find(record => record.statusMRPeriksa === true);
+        
+        if (foundRecord) {
+          console.log('Found Record:', foundRecord);
+          setMedicalRec(foundRecord);
+        } else {
+          console.log('No records with statusMRPeriksa: true found.');
+        }
+      } else {
+        console.error('Unexpected API response structure');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
+
+
+
+
   return (
     <html className='Admin'>
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -141,15 +408,21 @@ const toggleXRayOverlay = () => {
                     <span className="hide-menu">Home</span>
                 </li>
                 <li className="sidebar-item">
-                <NavLink 
-                        className={`sidebar-link ${activePage === 'Dashboard' ? 'active' : ''}`} 
-                        to="/Drdashboard" 
-                        aria-expanded="false" 
-                        onClick={() => handleSetActivePage('Dashboard')}
-                    >
-                        <span><i className="ti ti-layout-dashboard"></i></span>
-                        <span className="hide-menu">Dashboard</span>
-                    </NavLink>
+                <NavLink
+      className={`sidebar-link ${isDisabled ? 'disabled-link' : ''}`}
+      to="/Drdashboard"
+      aria-expanded="false"
+      onClick={(e) => {
+        if (isDisabled) {
+          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
+        } else {
+          handleSetActivePage('Dashboard'); // Jalankan fungsi jika tidak disabled
+        }
+      }}
+    >
+      <span><i className="ti ti-layout-dashboard"></i></span>
+      <span className="hide-menu">Dashboard</span>
+    </NavLink>
                     <NavLink 
                         className={`sidebar-link ${activePage === 'Monitoring' ? 'active' : ''}`} 
                         to="/Drmonitor" 
@@ -213,14 +486,15 @@ const toggleXRayOverlay = () => {
                     <img src={images2} className="photos"height="auto"/>
                   </div>
                 <div className="details">
+                {filteredPatient ? (
                 <table className="info">
   <tr class="infos">
     <th>Nama: </th>
-    <td>Yurike Jamals</td>
+    <td>{filteredPatient.namaLengkap}</td>
   </tr>
   <tr class="infos">
     <th>Nomor MR: </th>
-    <td>98217389127</td>
+    <td> {filteredPatient.nomorMR}</td>
   </tr>
   <tr class="infos">
     <th>Usia: </th>
@@ -228,15 +502,15 @@ const toggleXRayOverlay = () => {
   </tr>
   <tr class="infos">
     <th>Alamat: </th>
-    <td>Jalan Gatot Subroto IR juanda nomor 17 kelurahan asamadya</td>
+    <td>{filteredPatient.alamatLengkap}</td>
   </tr>
   <tr class="infos">
     <th>Jenis Kelamin: </th>
-    <td>Pria</td>
+    <td>{filteredPatient.jenisKelamin}</td>
   </tr>
   <tr class="infos">
     <th>Nomor Ponsel: </th>
-    <td>088888888888</td>
+    <td>{filteredPatient.phone_number}</td>
   </tr>
   <tr class="infos">
     <th>Golongan Darah: </th>
@@ -248,6 +522,9 @@ const toggleXRayOverlay = () => {
   </tr>
   
 </table> 
+ ) : (
+  <p>No patient data found with statusMRPeriksa = true</p>
+)}
                 </div>
                 
                 </div>
@@ -495,70 +772,23 @@ const toggleXRayOverlay = () => {
 		<summary className="fw-semibold">
 			12 Maret 2039 <br/><h8 className="fw-light">08:21</h8>
 		</summary>
+    {medicalRec ? (
 		<div>
       <h5>Pemeriksaan Tanda Vital</h5>
-      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Temperatur: <h8 className="fw-light">12</h8></h6>
-      <h6>Laju Pernafasan: <h8 className="fw-light">12</h8></h6>
-      <h6>Presentase SpO2: <h8 className="fw-light">12</h8></h6>
-      <h6>Tinggi Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>Berat Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>LILA: <h8 className="fw-light">12</h8></h6>
-      <h6>AVPU: <h8 className="fw-light">12</h8></h6>
+      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">{medicalRec.TDS}</h8></h6>
+      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">{medicalRec.TDD}</h8></h6>
+      <h6>Temperatur: <h8 className="fw-light">{medicalRec.Temperatur}</h8></h6>
+      <h6>Laju Pernafasan: <h8 className="fw-light">{medicalRec.LP}</h8></h6>
+      <h6>Presentase SpO2: <h8 className="fw-light">{medicalRec.Spot}</h8></h6>
+      <h6>Tinggi Badan: <h8 className="fw-light">{medicalRec.TB}</h8></h6>
+      <h6>Berat Badan: <h8 className="fw-light">{medicalRec.BB}</h8></h6>
+      <h6>LILA: <h8 className="fw-light">{medicalRec.LILA}</h8></h6>
+      <h6>AVPU: <h8 className="fw-light">{medicalRec.AVPU}</h8></h6>
 
 		</div>
-	</details>
-	<details>
-  <summary className="fw-semibold">
-			12 Maret 2039 <br/><h8 className="fw-light">08:21</h8>
-		</summary>
-		<div>
-    <h5>Pemeriksaan Tanda Vital</h5>
-      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Temperatur: <h8 className="fw-light">12</h8></h6>
-      <h6>Laju Pernafasan: <h8 className="fw-light">12</h8></h6>
-      <h6>Presentase SpO2: <h8 className="fw-light">12</h8></h6>
-      <h6>Tinggi Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>Berat Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>LILA: <h8 className="fw-light">12</h8></h6>
-      <h6>AVPU: <h8 className="fw-light">12</h8></h6>
-		</div>
-	</details>
-	<details>
-  <summary className="fw-semibold">
-			21 April 2019 <br/><h8 className="fw-light">12:21</h8>
-		</summary>
-		<div>
-    <h5>Pemeriksaan Tanda Vital</h5>
-      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Temperatur: <h8 className="fw-light">12</h8></h6>
-      <h6>Laju Pernafasan: <h8 className="fw-light">12</h8></h6>
-      <h6>Presentase SpO2: <h8 className="fw-light">12</h8></h6>
-      <h6>Tinggi Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>Berat Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>LILA: <h8 className="fw-light">12</h8></h6>
-      <h6>AVPU: <h8 className="fw-light">12</h8></h6>
-			</div>
-	</details>
-	<details>
-  <summary className="fw-semibold">
-			17 Agustus 2039 <br/><h8 className="fw-light">09:11</h8>
-		</summary>
-		<div>
-    <h5>Pemeriksaan Tanda Vital</h5>
-      <h6>Tekanan Darah Sistolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Tekanan Darah Diastolik: <h8 className="fw-light">12</h8></h6>
-      <h6>Temperatur: <h8 className="fw-light">12</h8></h6>
-      <h6>Laju Pernafasan: <h8 className="fw-light">12</h8></h6>
-      <h6>Presentase SpO2: <h8 className="fw-light">12</h8></h6>
-      <h6>Tinggi Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>Berat Badan: <h8 className="fw-light">12</h8></h6>
-      <h6>LILA: <h8 className="fw-light">12</h8></h6>
-      <h6>AVPU: <h8 className="fw-light">12</h8></h6>
-			</div>
+     ) : (
+      <p>No medical record with statusMRPeriksa: true found.</p>
+    )}
 	</details>
 </div>
               </div>
@@ -572,24 +802,26 @@ const toggleXRayOverlay = () => {
                     <input type="radio" name="tabs" id="tabtwo"/>
                     <label for="tabtwo">Diagnosa</label>
                     <div className="tab">
+                      
             <div>
+            <form onSubmit={handleSubmit}>
                 <h6 className="Tanda fw-bold">Anamnesis dan Pemeriksaan fisik</h6>
-                <textarea name="Anamnesis" value={formData.Anamnesis} onChange={handleChange} className="form-sels" />
+                <textarea type="text" name="Anamnesis" className="form-control" value={Anamnesis} onChange={(e) => setAnamnesis(e.target.value)}/>
                 <h6 className="Tanda fw-bold">Diagnosa (A)</h6>
-                <textarea name="Diagnosa" value={formData.Diagnosa} onChange={handleChange} className="form-sels" />
+                <textarea type="text" name="Diagnosa" className="form-control" value={Diagnosa} onChange={(e) => setDiagnosa(e.target.value)} />
                 <h6 className="Tanda fw-bold">Status Lokalis</h6>
-                <select name="StatusLokalis" value={formData.StatusLokalis} onChange={handleChange} className="form-sels">
+                <select type="text" name="StatusLokalis" className="form-control" value={StatusLokalis} onChange={(e) => setStatusLokalis(e.target.value)}>
                     <option value="">Pilih status</option>
                     <option value="High">High</option>
                     <option value="Medium">Medium</option>
                     <option value="Low">Low</option>
                 </select>
                 <h6 className="Tanda fw-bold">Pemeriksaan Penunjang</h6>
-                <textarea name="PemeriksaanPenunjang" value={formData.PemeriksaanPenunjang} onChange={handleChange} className="form-sels" />
+                <textarea type="text" name="Penunjang" className="form-control" value={Penunjang} onChange={(e) => setPenunjang(e.target.value)} />
                 <h6 className="Tanda fw-bold">Rencana dan Terapi</h6>
-                <textarea name="RencanaTerapi" value={formData.RencanaTerapi} onChange={handleChange} className="form-sels" />
+                <textarea type="text" name="RTP" className="form-control" value={RTP} onChange={(e) => setRTP(e.target.value)}/>
                 <h5 className="Tanda fw-bold">Diagnosa Berdasarkan ICD-11</h5>
-                <input name="DiagnosaICD11" type="text" value={formData.DiagnosaICD11} onChange={handleChange} className="ctw-input" autoComplete="off" data-ctw-ino="1" />
+                <input type="text" name="DiagnosaICD11" className="form-control" value={DiagnosaICD11} onChange={(e) => setDiagnosaICD11(e.target.value)}/>
                 <h6 className="Tanda fw-bold">Dirujuk Ke</h6>
                 <div className="Rujukbtn">
                     <button type="button" className="btn btn-primary" onClick={toggleLabOverlay}>
@@ -598,10 +830,15 @@ const toggleXRayOverlay = () => {
                     <button type="button" className="btn btn-primary" onClick={toggleXRayOverlay}>
                         X-Ray
                     </button>
-                    <button type="button" className="btn btn-primary" onClick={handleSave}>
+                    <button  type="submit" className="btn btn-primary">
                         Simpan
                     </button>
+                  
+                <button  type="button" className="btn btn-primary" onClick={handleUpdateStatus}>
+                        Selesai
+                    </button>
                 </div>
+                </form>
             </div>
             {showLabOverlay && (
         <div className="modal fade show" id="labOverlay" tabIndex="-1" aria-labelledby="labOverlayLabel" aria-hidden="true" style={{ display: 'block' }}>
@@ -615,268 +852,268 @@ const toggleXRayOverlay = () => {
               <div className="modal-body">
               <h6>Jenis Pemeriksaan Lab:</h6>
               <div className="lalala">
-  <div className="Organ">
-    <h6>Organ:</h6>
-  <label className="checkbox-label">
-    <input type="checkbox" value="carnial" onChange={handleLabChange} />
-    Carnial
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="waters" onChange={handleLabChange} />
-    Waters
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="vert_cervical" onChange={handleLabChange} />
-    Vert cervical
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="clavicula" onChange={handleLabChange} />
-    Clavicula
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="thorax" onChange={handleLabChange} />
-    Thorax
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="bno" onChange={handleLabChange} />
-    BNO
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="pelvis" onChange={handleLabChange} />
-    Pelvis
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="manus" onChange={handleLabChange} />
-    Manus
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="wrist" onChange={handleLabChange} />
-    Wrist
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="antebrachi" onChange={handleLabChange} />
-    Antebrachi
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="elbow" onChange={handleLabChange} />
-    Elbow
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="humerus" onChange={handleLabChange} />
-    Humerus
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="shoulder" onChange={handleLabChange} />
-    Shoulder
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="femur" onChange={handleLabChange} />
-    Femur
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="cruris" onChange={handleLabChange} />
-    Cruris
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="genu" onChange={handleLabChange} />
-    Genu
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="ankle" onChange={handleLabChange} />
-    Ankle
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="pedis" onChange={handleLabChange} />
-    Pedis
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="vert_thoracal" onChange={handleLabChange} />
-    Vert thoracal
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="vert_lumbosacral" onChange={handleLabChange} />
-    Vert lumbosacral
-  </label>
-  </div>
-  <div className="Organ">
-  <h6>Hematologi:</h6>
-  <label className="checkbox-label">
-    <input type="checkbox" value="darah_lengkap" onChange={handleLabChange} />
-    Darah Lengkap
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="darah_rutin" onChange={handleLabChange} />
-    Darah Rutin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="hemoglobin" onChange={handleLabChange} />
-    Hemoglobin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="lekosit" onChange={handleLabChange} />
-    Lekosit
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="eritrosit" onChange={handleLabChange} />
-    Eritrosit
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="trombosit" onChange={handleLabChange} />
-    Trombosit
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="hermatokrit" onChange={handleLabChange} />
-    Hematokrit
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="diff_count" onChange={handleLabChange} />
-    Diff Count
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="mcv_mch_mchc" onChange={handleLabChange} />
-    MCV MCH MCHC
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="gol_dar_rhesus" onChange={handleLabChange} />
-    Gol. Darah & Rhesus
-  </label>
-</div>
-<div className="Organ">
-  <h6>Urinologi:</h6>
-  <label className="checkbox-label">
-    <input type="checkbox" value="urin_lengkap" onChange={handleLabChange} />
-    Urin Lengkap
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="urin_rutin" onChange={handleLabChange} />
-    Urin Rutin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="glukosa_urin" onChange={handleLabChange} />
-    Glukosa Urin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="protein_urin" onChange={handleLabChange} />
-    Protein Urin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="bilirubin_urin" onChange={handleLabChange} />
-    Bilirubin Urin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="tes_kehamilan" onChange={handleLabChange} />
-    Tes Kehamilan
-  </label>
-</div>
-<div className="Organ">
-  <h6>Kimia Darah:</h6>
-  <label className="checkbox-label">
-    <input type="checkbox" value="gula_darah_sewaktu" onChange={handleLabChange} />
-    Gula Darah Sewaktu
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="gula_darah_puasa" onChange={handleLabChange} />
-    Gula Darah Puasa
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="gula_darah_2_jam_pp" onChange={handleLabChange} />
-    Gula Darah 2 Jam PP
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="hba_1c" onChange={handleLabChange} />
-    HbA1c
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="cholestrol" onChange={handleLabChange} />
-    Cholestrol
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="trigliserida" onChange={handleLabChange} />
-    Trigliserida
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="hdl_cholestrol" onChange={handleLabChange} />
-    HDL Cholestrol
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="ldl_cholestrol" onChange={handleLabChange} />
-    LDL Cholestrol
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="asam_urat" onChange={handleLabChange} />
-    Asam Urat
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="ureum" onChange={handleLabChange} />
-    Ureum
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="keratin" onChange={handleLabChange} />
-    Keratin
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="sgot" onChange={handleLabChange} />
-    SGOT
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="sgpt" onChange={handleLabChange} />
-    SGPT
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="bilirubin_total" onChange={handleLabChange} />
-    Bilirubin Total
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="bilirubin_i_d" onChange={handleLabChange} />
-    Bilirubin I.D.
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="albumin" onChange={handleLabChange} />
-    Albumin
-  </label>
-</div>
-<div className="Organ">
-  <h6>Imunologi & Serologi:</h6>
-  <label className="checkbox-label">
-    <input type="checkbox" value="widai_test" onChange={handleLabChange} />
-    Widal Test
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="hbs_ag" onChange={handleLabChange} />
-    HBsAg
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="anti_hcv" onChange={handleLabChange} />
-    Anti-HCV
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="vdrl" onChange={handleLabChange} />
-    VDRL
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="tpha" onChange={handleLabChange} />
-    TPHA
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="rf" onChange={handleLabChange} />
-    RF
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="asto" onChange={handleLabChange} />
-    ASTO
-  </label>
-  <label className="checkbox-label">
-    <input type="checkbox" value="ns_1_dengue" onChange={handleLabChange} />
-    NS-1 Dengue
-  </label>
-</div>
+                <div className="Organ">
+                  <h6>Organ:</h6>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="carnial" onChange={handleLabChange} />
+                  Carnial
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="waters" onChange={handleLabChange} />
+                  Waters
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="vert_cervical" onChange={handleLabChange} />
+                  Vert cervical
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="clavicula" onChange={handleLabChange} />
+                  Clavicula
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="thorax" onChange={handleLabChange} />
+                  Thorax
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="bno" onChange={handleLabChange} />
+                  BNO
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="pelvis" onChange={handleLabChange} />
+                  Pelvis
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="manus" onChange={handleLabChange} />
+                  Manus
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="wrist" onChange={handleLabChange} />
+                  Wrist
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="antebrachi" onChange={handleLabChange} />
+                  Antebrachi
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="elbow" onChange={handleLabChange} />
+                  Elbow
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="humerus" onChange={handleLabChange} />
+                  Humerus
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="shoulder" onChange={handleLabChange} />
+                  Shoulder
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="femur" onChange={handleLabChange} />
+                  Femur
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="cruris" onChange={handleLabChange} />
+                  Cruris
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="genu" onChange={handleLabChange} />
+                  Genu
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="ankle" onChange={handleLabChange} />
+                  Ankle
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="pedis" onChange={handleLabChange} />
+                  Pedis
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="vert_thoracal" onChange={handleLabChange} />
+                  Vert thoracal
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="vert_lumbosacral" onChange={handleLabChange} />
+                  Vert lumbosacral
+                </label>
+                </div>
+                <div className="Organ">
+                <h6>Hematologi:</h6>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="darah_lengkap" onChange={handleLabChange} />
+                  Darah Lengkap
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="darah_rutin" onChange={handleLabChange} />
+                  Darah Rutin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="hemoglobin" onChange={handleLabChange} />
+                  Hemoglobin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="lekosit" onChange={handleLabChange} />
+                  Lekosit
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="eritrosit" onChange={handleLabChange} />
+                  Eritrosit
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="trombosit" onChange={handleLabChange} />
+                  Trombosit
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="hermatokrit" onChange={handleLabChange} />
+                  Hematokrit
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="diff_count" onChange={handleLabChange} />
+                  Diff Count
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="mcv_mch_mchc" onChange={handleLabChange} />
+                  MCV MCH MCHC
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="gol_dar_rhesus" onChange={handleLabChange} />
+                  Gol. Darah & Rhesus
+                </label>
+              </div>
+              <div className="Organ">
+                <h6>Urinologi:</h6>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="urin_lengkap" onChange={handleLabChange} />
+                  Urin Lengkap
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="urin_rutin" onChange={handleLabChange} />
+                  Urin Rutin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="glukosa_urin" onChange={handleLabChange} />
+                  Glukosa Urin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="protein_urin" onChange={handleLabChange} />
+                  Protein Urin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="bilirubin_urin" onChange={handleLabChange} />
+                  Bilirubin Urin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="tes_kehamilan" onChange={handleLabChange} />
+                  Tes Kehamilan
+                </label>
+              </div>
+              <div className="Organ">
+                <h6>Kimia Darah:</h6>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="gula_darah_sewaktu" onChange={handleLabChange} />
+                  Gula Darah Sewaktu
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="gula_darah_puasa" onChange={handleLabChange} />
+                  Gula Darah Puasa
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="gula_darah_2_jam_pp" onChange={handleLabChange} />
+                  Gula Darah 2 Jam PP
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="hba_1c" onChange={handleLabChange} />
+                  HbA1c
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="cholestrol" onChange={handleLabChange} />
+                  Cholestrol
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="trigliserida" onChange={handleLabChange} />
+                  Trigliserida
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="hdl_cholestrol" onChange={handleLabChange} />
+                  HDL Cholestrol
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="ldl_cholestrol" onChange={handleLabChange} />
+                  LDL Cholestrol
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="asam_urat" onChange={handleLabChange} />
+                  Asam Urat
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="ureum" onChange={handleLabChange} />
+                  Ureum
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="keratin" onChange={handleLabChange} />
+                  Keratin
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="sgot" onChange={handleLabChange} />
+                  SGOT
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="sgpt" onChange={handleLabChange} />
+                  SGPT
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="bilirubin_total" onChange={handleLabChange} />
+                  Bilirubin Total
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="bilirubin_i_d" onChange={handleLabChange} />
+                  Bilirubin I.D.
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="albumin" onChange={handleLabChange} />
+                  Albumin
+                </label>
+              </div>
+              <div className="Organ">
+                <h6>Imunologi & Serologi:</h6>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="widai_test" onChange={handleLabChange} />
+                  Widal Test
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="hbs_ag" onChange={handleLabChange} />
+                  HBsAg
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="anti_hcv" onChange={handleLabChange} />
+                  Anti-HCV
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="vdrl" onChange={handleLabChange} />
+                  VDRL
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="tpha" onChange={handleLabChange} />
+                  TPHA
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="rf" onChange={handleLabChange} />
+                  RF
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="asto" onChange={handleLabChange} />
+                  ASTO
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" value="ns_1_dengue" onChange={handleLabChange} />
+                  NS-1 Dengue
+                </label>
+              </div>
 
-</div>
-</div>
+              </div>
+              </div>
 
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleSaveLab}>Simpan</button>
+                <button type="button" className="btn btn-secondary">Simpan</button>
               </div>
             </div>
           </div>
@@ -893,7 +1130,7 @@ const toggleXRayOverlay = () => {
                             <div className="modal-body">
                                 {/* Konten overlay untuk memilih jenis pemeriksaan X-Ray */}
                                 <h6>Jenis Pemeriksaan X-Ray:</h6>
-                                <textarea name="Xray" value={formData.Xray} onChange={handleChange} className="form-sels" />
+                                <textarea name="Xray" className="form-sels" />
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" onClick={toggleXRayOverlay}>Simpan</button>
@@ -901,22 +1138,9 @@ const toggleXRayOverlay = () => {
                         </div>
                     </div>
                 </div>
-            )}
-            {summary && (
-                <div className="summary">
-                  <br />
-                    <h2>Ringkasan Data:</h2>
-                    <ul>
-                        {Object.entries(summary).map(([key, value]) => (
-                            <li key={key}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            )}           
+            
         </div>
-
                     <input type="radio" name="tabs" id="tabthree"/>
                     <label for="tabthree">Obat</label>
                     <div class="tab">

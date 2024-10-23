@@ -32,6 +32,6 @@
     "puppeteer": "^22.3.0",
     "query-string": "^9.0.0",
     "require-string": "^0.1.0",
-    "sweetalert2": "^11.14.2"
+    "sweetalert2": "^11.14.3"
   }
 }

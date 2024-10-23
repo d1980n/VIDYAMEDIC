@@ -309,7 +309,7 @@ function Antrian() {
     // Pastikan selectedPatient sudah dipilih
     if (selectedPatient) {
       try {
-        const response = await fetch(`http://localhost:3000/patients/${selectedPatient.nomorMR}`, {
+        const response = await fetch(`http://localhost:3000/patients/update/${selectedPatient.nomorMR}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -675,7 +675,7 @@ const susterAntri = async (index, nomorMR) => {
         onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
         disabled={!selectedPatient} // Disable tombol jika pasien belum dipilih
       >
-        Update Antri
+       Antri
       </button>
     </div>
 

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 // Import your models
 const Medical = require('./models/medicalrecord.model');
@@ -25,7 +26,7 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(error => console.error('Error connecting to MongoDB:', error));
 // Using Express, cookies
 const app = express();
-
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
