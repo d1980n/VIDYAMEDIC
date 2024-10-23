@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const dataDokter = require('./dataDokter');
 const dataSuster = require('./dataSuster');
+const dataAdmin = require('./dataAdmin');
 
 // Middleware untuk parsing JSON
 app.use(express.json());
@@ -90,6 +91,49 @@ app.delete('/api/suster/:kode_sus', (req, res) => {
   }
   const deletedSuster = dataSuster.splice(index, 1);
   res.json({ message: 'Suster deleted', deletedSuster });
+});
+
+//=====================================================================================================================================================================================================
+
+// Endpoint: Get all admin
+app.get('/api/admin', (req, res) => {
+  res.json(dataAdmin);
+});
+
+// Endpoint: Get suster by kode_min
+app.get('/api/admin/:kode_min', (req, res) => {
+  const admin = dataAdmin.find(a => a.kode_min === req.params.kode_min);
+  if (!admin) {
+    return res.status(404).json({ message: 'Admin not found' });
+  }
+  res.json(admin);
+});
+
+// Endpoint: Create new admin
+app.post('/api/admin', (req, res) => {
+  const newAdmin = req.body;
+  dataAdmin.push(newAdmin);
+  res.status(201).json(newAdmin);
+});
+
+// Endpoint: Update admin by kode_min
+app.put('/api/admin/:kode_min', (req, res) => {
+  const index = dataAdmin.findIndex(a => a.kode_min === req.params.kode_min);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Admin not found' });
+  }
+  dataAdmin[index] = { ...dataAdmin[index], ...req.body };
+  res.json(dataAdmin[index]);
+});
+
+// Endpoint: Delete admin by kode_min
+app.delete('/api/admin/:kode_min', (req, res) => {
+  const index = dataAdmin.findIndex(a => a.kode_min === req.params.kode_min);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Admin not found' });
+  }
+  const deletedAdmin = dataAdmin.splice(index, 1);
+  res.json({ message: 'Admin deleted', deletedAdmin });
 });
 
 // Menjalankan server

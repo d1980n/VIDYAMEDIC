@@ -323,7 +323,7 @@ const [susters, setSusters] = useState([]);
                     <div className="card w-100">
                       <div className="card-body p-4 width">
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
-                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Dokter</h5>
+                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Suster</h5>
                           <input
                                 type="text"
                                 id="search-input"

@@ -262,6 +262,31 @@ function SuperAdminDashboard() {
                   </div>
                 </div>
               </div>
+
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "15rem" }}>
+                <div class="row" style={{ width: "23%", marginLeft: "1px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "23%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "50%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "25rem"}}>
                 <div class="row" style={{ width: "100%", marginLeft: "1px",}}>
                   <div class="card overflow-hidden">

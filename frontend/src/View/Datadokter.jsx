@@ -20,9 +20,10 @@ function DataDokter() {
   const [ttl, setTtl] = useState('');
   const [poli, setPoli] = useState('');
   const [role, setRole] = useState('');
-  const [kodeDok, setKodeDok] = useState('');
-  const [daftarDokter, setDaftarDokter] = useState([]);
   const [formData, setFormData] = useState({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [dokters, setDokters] = useState([]);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -103,14 +104,13 @@ function DataDokter() {
 //     fetchDaftarDokter();
 //   }, []);
 
-const [confirmPassword, setConfirmPassword] = useState('');
-const [error, setError] = useState('');
+
 
 // Fungsi untuk membuat kode dokter otomatis dengan awalan "D" dan 3 angka acak
-const generateKodeDokter = () => {
-  const randomNumber = Math.floor(100 + Math.random() * 900); // Menghasilkan angka acak antara 100 dan 999
-  return `D${randomNumber}`;
-};
+// const generateKodeDokter = () => {
+//   const randomNumber = Math.floor(100 + Math.random() * 900); // Menghasilkan angka acak antara 100 dan 999
+//   return `D${randomNumber}`;
+// };
 
 const resetForm = () => {
   setNamaLengkap("");
@@ -133,12 +133,10 @@ const handleSubmit = async (e) => {
   }
 
   // Pastikan kode_dok dan role diisi secara otomatis
-  const finalKodeDok = kodeDok || generateKodeDokter();
   const finalRole = role || 'Dokter';
 
   // Menyusun data form
   const formData = {
-    kodeDok: finalKodeDok,
     namaLengkap,
     jenisKelamin,
     email,
@@ -176,8 +174,6 @@ const handleSubmit = async (e) => {
  }
 };
 
-const [dokters, setDokters] = useState([]);
-
   useEffect(() => {
     const fetchDokters = async () => {
       try {
@@ -190,6 +186,28 @@ const [dokters, setDokters] = useState([]);
 
     fetchDokters();
   }, []);
+
+  // Fungsi untuk menghapus dokter berdasarkan kode_dok dari API
+  const deleteDokter = async (kode_dok) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/dokter/${kode_dok}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error deleting dokter');
+      }
+
+      const data = await response.json();
+      console.log(data.message); // Log response message
+
+      // Hapus dokter dari state setelah berhasil dihapus dari backend
+      const updatedDokters = dokters.filter(dokter => dokter.kode_dok !== kode_dok);
+      setDokters(updatedDokters);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   // ===============================================================================================================================
 
@@ -378,6 +396,7 @@ const [dokters, setDokters] = useState([]);
                                   </td>
                                   <td className="border-bottom-0">
                                     <button type="button" className="btn btn-success m-1">Detail</button>
+                                    <button type="button" className="btn btn-danger m-1" onClick={() => deleteDokter(dokter.kode_dok)}>Delete</button>
                                   </td>
                                 </tr>
                             ))}
