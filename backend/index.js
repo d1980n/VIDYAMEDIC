@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 
 // Import your models
 const Medical = require('./models/medicalrecord.model');
+const Person = require('./models/person.model');
 
 require('dotenv').config({ path: __dirname + '/../.env' })
 
@@ -59,7 +60,14 @@ app.get('/medical', async(req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 });
-
+app.get('/person', async(req, res) => {
+    try {
+        const person = await Person.find();
+        res.json({ success: true, person });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
@@ -77,13 +85,13 @@ app.post('/api/antrian', (req, res) => {
     const { id, sound } = req.body;
     soundData = { id, sound };
     res.json({ message: 'Sound ID and file received', soundData });
-  });
-  
-  // GET /api/target: mengembalikan ID dan file suara yang dikirim
-  app.get('/api/target', (req, res) => {
+});
+
+// GET /api/target: mengembalikan ID dan file suara yang dikirim
+app.get('/api/target', (req, res) => {
     if (soundData) {
-      res.json(soundData);
+        res.json(soundData);
     } else {
-      res.status(404).json({ message: 'No sound data available' });
+        res.status(404).json({ message: 'No sound data available' });
     }
-  });
+});

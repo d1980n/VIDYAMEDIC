@@ -14,6 +14,8 @@ function Drdashboard() {
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [isPeriksaSelesai, setIsPeriksaSelesai] = useState([]);
   const navigate = useNavigate(); 
+  const [isDisabled, setIsDisabled] = useState(false); // Contoh inisialisasi
+
   
   useEffect(() => {
       const fetchData = async () => {
@@ -98,7 +100,7 @@ function Drdashboard() {
   const dokterPeriksa = async (index, nomorMR) => {
     const result = await Swal.fire({
       title: 'Apakah Anda yakin?',
-      text: "Pasien akan diperiksa oleh dokter.",
+      text: "Pasien akan diperiksa.",
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -263,11 +265,11 @@ function Drdashboard() {
                         <span className="hide-menu">Dashboard</span>
                     </NavLink>
                     <NavLink 
-                      className={`sidebar-link ${'Dashboard' ? 'disabled-link ' : ''}`} 
+                      className={`sidebar-link ${isDisabled ? 'disabled-link ' : ''}`} 
                       to="/Drmonitor" 
                       aria-expanded="false" 
                       onClick={(e) => {
-                        if (activePage === 'Monitoring') {
+                        if (isDisabled) {
                           e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
                         } else {
                           handleSetActivePage('Monitoring'); // Jalankan fungsi jika tidak disabled
@@ -396,42 +398,38 @@ function Drdashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                            {daftarPasien.map((pasien, index,) => (
-                              <tr key={pasien.nomorMR}>
-                                <td class="border-bottom-0">
-                                  <h6 class="fw-semibold mb-0">{index + 1}</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <p class="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-normal">{pasien.nomorMR}</span>
-                                  </div>
-                                </td>
-                                <td class="border-bottom-0"> 
-                                {/* {!isPeriksaSelesai ? ( */}
-                                    <button
-                                      type="button"
-                                      className="btn btn-primary m-1"
-                                      onClick={() => dokterPeriksa(index, pasien.nomorMR)} // Menjalankan dokterPeriksa
-                                    >
-                                      Periksa
-                                    </button>
-                                  {/* ) : (
-                                    // Jika periksa selesai, tampilkan NavLink yang membawa ke /Drmonitor
-                                    <NavLink to="/Drmonitor" className="btn btn-success m-1">
-                                     Pergi ke Monitor Dokter
-                                   </NavLink>
-                                 )} */}
-                               
-                                </td>
-                                <td class="border-bottom-0"> 
-                               
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
+                        {daftarPasien.length > 0 ? (
+                          daftarPasien.map((pasien, index) => (
+                            <tr key={pasien.nomorMR}>
+                              <td className="border-bottom-0">
+                                <h6 className="fw-semibold mb-0">{index + 1}</h6>
+                              </td>
+                              <td className="border-bottom-0">
+                                <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+                              </td>
+                              <td className="border-bottom-0">
+                                <div className="d-flex align-items-center gap-2">
+                                  <span className="fw-normal">{pasien.nomorMR}</span>
+                                </div>
+                              </td>
+                              <td className="border-bottom-0"> 
+                                <button
+                                  type="button"
+                                  className="btn btn-primary m-1"
+                                  onClick={() => dokterPeriksa(index, pasien.nomorMR)} // Menjalankan dokterPeriksa
+                                >
+                                  Periksa
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+                          </tr>
+                        )}
+                      </tbody>
+
                   </table>
                 </div>
                 

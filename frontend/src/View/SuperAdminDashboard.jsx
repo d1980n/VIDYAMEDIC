@@ -169,19 +169,19 @@ function SuperAdminDashboard() {
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Dokter</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-nurse"></i>
                       </span>
                       <span className="hide-menu">Data Suster</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-accessible"></i>
                       </span>
                       <span className="hide-menu">Data Admin</span>
                     </NavLink>

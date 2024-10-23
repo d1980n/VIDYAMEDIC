@@ -4,22 +4,27 @@ import logo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
 import images from '../source/Picture1.png';
+import Swal from 'sweetalert2';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
 
 function DataSuster() {
   const [showModal, setShowModal] = useState(false);
-  const [namaLengkap, setNamaLengkap] = useState('');
+  const [nama, setNama] = useState('');
   // const [fotoKTP, setFotoKTP] = useState(null);
   const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamatLengkap, setAlamatLengkap] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
   const [email, setEmail] = useState('');
+  const [tl, setTl] = useState('');
   const [password, setPassword] = useState('');
   const [konfPassword, setKonfPassword] = useState('');
   const [role, setRole] = useState('');
   const [daftarPasien, setDaftarPasien] = useState([]);
+  const [nik, setNik] = useState('');
   const [formData, setFormData] = useState({});
+  const [personList, setPersonList] = useState([]);
+  const [susterList, setSusterList] = useState([]);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -36,14 +41,16 @@ function DataSuster() {
   
     // Menyusun data form
     const formData = {
-      namaLengkap,
+      nama,
       jenisKelamin,
-      alamatLengkap,
+      nik,
+      role,
+      alamat,
       email,
       password,
-      konfPassword,
-      role,
-      phone_number,
+      role: 'Suster',
+      no_hp,
+      tl,
 
     };
   
@@ -53,7 +60,7 @@ function DataSuster() {
 
 
     try {
-      const response = await fetch('http://localhost:3000/patients/tambah', {
+      const response = await fetch('http://localhost:3000/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,10 +73,10 @@ function DataSuster() {
       console.log('Response Data:', data);
   
       // Reset form setelah pengiriman berhasil
-      setNamaLengkap('');
+      setNama('');
       setJenisKelamin('');
-      setAlamatLengkap('');
-      setPhoneNumber('');
+      setAlamat('');
+      setNoHp('');
       setEmail('');
       setPassword('');
       setKonfPassword('');
@@ -82,6 +89,11 @@ function DataSuster() {
       console.error('Error:', error.message);
     }
   };
+
+
+
+
+
   const fetchDaftarPasien = async () => {
     try {
         const response = await fetch('http://localhost:3000/patients');
@@ -171,68 +183,6 @@ function DataSuster() {
 
 
 
-// Fungsi untuk membatalkan antrian pasien
-const cancelPasien = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1);
-  setDaftarPasien(newDaftarPasien);
-  
-  try {
-      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nomorMR }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-          throw new Error(data.message || 'Gagal membatalkan antrian pasien');
-      }
-      else{
-        window.location.reload(); 
-      }
-
-      console.log('Antrian dibatalkan:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
-};
-
-// Fungsi untuk memperbarui status antrian suster
-const susterAntri = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
-  setDaftarPasien(newDaftarPasien);
-
-  try {
-      const response = await fetch(`http://localhost:3000/patients/susterAntri`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nomorMR }), // Mengirim nomorMR ke backend
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-          throw new Error(data.message || 'Gagal memperbarui status antrian suster');
-      }
-      else{
-        window.location.reload(); 
-      }
-
-      console.log('Status antrian suster berhasil diperbarui:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
-};
-
-
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -259,6 +209,54 @@ const susterAntri = async (index, nomorMR) => {
   };
 
   const [showOverlay, setShowOverlay] = useState(false);
+  
+
+
+
+
+  const fetchDaftarPerson = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+        if (data.success) {
+            // Menyimpan semua person ke dalam state
+            setPersonList(data.person);
+            
+            // Filter untuk Suster
+            const filteredSuster = data.person.filter((person) => person.role === 'Suster');
+            
+            // Jika ingin menyimpan filteredSuster ke dalam state terpisah, bisa menggunakan setSusterList
+            setSusterList(filteredSuster); // Pastikan Anda mendefinisikan state setSusterList sebelumnya
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching persons:", error);
+    }
+};
+
+    useEffect(() => {
+      fetchDaftarPerson();
+  }, []);
+
+
+
+
+  const handleDelete = async (id) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/delete/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error('HTTP error! Status: ' + response.status);
+        }
+        // Lakukan sesuatu setelah berhasil menghapus person
+    } catch (error) {
+        console.error('Error deleting person:', error);
+    }
+};
+
+
 
   return (
     <html className='Admin'>
@@ -291,19 +289,19 @@ const susterAntri = async (index, nomorMR) => {
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Dokter</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-nurse"></i>
                       </span>
                       <span className="hide-menu">Data Suster</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-accessible"></i>
                       </span>
                       <span className="hide-menu">Data Admin</span>
                     </NavLink>
@@ -422,38 +420,36 @@ const susterAntri = async (index, nomorMR) => {
                                 <th className="border-bottom-0">
                                   <h6 className="fw-semibold mb-0">Email</h6>
                                 </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Password</h6>
-                                </th>
                                 <th style={{width: '10rem'}} className="border-bottom-0">
                                   <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                            {daftarPasien.map((pasien, index) => (
-                                <tr key={pasien.nomorMR}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">Dr. Dymas, Sp. A</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">dymasnih@mail.com</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">161223</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-success m-1">Detail</button>
-                                  </td>
-                                </tr>
-                            ))}
+                              {susterList.length > 0 ? (
+                                  susterList.map((suster, index) => (
+                                      <tr key={suster._id}>
+                                          <td>{index + 1}</td>
+                                          <td>{suster.nama}</td>
+                                          <td>{suster.no_hp}</td>
+                                          <td>
+                                              <button
+                                                  type="button"
+                                                  className="btn btn-danger m-1"
+                                                  onClick={() => handleDelete(suster._id)} // Panggil fungsi delete dengan id
+                                              >
+                                                  Hapus
+                                              </button>
+                                          </td>
+                                      </tr>
+                                  ))
+                              ) : (
+                                  <tr>
+                                      <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+                                  </tr>
+                              )}
+                          </tbody>
 
-                        </tbody>
 
 
                           </table>
@@ -472,49 +468,51 @@ const susterAntri = async (index, nomorMR) => {
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                          <div className="modal-body">
-                            <div className="mb-3">
-                              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-                              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} />
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
+                                    <input type="text" className="form-control" id="nama" value={nama} onChange={(e) => setNama(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="nik" className="form-label">NIK</label>
+                                    <input type="text" className="form-control" id="nik" value={nik} onChange={(e) => setNik(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+                                    <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                                        <option value="">Select</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="no_hp" className="form-label">Nomor Telepon</label>
+                                    <input type="text" className="form-control" id="no_hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="alamat" className="form-label">Alamat Lengkap</label>
+                                    <textarea className="form-control" id="alamat" rows="3" value={alamat} onChange={(e) => setAlamat(e.target.value)}></textarea>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="tl" className="form-label">Tanggal Lahir</label>
+                                    <input type="date" className="form-control" id="tl" value={tl} onChange={(e) => setTl(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="email" className="form-label">Alamat Email</label>
+                                    <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="password" className="form-label">Password</label>
+                                    <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
                             </div>
-                            {/* <div className="mb-3">
-                              <label htmlFor="fotoKTP" className="form-label">Foto KTP</label>
-                              <input type="file" className="form-control" id="fotoKTP" onChange={(e) => setFotoKTP(e.target.files[0])} />
-                            </div> */}
-                            <div className="mb-3">
-                              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-                              <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                              <option value="Select">Select</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                              </select>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+                                <button type="submit" className="btn btn-primary">Simpan</button>
                             </div>
-                            <div className="mb-3">
-                              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-                              <textarea className="form-control" id="alamatLengkap" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-                              <input type="text" className="form-control" id="phone_number" onChange={(e) => setPhoneNumber(e.target.value)}/>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="email" className="form-label">Alamat Email</label>
-                              <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="password" className="form-label">Password</label>
-                              <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="konfPassword" className="form-label">Konfirmasi Password</label>
-                              <input type="password" className="form-control" id="konfPassword" value={konfPassword} onChange={(e) => setKonfPassword(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                            <button type="submit" className="btn btn-primary">Simpan</button>
-                          </div>
                         </form>
+
+
                       </div>
                     </div>
                   </div>

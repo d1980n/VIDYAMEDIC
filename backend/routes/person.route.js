@@ -1,14 +1,12 @@
 // import pachkage
 const express = require('express');
-// import necesities
-const verifyToken  = require('../utils/verifyUser.js');
 // import Controller
-const { getPerson, deletePerson, updatePerson } = require ('../controllers/person.controller.js');
+const { getPerson, deletePerson, updatePerson } = require('../controllers/person.controller.js');
 
 const router = express.Router();
 
-router.get('/:id', verifyToken, getPerson)
-router.post('/update/:id', verifyToken, updatePerson)
-router.delete('/delete/:id', verifyToken, deletePerson)
+router.get('/:id', getPerson)
+router.post('/update/:id', updatePerson)
+router.delete('/delete/:id', deletePerson)
 
 module.exports = router;

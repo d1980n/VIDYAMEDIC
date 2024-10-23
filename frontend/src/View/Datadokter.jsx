@@ -9,17 +9,20 @@ import images2 from '../source/img2.png';
 
 function DataDokter() {
   const [showModal, setShowModal] = useState(false);
-  const [namaLengkap, setNamaLengkap] = useState('');
+  const [nama, setNama] = useState('');
+  const [nik, setNik] = useState('');
   // const [fotoKTP, setFotoKTP] = useState(null);
   const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamatLengkap, setAlamatLengkap] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
+  const [tl, setTl] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [konfpassword, setKonfPassword] = useState('');
   const [role, setRole] = useState('');
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({});
+  const [dokterList, setDokterList] = useState([]);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -36,14 +39,16 @@ function DataDokter() {
   
     // Menyusun data form
     const formData = {
-      namaLengkap,
+      nama,
       jenisKelamin,
-      alamatLengkap,
+      nik,
+      role,
+      alamat,
       email,
       password,
-      konfpassword,
-      role,
-      phone_number,
+      role: 'Dokter',
+      no_hp,
+      tl,
 
     };
   
@@ -53,7 +58,7 @@ function DataDokter() {
 
 
     try {
-      const response = await fetch('http://localhost:3000/patients/tambah', {
+      const response = await fetch('http://localhost:3000/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,10 +71,10 @@ function DataDokter() {
       console.log('Response Data:', data);
   
       // Reset form setelah pengiriman berhasil
-      setNamaLengkap('');
+      setNama('');
       setJenisKelamin('');
-      setAlamatLengkap('');
-      setPhoneNumber('');
+      setAlamat('');
+      setNoHp('');
       setEmail('');
       setPassword('');
       setKonfPassword('');
@@ -82,6 +87,8 @@ function DataDokter() {
       console.error('Error:', error.message);
     }
   };
+
+
   const fetchDaftarPasien = async () => {
     try {
         const response = await fetch('http://localhost:3000/patients');
@@ -260,6 +267,33 @@ const susterAntri = async (index, nomorMR) => {
 
   const [showOverlay, setShowOverlay] = useState(false);
 
+
+  const fetchDaftarDokter = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+        console.log("response : ", response);
+        console.log("data dokter: ", data.person); // Menampilkan data dokter yang diterima
+
+        if (data.success) {
+            // Memfilter dokter berdasarkan role "Dokter"
+            const filteredDokter = data.person.filter((person) => person.role === 'Dokter');
+            setDokterList(filteredDokter); // Mungkin perlu diubah menjadi setDokterList jika variabelnya berbeda
+        } else {
+            console.error("Failed to fetch dokter:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching dokter:", error);
+        // Tangani kesalahan dengan baik, misalnya menampilkan pesan kesalahan kepada pengguna
+    }
+};
+
+// Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
+useEffect(() => {
+    fetchDaftarDokter();
+}, []);
+
+
   return (
     <html className='Admin'>
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -291,19 +325,19 @@ const susterAntri = async (index, nomorMR) => {
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Dokter</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-nurse"></i>
                       </span>
                       <span className="hide-menu">Data Suster</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-accessible"></i>
                       </span>
                       <span className="hide-menu">Data Admin</span>
                     </NavLink>
@@ -422,38 +456,29 @@ const susterAntri = async (index, nomorMR) => {
                                 <th className="border-bottom-0">
                                   <h6 className="fw-semibold mb-0">Email</h6>
                                 </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Password</h6>
-                                </th>
                                 <th style={{width: '10rem'}} className="border-bottom-0">
                                   <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                            {daftarPasien.map((pasien, index) => (
-                                <tr key={pasien.nomorMR}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">Dr. Dymas, Sp. A</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">dymasnih@mail.com</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">161223</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-success m-1">Detail</button>
-                                  </td>
-                                </tr>
-                            ))}
-
-                        </tbody>
+                    {dokterList.length > 0 ? (
+                        dokterList.map((dokter, index) => (
+                            <tr key={dokter._id}>
+                                <td>{index + 1}</td>
+                                <td>{dokter.nama}</td>
+                                <td>{dokter.email}</td>
+                                <td>
+                                    <button type="button" className="btn btn-primary">Detail</button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+                        </tr>
+                    )}
+                </tbody>
 
 
                           </table>
@@ -472,48 +497,48 @@ const susterAntri = async (index, nomorMR) => {
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                          <div className="modal-body">
-                            <div className="mb-3">
-                              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-                              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} />
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
+                                    <input type="text" className="form-control" id="nama" value={nama} onChange={(e) => setNama(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="nik" className="form-label">NIK</label>
+                                    <input type="text" className="form-control" id="nik" value={nik} onChange={(e) => setNik(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+                                    <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                                        <option value="">Select</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="no_hp" className="form-label">Nomor Telepon</label>
+                                    <input type="text" className="form-control" id="no_hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="alamat" className="form-label">Alamat Lengkap</label>
+                                    <textarea className="form-control" id="alamat" rows="3" value={alamat} onChange={(e) => setAlamat(e.target.value)}></textarea>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="tl" className="form-label">Tanggal Lahir</label>
+                                    <input type="date" className="form-control" id="tl" value={tl} onChange={(e) => setTl(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="email" className="form-label">Alamat Email</label>
+                                    <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="password" className="form-label">Password</label>
+                                    <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
                             </div>
-                            {/* <div className="mb-3">
-                              <label htmlFor="fotoKTP" className="form-label">Foto KTP</label>
-                              <input type="file" className="form-control" id="fotoKTP" onChange={(e) => setFotoKTP(e.target.files[0])} />
-                            </div> */}
-                            <div className="mb-3">
-                              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-                              <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                              <option value="Select">Select</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                              </select>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+                                <button type="submit" className="btn btn-primary">Simpan</button>
                             </div>
-                            <div className="mb-3">
-                              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-                              <textarea className="form-control" id="alamatLengkap" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-                              <input type="text" className="form-control" id="phone_number" onChange={(e) => setPhoneNumber(e.target.value)}/>
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="email" className="form-label">Alamat Email</label>
-                              <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="password" className="form-label">Password</label>
-                              <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                            </div>
-                            <div className="mb-3">
-                              <label htmlFor="konfPassword" className="form-label">Konfirmasi Password</label>
-                              <input type="password" className="form-control" id="konfPassword" value={konfpassword} onChange={(e) => setKonfPassword(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                            <button type="submit" className="btn btn-primary">Simpan</button>
-                          </div>
                         </form>
                       </div>
                     </div>
