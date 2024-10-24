@@ -38,9 +38,9 @@ const signin = async (req, res) => {
   }
 };
 
-const signup = async (req, res) => {
-  try {
-    const { nama, nik, no_hp, role, email, password } = req.body;
+const signup = async(req, res) => {
+    try {
+        const { nama, nik, no_hp, role, email, password, tl, jenisKelamin, alamat } = req.body;
 
     if (!nama || !nik || !no_hp || !role || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
@@ -53,14 +53,18 @@ const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newUser = new Person({
-      nama,
-      nik,
-      no_hp,
-      role,
-      email,
-      password: hashedPassword,
-    });
+        // Menyusun data baru dengan pengecekan opsional untuk `tl`
+        const newUser = new Person({
+            nama,
+            jenisKelamin,
+            alamat,
+            nik,
+            no_hp,
+            role,
+            email,
+            password: hashedPassword,
+            tl: tl || null, // Jika `tl` tidak ada, atur ke `null`
+        });
 
     await newUser.save();
 
@@ -112,6 +116,7 @@ const signup = async (req, res) => {
     next(error);
   }
 };
+
 
 const signOut = (req, res) => {
   // Implement sign out logic here if required
