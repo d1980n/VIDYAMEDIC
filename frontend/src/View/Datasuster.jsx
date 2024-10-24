@@ -243,18 +243,52 @@ function DataSuster() {
 
 
   const handleDelete = async (id) => {
-    try {
-        const response = await fetch(`http://localhost:3000/api/delete/${id}`, {
+    // Konfirmasi sebelum menghapus dengan SweetAlert
+    Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Anda tidak dapat mengembalikan data yang sudah dihapus!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Lakukan penghapusan setelah konfirmasi
+          const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
             method: 'DELETE',
-        });
-        if (!response.ok) {
+          });
+          if (!response.ok) {
             throw new Error('HTTP error! Status: ' + response.status);
+          }
+  
+          // Tampilkan pesan sukses setelah penghapusan
+          Swal.fire(
+            'Terhapus!',
+            'Data berhasil dihapus.',
+            'success'
+          ).then(() => {
+            // Reload halaman setelah SweetAlert sukses
+            window.location.reload();
+          });
+  
+        } catch (error) {
+          console.error('Error deleting person:', error);
+  
+          // Tampilkan pesan error jika gagal menghapus
+          Swal.fire(
+            'Gagal!',
+            'Terjadi kesalahan saat menghapus data.',
+            'error'
+          );
         }
-        // Lakukan sesuatu setelah berhasil menghapus person
-    } catch (error) {
-        console.error('Error deleting person:', error);
-    }
-};
+      }
+    });
+  };
+  
+  
 
 
 

@@ -3,6 +3,7 @@ import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
+import Swal from 'sweetalert2';
 import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
@@ -232,6 +233,51 @@ useEffect(() => {
     fetchDaftarAdmin();
 }, []);
 
+const handleDelete = async (id) => {
+  // Konfirmasi sebelum menghapus dengan SweetAlert
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Anda tidak dapat mengembalikan data yang sudah dihapus!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // Lakukan penghapusan setelah konfirmasi
+        const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('HTTP error! Status: ' + response.status);
+        }
+
+        // Tampilkan pesan sukses setelah penghapusan
+        Swal.fire(
+          'Terhapus!',
+          'Data berhasil dihapus.',
+          'success'
+        ).then(() => {
+          // Reload halaman setelah SweetAlert sukses
+          window.location.reload();
+        });
+
+      } catch (error) {
+        console.error('Error deleting person:', error);
+
+        // Tampilkan pesan error jika gagal menghapus
+        Swal.fire(
+          'Gagal!',
+          'Terjadi kesalahan saat menghapus data.',
+          'error'
+        );
+      }
+    }
+  });
+};
 
   return (
     <html className='Admin'>
@@ -410,6 +456,15 @@ useEffect(() => {
                                 <td>
                                     <button type="button" className="btn btn-primary">Detail</button>
                                 </td>
+                                <td>
+                                              <button
+                                                  type="button"
+                                                  className="btn btn-danger m-1"
+                                                  onClick={() => handleDelete(admin._id)}
+                                              >
+                                                  Hapus
+                                              </button>
+                                          </td>
                             </tr>
                         ))
                     ) : (
