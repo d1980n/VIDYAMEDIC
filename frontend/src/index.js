@@ -17,6 +17,8 @@ import DataPasien from './View/DataPasien.jsx';
 import DataDokter from './View/DataDokter.jsx';
 import DataSuster from './View/DataSuster.jsx';
 import DataAdmin from './View/DataAdmin.jsx';
+import DashboardGamma from './View/GammaDashboard.jsx';
+import DataSuperAdmin from './View/DataSuperAdmin.jsx';
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import {
   createBrowserRouter,
@@ -105,6 +107,14 @@ const router = createBrowserRouter([
   {
     path: "/Target",
     element: <Target/>
+  },
+  {
+    path: "/DashboardGamma",
+    element: <DashboardGamma/>
+  },
+  {
+    path: "/DataSuperAdmin",
+    element: <DataSuperAdmin/>
   }
 ]);
 
