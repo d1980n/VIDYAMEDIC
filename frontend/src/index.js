@@ -10,7 +10,7 @@ import Prediksiresiko from './View/prediksiresiko.jsx';
 import Riwayatdeteksi from './View/Riwayatdeteksi.jsx';
 import Treatment from './View/Treatment.jsx';
 import Rekomendasi from './View/Rekomendasi.jsx';
-import DrDashboard from './View/DrDashboard.jsx';
+import DrDashboard from './View/Drdashboard.jsx';
 import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
 import DataPasien from './View/DataPasien.jsx';

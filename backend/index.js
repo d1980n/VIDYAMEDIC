@@ -39,6 +39,9 @@ app.use('/dashboard', DashboardRoute);
 app.use('/medical', MedicalRoute);
 app.use('/patients', patientRoutes);
 
+app.listen(3000, () => {
+    console.log('Server is running on port 3000!');
+});
 
 app.get('/patients', async(req, res) => {
     try {
