@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.7.0",
+    "moongose": "^1.0.0",
     "node-cron": "^3.0.3",
     "node-fetch": "^2.7.0",
     "nodemon": "^3.1.0",

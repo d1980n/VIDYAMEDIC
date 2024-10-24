@@ -38,10 +38,6 @@ app.use('/dashboard', DashboardRoute);
 app.use('/medical', MedicalRoute);
 app.use('/patients', patientRoutes);
 
-// running app
-app.listen(3000, () => {
-    console.log('Server is running on port 3000!');
-});
 
 app.get('/patients', async(req, res) => {
     try {
@@ -87,3 +83,9 @@ app.post('/api/antrian', (req, res) => {
       res.status(404).json({ message: 'No sound data available' });
     }
   });
+
+
+  // running app
+app.listen(3000, () => {
+    console.log('Server is running on port 3000!');
+});

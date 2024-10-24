@@ -2,7 +2,7 @@ import '../css/login.css';
 import { useState } from 'react';
 import logologin from '../source/logologin.png';
 import { useNavigate } from 'react-router-dom';
-
+import Signin from './Signin';
 function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
@@ -61,6 +61,7 @@ function Login() {
 
       // Successful login, navigate based on role
       handleRoleNavigation(data.role);
+      
     } catch (error) {
       console.error('Error:', error.message);
       setErrorMessage(error.message);
@@ -110,7 +111,8 @@ function Login() {
                           <a className="ti ti-brand-facebook titi"></a>
                         </span>
                         <span>
-                          <a className="ti ti-brand-google titi"></a>
+                          <Signin/>
+                          
                         </span>
                         <span>
                           <a className="ti ti-brand-mantine titi"></a>
