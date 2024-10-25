@@ -10,17 +10,17 @@ import images2 from '../source/img2.png';
 
 function DataDokter() {
   const [showModal, setShowModal] = useState(false);
-  const [nama, setNama] = useState('');
-  const [nik, setNik] = useState('');
+  const [nama, setNama] = useState("");
+  const [nik, setNik] = useState("");
   // const [fotoKTP, setFotoKTP] = useState(null);
-  const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamat, setAlamat] = useState('');
-  const [no_hp, setNoHp] = useState('');
-  const [tl, setTl] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [konfpassword, setKonfPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [jenisKelamin, setJenisKelamin] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [no_hp, setNoHp] = useState("");
+  const [tl, setTl] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [konfpassword, setKonfPassword] = useState("");
+  const [role, setRole] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({});
   const [personList, setPersonList] = useState([]);
@@ -40,7 +40,7 @@ function DataDokter() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Menyusun data form
     const formData = {
       nama,
@@ -50,70 +50,64 @@ function DataDokter() {
       alamat,
       email,
       password,
-      role: 'Dokter',
+      role: "Dokter",
       no_hp,
       tl,
-
     };
-  
-    // Log data untuk memeriksa
-    console.log('Form Data:', formData);
-  
 
+    // Log data untuk memeriksa
+    console.log("Form Data:", formData);
 
     try {
-      const response = await fetch('http://localhost:3000/auth/signup', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/auth/signup", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-  
-  
+
       const data = await response.json();
-      console.log('Response Data:', data);
-  
+      console.log("Response Data:", data);
+
       // Reset form setelah pengiriman berhasil
-      setNama('');
-      setJenisKelamin('');
-      setAlamat('');
-      setNoHp('');
-      setEmail('');
-      setPassword('');
-      setKonfPassword('');
-      setRole('Dokter');
+      setNama("");
+      setJenisKelamin("");
+      setAlamat("");
+      setNoHp("");
+      setEmail("");
+      setPassword("");
+      setKonfPassword("");
+      setRole("Dokter");
       setShowModal(false);
-  
+
       // Fetch data again after adding a new patient
       fetchDaftarPasien();
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error("Error:", error.message);
     }
   };
 
-
   const fetchDaftarPasien = async () => {
     try {
-        const response = await fetch('http://localhost:3000/patients');
-        const data = await response.json();
+      const response = await fetch("http://localhost:3000/patients");
+      const data = await response.json();
 
-        if (response.ok) { // Check if the response is successful
-            const filteredPatients = data.patients.filter(patient => 
-                patient.antrianStatus && 
-                patient.antrianStatus.status === true && 
-                patient.is_active !== true // Exclude patients with is_active = true
-            );
-            setDaftarPasien(filteredPatients); // Save the filtered patients to state
-        } else {
-            console.error('Failed to fetch patients:', data.message);
-        }
+      if (response.ok) {
+        // Check if the response is successful
+        const filteredPatients = data.patients.filter(
+          (patient) => patient.antrianStatus && patient.antrianStatus.status === true && patient.is_active !== true // Exclude patients with is_active = true
+        );
+        setDaftarPasien(filteredPatients); // Save the filtered patients to state
+      } else {
+        console.error("Failed to fetch patients:", data.message);
+      }
     } catch (error) {
-        console.error('Error fetching patients:', error);
-        // Handle error appropriately, e.g., displaying an error message to the user
+      console.error("Error fetching patients:", error);
+      // Handle error appropriately, e.g., displaying an error message to the user
     }
-};
-  
+  };
+
   useEffect(() => {
     fetchDaftarPasien();
   }, []);
@@ -122,7 +116,9 @@ function DataDokter() {
   
 
 
-  const [searchTerm, setSearchTerm] = useState('');
+ 
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const toggleOverlay = () => {
@@ -137,13 +133,13 @@ function DataDokter() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (searchTerm.trim() !== '') {
+      if (searchTerm.trim() !== "") {
         try {
           const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
           const data = await response.json();
           setSearchResults(data);
         } catch (error) {
-          console.error('Error:', error);
+          console.error("Error:", error);
         }
       } else {
         setSearchResults([]);
@@ -153,7 +149,7 @@ function DataDokter() {
     fetchData();
   }, [searchTerm]);
 
-  const [activePage, setActivePage] = useState('');
+  const [activePage, setActivePage] = useState("");
 
   const handleSetActivePage = (page) => {
     setActivePage(page);
@@ -256,11 +252,10 @@ const handleInputChange = (event) => {
     };
 
   return (
-    <html className='Admin'>
+    <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
       <body>
-        <div className="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-          data-sidebar-position="fixed" data-header-position="fixed">
+        <div className="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
           <aside className="left-sidebar">
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
@@ -278,7 +273,7 @@ const handleInputChange = (event) => {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                  <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                    <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
@@ -296,13 +291,10 @@ const handleInputChange = (event) => {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink 
-                      className={`sidebar-link ${activePage === 'Log Out' ? 'active' : ''}`} 
-                      to="/" 
-                      aria-expanded="false" 
-                      onClick={() => handleSetActivePage('Log Out')}
-                    >
-                      <span><i className="ti ti-login"></i></span>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                      <span>
+                        <i className="ti ti-login"></i>
+                      </span>
                       <span className="hide-menu">Log Out</span>
                     </NavLink>
                   </li>
@@ -353,7 +345,7 @@ const handleInputChange = (event) => {
                                       </div>
                                       <div clasName="d-flex justify-content-end ms-auto tabs-suster">
                                         <button className="btn btn-primary mb-3" style={{marginRight: "0.75rem",}} onClick={toggleModal}>
-                                          Tambah Suster
+                                          Tambah Nakes
                                         </button>
                                       </div>
                                       {/* Konten tab yang umum */}
@@ -425,56 +417,89 @@ const handleInputChange = (event) => {
                        {/* ============================================================================================================================================================ */}
                          {/* ============================================================================================================================================================ */}
                 {showModal && (
-                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
                     <div className="modal-dialog">
                       <div className="modal-content">
                         <div className="modal-header">
-                          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
+                          <h5 className="modal-title" id="exampleModalLabel">
+                            Tambah Pengukuran Medis
+                          </h5>
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="modal-body">
-                                <div className="mb-3">
-                                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
-                                    <input type="text" className="form-control" id="nama" value={nama} onChange={(e) => setNama(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="nik" className="form-label">NIK</label>
-                                    <input type="text" className="form-control" id="nik" value={nik} onChange={(e) => setNik(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-                                    <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                                        <option value="">Select</option>
-                                        <option value="Laki-laki">Laki-laki</option>
-                                        <option value="Perempuan">Perempuan</option>
-                                    </select>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="no_hp" className="form-label">Nomor Telepon</label>
-                                    <input type="text" className="form-control" id="no_hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="alamat" className="form-label">Alamat Lengkap</label>
-                                    <textarea className="form-control" id="alamat" rows="3" value={alamat} onChange={(e) => setAlamat(e.target.value)}></textarea>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="tl" className="form-label">Tanggal Lahir</label>
-                                    <input type="date" className="form-control" id="tl" value={tl} onChange={(e) => setTl(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="email" className="form-label">Alamat Email</label>
-                                    <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
-                                    <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                                </div>
+                          <div className="modal-body">
+                            {/* Input pengukuran medis */}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Nama</h6>
+                                <input type="text" name="Nama" className="form-control" placeholder="Nama" />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">NIK</h6>
+                                <input type="number" name="Nama" className="form-control" placeholder="NIK" />
+                              </div>
                             </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                                <button type="submit" className="btn btn-primary">Simpan</button>
+
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Jenis Kelamin</h6>
+                                <select className="form-select" id="jenisKelamin">
+                                  <option value="Select">Select</option>
+                                  <option value="Laki-laki">Laki-laki</option>
+                                  <option value="Perempuan">Perempuan</option>
+                                </select>
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Email</h6>
+                                <input type="email" name="Email" className="form-control" placeholder="Email" />
+                              </div>
                             </div>
+
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">No HP</h6>
+                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Role</h6>
+                                <select className="form-select" id="jenisKelamin">
+                                  <option value="Select">Select</option>
+                                  <option value="Laki-laki">Dokter</option>
+                                  <option value="Perempuan">Antrian</option>
+                                  <option value="Perempuan">Suster</option>
+                                  
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Alamat</h6>
+                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Profile PIcture</h6>
+                                <input type="text" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" />
+                              </div>
+                            </div>
+
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Password</h6>
+                                <input type="password" name="Password" className="form-control" placeholder="Password" />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>
+                              Tutup
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                              <i className="ti ti-playlist-add"></i> Detail
+                            </button>
+                            {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                          </div>
                         </form>
 
 
@@ -482,8 +507,7 @@ const handleInputChange = (event) => {
                     </div>
                   </div>
                 )}
-                {showModal && <div className="modal-backdrop fade show">
-                  </div>}
+                {showModal && <div className="modal-backdrop fade show"></div>}
               </div>
             </div>
           </div>

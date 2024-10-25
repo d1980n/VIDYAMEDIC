@@ -5,15 +5,25 @@ import "../css/admindash.css";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import images from "../source/Picture1.png";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import images2 from "../source/img2.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const DrDashboard = () => {
   const [activePage, setActivePage] = useState("");
 
+  const [isDisabled, setIsDisabled] = useState(false); // Contoh inisialisasi
+  const location = useLocation();
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
+  useEffect(() => {
+    // Check if the current path is '/drDashboard' and disable the NavLink
+    if (location.pathname === "/drDashboard") {
+      setIsDisabled(true);
+    } else {
+      setIsDisabled(false);
+    }
+  }, [location.pathname]);
   return (
     <>
       <html className="Admin">
@@ -49,27 +59,16 @@ const DrDashboard = () => {
                       </NavLink>
                       <NavLink className={`sidebar-link ${activePage === "DrAntri" ? "active" : ""}`} to="/DrAntri" aria-expanded="false" onClick={() => handleSetActivePage("DrAntri")}>
                         <span>
-                          <i className="ti ti-layout-dashboard"></i>  
+                          <i className="ti ti-clipboard"></i>
                         </span>
                         <span className="hide-menu">Antrian</span>
                       </NavLink>
 
-                      <NavLink
-                        className={`sidebar-link ${"Dashboard" ? "disabled-link " : ""}`}
-                        to="/Drmonitor"
-                        aria-expanded="false"
-                        onClick={(e) => {
-                          if (activePage === "Monitoring") {
-                            e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
-                          } else {
-                            handleSetActivePage("Monitoring"); // Jalankan fungsi jika tidak disabled
-                          }
-                        }}
-                      >
+                      <NavLink className={`sidebar-linkk ${activePage === "Dashboard" ? "active" : ""}`} to="/Drdashboard" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
                         <span>
                           <i className="ti ti-heart-rate-monitor"></i>
                         </span>
-                        <span className="hide-menu">Monitoring</span>
+                        <span className="hide-menu">Periksa</span>
                       </NavLink>
 
                       {/* Tambahkan tautan lainnya dengan pola yang sama */}

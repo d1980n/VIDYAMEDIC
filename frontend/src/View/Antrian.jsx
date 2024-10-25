@@ -644,30 +644,30 @@ const susterAntri = async (index, nomorMR) => {
       <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>
         Antrian Pasien
       </h5>
-      <input
-        type="text"
-        id="search-input"
-        className="form-sels"
-        placeholder="Masukkan nama pasien"
-        style={{ width: '67%' }}
-        onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
-        value={searchP} // Set nilai input sesuai searchP
-      />
-      
-      <div className="popup">
+        <input
+          type="text"
+          id="search-input"
+          className="form-sels"
+          placeholder="Masukkan nama pasien"
+          style={{ width: '67%' }}
+          onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
+          value={searchP} // Set nilai input sesuai searchP
+        />
+        
+        <div className="popup">
 
-      {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
-        <div className="flex">
-          {targetPasien.map((pasien, index) => (
-            <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
-              <p>Nama: {pasien.namaLengkap}</p>
-              <p>Nomor MR: {pasien.nomorMR}</p>
-              <p>Nomor Telepon: {pasien.phone_number}</p>
-            </div>
-          ))}
+        {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
+          <div className="flex">
+            {targetPasien.map((pasien, index) => (
+              <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
+                <p>Nama: {pasien.namaLengkap}</p>
+                <p>Nomor MR: {pasien.nomorMR}</p>
+                <p>Nomor Telepon: {pasien.phone_number}</p>
+              </div>
+            ))}
+          </div>
+        )}
         </div>
-      )}
-      </div>
       {/* Tampilkan hasil pencarian hanya jika searchP tidak kosong */}
       <button
         type="button"
