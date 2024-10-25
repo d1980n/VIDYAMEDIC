@@ -25,12 +25,10 @@ function DataDokter() {
   const [role, setRole] = useState('');
   const [profilePict, setProfilePict] = useState('');
   const [formData, setFormData] = useState({});
-  const [dokterList, setDokterList] = useState([]);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [searchP, setSearchP] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState(null);
-
-
+  const [personList, setPersonList] = useState([]);
+  const [currentRole, setCurrentRole] = useState("Dokter");
+  const [filteredList, setFilteredList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -182,13 +180,55 @@ function DataDokter() {
       });
 
       // Fetch data again after adding a new patient
-      fetchDaftarDokter();
+      fetchPersonData();
     } catch (error) {
       console.error("Error:", error.message);
     }
   };
 
   // ===============================================================================================================================
+
+
+
+  // Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
+
+
+  // ===============================================================================================================================
+  
+
+
+ 
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const toggleOverlay = () => {
+    setOverlayVisible(!isOverlayVisible);
+  };
+
+
+
+// Fungsi untuk membatalkan antrian pasien
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (searchTerm.trim() !== "") {
+        try {
+          const response = await fetch(`https://api.icd11.mondofacto.com/2020-09/${searchTerm}`);
+          const data = await response.json();
+          setSearchResults(data);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    fetchData();
+  }, [searchTerm]);
 
   const [activePage, setActivePage] = useState("");
 
@@ -197,100 +237,6 @@ function DataDokter() {
   };
 
 
-  const fetchDaftarDokter = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/person");
-      const data = await response.json();
-      console.log("response : ", response);
-      console.log("data dokter: ", data.person); // Menampilkan data dokter yang diterima
-
-      if (data.success) {
-        // Memfilter dokter berdasarkan role "Dokter"
-        const filteredDokter = data.person.filter((person) => person.role === "Dokter");
-        setDokterList(filteredDokter); // Mungkin perlu diubah menjadi setDokterList jika variabelnya berbeda
-      } else {
-        console.error("Failed to fetch dokter:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching dokter:", error);
-      // Tangani kesalahan dengan baik, misalnya menampilkan pesan kesalahan kepada pengguna
-    }
-  };
-
-  // Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
-  useEffect(() => {
-    fetchDaftarDokter();
-}, []);
-
-const [targetPasien, setTargetPasien] = useState(null); // State untuk menyimpan pasien yang dicari
-
-  const handleInputChange = async (e) => {
-    const searchP = e.target.value;
-    setSearchP(searchP); // Update state pencarian
-
-    // Jangan lakukan pencarian jika input kosong
-    if (!searchP.trim()) {
-      setTargetPasien([]); // Kosongkan hasil pencarian
-      return;
-    }
-
-    try {
-      // Pencarian pasien berdasarkan input di API
-      const response = await fetch(`http://localhost:3000/person`);
-      const data = await response.json();
-
-      if (response.ok) {
-        // Filter pasien berdasarkan nama dan role Suster
-        const filteredPatients = data.person.filter((p) => p.nama.toLowerCase().includes(searchP.toLowerCase()) && p.role === "Dokter");
-        setTargetPasien(filteredPatients); // Simpan hasil pencarian yang sesuai
-      } else {
-        setTargetPasien([]); // Kosongkan state jika tidak ada pasien
-      }
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-      setTargetPasien([]); // Kosongkan state jika ada error
-    }
-  };
-
-  const handlePatientClick = (pasien) => {
-    setSelectedPatient(pasien); // Simpan pasien yang diklik ke state
-    setSearchP(pasien.nama); // Update input dengan nama pasien yang diklik
-    setTargetPasien([]); // Kosongkan hasil pencarian setelah pasien dipilih
-  };
-  const updateAntrianStatus = async () => {
-    console.log(targetPasien);
-    if (targetPasien) {
-      try {
-        const response = await fetch(`http://localhost:3000/patients/${targetPasien.nomorMR}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ antrianStatus: { status: true } }), // Sesuai dengan backend
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          console.log("Status antrian berhasil diperbarui:", data);
-          window.location.reload();
-        } else {
-          console.error("Error updating antrian status:", data.message);
-        }
-      } catch (error) {
-        console.error("Error updating antrian status:", error);
-      }
-    } else {
-      console.log("Pasien tidak ditemukan");
-    }
-  };
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isOverlayVisible, setOverlayVisible] = useState(false);
-  const toggleOverlay = () => {
-    setOverlayVisible(!isOverlayVisible);
-  };
 
 const handleDelete = async (id) => {
   // Konfirmasi sebelum menghapus dengan SweetAlert
@@ -339,6 +285,53 @@ const handleDelete = async (id) => {
 };
 
 
+const fetchPersonData = async () => {
+  try {
+      const response = await fetch("http://localhost:3000/person");
+      const data = await response.json();
+
+      if (data.success) {
+          setPersonList(data.person); // Menyimpan semua data person
+      } else {
+          console.error("Failed to fetch persons:", data.message);
+      }
+  } catch (error) {
+      console.error("Error fetching persons:", error);
+  }
+};
+
+// Fetch once on component mount
+useEffect(() => {
+  const filterDataByRole = () => {
+      const filtered = personList.filter(person => person.role === currentRole);
+      setFilteredList(filtered); // Menyimpan data yang sudah difilter ke state
+  };
+  filterDataByRole();
+}, [currentRole, personList]); // Akan merender ulang ketika currentRole atau personList berubah
+
+// Fetch data pada saat komponen dimuat
+useEffect(() => {
+  fetchPersonData();
+}, []);
+
+useEffect(() => {
+  // Filter data by role and search query
+  const filterData = () => {
+      const filtered = personList
+          .filter(person => person.role === currentRole)
+          .filter(person => 
+              person.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              person.email.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+      setFilteredList(filtered);
+  };
+  filterData();
+}, [currentRole, personList, searchQuery]);
+
+const handleInputChange = (event) => {
+  setSearchQuery(event.target.value); // Update search query
+    };
+
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -371,19 +364,7 @@ const handleDelete = async (id) => {
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
-                      <span className="hide-menu">Data Dokter</span>
-                    </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("DataSuster")}>
-                      <span>
-                        <i className="ti ti-nurse"></i>
-                      </span>
-                      <span className="hide-menu">Data Suster</span>
-                    </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataAdmin")}>
-                      <span>
-                        <i className="ti ti-accessible"></i>
-                      </span>
-                      <span className="hide-menu">Data Admin</span>
+                      <span className="hide-menu">Data Tenaga Kesehatan</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
                       <span>
@@ -409,156 +390,119 @@ const handleDelete = async (id) => {
             </div>
           </aside>
           <div className="body-wrapper">
-            <header className="app-header">
-              <nav className="navbar navbar-expand-lg navbar-light">
-                <ul className="navbar-nav">
-                  <li className="nav-item d-block d-xl-none">
-                    <a className="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
-                      <i className="ti ti-menu-2"></i>
-                    </a>
-                  </li>
-                  <li className="nav-item">
-                    <a className="nav-link nav-icon-hover" href="javascript:void(0)">
-                      <i className="ti ti-bell-ringing"></i>
-                      <div className="notification bg-primary rounded-circle"></div>
-                    </a>
-                  </li>
-                </ul>
-                <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
-                  <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                    <li className="nav-item dropdown">
-                      <a className="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src={profiles} alt="" width="35" height="35" className="rounded-circle" />
-                      </a>
-                      <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                        <div className="message-body">
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-user fs-6"></i>
-                            <p className="mb-0 fs-3">My Profile</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-mail fs-6"></i>
-                            <p className="mb-0 fs-3">My Account</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-list-check fs-6"></i>
-                            <p className="mb-0 fs-3">My Task</p>
-                          </a>
-                          <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">
-                            Logout
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </nav>
-            </header>
+            
             <div className="container-fluid">
               <body className="login"></body>
               <div>
-                <button className="btn btn-primary mb-3" onClick={toggleModal}>
-                  Tambah Dokter
-                </button>
-                <div className="row">
-                  <div className="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
-                    <div className="card w-100">
-                      <div className="card-body p-4 width">
-                        <div style={{ display: "flex", gap: "20px", marginBottom: "5vh" }}>
-                          <h5 className="card-title fw-semibold" style={{ width: "15%", alignItems: "center", display: "flex" }}>
-                            Data Dokter
-                          </h5>
-                          <input
-  type="text"
-  id="search-input"
-  className="form-sels"
-  placeholder="Masukkan nama dokter"
-  style={{ width: '67%' }}
-  onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
-  value={searchP} // Set nilai input sesuai searchP
-/>
 
-<div className="popup">
-  {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
-    <div className="flex">
-      {targetPasien.map((pasien, index) => (
-        <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
-          <p><strong>Nama:</strong> {pasien.nama}</p> {/* Mengubah field ke `nama` */}
-          <p><strong>NIK:</strong> {pasien.nik}</p> {/* Menampilkan NIK sebagai ganti dari `nomorMR` */}
-          <p><strong>Nomor Telepon:</strong> {pasien.no_hp}</p> {/* Menampilkan nomor telepon dari field `no_hp` */}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                {/* ============================================================================================================================================================ */}
+                  {/* ============================================================================================================================================================ */}
+                    {/* ============================================================================================================================================================ */}
+                      {/* ============================================================================================================================================================ */}
+                        {/* ============================================================================================================================================================ */}
+                        <div className="row">
+                            <div className="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
+                              <div className="card w-100">
+                                <div className="card-body p-4 width">
+                                  <div className="table-responsive">
+                                    <div className="tabs d-flex mb-4 row-tabss  ">
+                                      {" "}
+                                      {/* Menambahkan kelas d-flex dan flex-column */}
+                                      <div className="row-tabs">
 
-                          <button
-                            type="button"
-                            className="btn btn-secondary m-1"
-                            onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
-                            disabled={!targetPasien} // Disable tombol jika pasien tidak ditemukan
-                          >
-                            Update Antri
-                          </button>
-                        </div>
+                                      <div className="d-flex">
+                                        {" "}
+                                        {/* Mengatur kolom untuk input dan label */}
+                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Dokter"} onChange={() => setCurrentRole("Dokter")} />
+                                        <label htmlFor="tabDokter"  style={{height:"40px",}}>Data Dokter</label>
+                                      </div>
+                                      <div className="d-flex">
+                                        {" "}
+                                        {/* Mengatur kolom untuk input dan label */}
+                                        <input type="radio"  name="tabs" id="tabSuster" checked={currentRole === "Suster"} onChange={() => setCurrentRole("Suster")} />
+                                        <label htmlFor="tabSuster" style={{height:"40px",}}>Data Suster</label>
+                                      </div>
+                                      <div className="d-flex">
+                                        {" "}
+                                        {/* Mengatur kolom untuk input dan label */}
+                                        <input type="radio" name="tabs" id="tabAdmin" checked={currentRole === "Antrian"} onChange={() => setCurrentRole("Antrian")} />
+                                        <label htmlFor="tabAdmin"  style={{height:"40px",}}>Data Admin Antrian</label>
+                                      </div>
 
-                        <div className="table-responsive">
-                          <table className="table text-nowrap mb-0 align-middle">
-                            <thead className="text-dark fs-4">
-                              <tr>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">No</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Nama Dokter</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Email</h6>
-                                </th>
-                                <th style={{ width: "10rem" }} className="border-bottom-0">
-                                  <h6 style={{ maxWidth: "5rem", minWidth: "5rem" }} className="fw-semibold mb-0">
-                                    Action
-                                  </h6>
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                    {dokterList.length > 0 ? (
-                        dokterList.map((dokter, index) => (
-                            <tr key={dokter._id}>
-                                <td>{index + 1}</td>
-                                <td>{dokter.nama}</td>
-                                <td>{dokter.email}</td>
-                                
-                                <td>
-                                <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(dokter._id)}>
-                                        Update
-                                      </button>
-                                              <button
-                                                  type="button"
-                                                  className="btn btn-danger m-1"
-                                                  onClick={() => handleDelete(dokter._id)} // Panggil fungsi delete dengan id
-                                              >
-                                                  Hapus
-                                              </button>
-                                          </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
-                        </tr>
-                    )}
-                </tbody>
+                                      </div>
+                                      <div clasName="d-flex justify-content-end ms-auto tabs-suster">
+                                        <button className="btn btn-primary mb-3" style={{marginRight: "0.75rem",}} onClick={toggleModal}>
+                                          Tambah Nakes
+                                        </button>
+                                      </div>
+                                      {/* Konten tab yang umum */}
+                                    </div>
+                                    <div className="tab-content">
+                                      <div style={{ display: "flex", gap: "20px", marginBottom: "5vh" }}>
+                                        <h5 className="card-title fw-semibold" style={{ width: "15%", alignItems: "center", display: "flex" }}>
+                                          {`Data ${currentRole}`}
+                                        </h5>
+                                        <input type="text" id="search-input" className="form-sels" placeholder="Masukkan nama atau email" style={{ width: "67%" }} onChange={handleInputChange} />
+                                      </div>
 
-
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+                                      <div className="table-responsive">
+                                        <table className="table text-nowrap mb-0 align-middle">
+                                          <thead className="text-dark fs-4">
+                                            <tr>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">No</h6>
+                                              </th>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Nama {currentRole}</h6>
+                                              </th>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Email</h6>
+                                              </th>
+                                              <th className="border-bottom-0" style={{ width: "10rem" }}>
+                                                <h6 className="fw-semibold mb-0">Action</h6>
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {filteredList.length > 0 ? (
+                                              filteredList.map((person, index) => (
+                                                <tr key={person._id}>
+                                                  <td>{index + 1}</td>
+                                                  <td>{person.nama}</td>
+                                                  <td>{person.email}</td>
+                                                  <td>
+                                                    <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(person._id)}>
+                                                      Detail
+                                                    </button>
+                                                    <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(person._id)}>
+                                                      Hapus
+                                                    </button>
+                                                  </td>
+                                                </tr>
+                                              ))
+                                            ) : (
+                                              <tr>
+                                                <td colSpan="4" className="text-center">
+                                                  Tidak ada data untuk ditampilkan
+                                                </td>
+                                              </tr>
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                {/* <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Dokter</button> */}
+               
+                 {/* ============================================================================================================================================================ */}
+                   {/* ============================================================================================================================================================ */}
+                     {/* ============================================================================================================================================================ */}
+                       {/* ============================================================================================================================================================ */}
+                         {/* ============================================================================================================================================================ */}
                 {showModal && (
                   <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
                     <div className="modal-dialog">
@@ -660,6 +604,8 @@ const handleDelete = async (id) => {
                             {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
                           </div>
                         </form>
+
+
                       </div>
                     </div>
                   </div>

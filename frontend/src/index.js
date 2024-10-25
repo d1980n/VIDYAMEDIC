@@ -15,12 +15,11 @@ import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
 import SusAntri from './View/SusAntri.jsx'
 import DataPasien from './View/DataPasien.jsx';
-import DataDokter from './View/DataDokter.jsx';
-import DataSuster from './View/DataSuster.jsx';
-import DataAdmin from './View/DataAdmin.jsx';
-import DashboardGamma from './View/GammaDashboard.jsx';
-import DataSuperAdmin from './View/DataSuperAdmin.jsx';
+import DataDokter from './View/Datadokter.jsx';
+import DataSuperAdmin from './View/DataSuperAdmin.jsx'
+import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -102,14 +101,6 @@ const router = createBrowserRouter([
   {
     path: "/DataDokter",
     element: <DataDokter/>
-  },
-  {
-    path: "/DataSuster",
-    element: <DataSuster/>
-  },
-  {
-    path: "/DataAdmin",
-    element: <DataAdmin/>
   },
   {
     path: "/Target",

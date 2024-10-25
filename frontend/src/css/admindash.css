@@ -17907,7 +17907,7 @@ fieldset:disabled .btn {
     font-weight: 400
 }
 
-.sidebar-nav ul .sidebar-item .sidebar-link  span:first-child {
+.sidebar-nav ul .sidebar-item .sidebar-link span:first-child {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex
@@ -19206,7 +19206,22 @@ input .deksripsi {
     margin: 5px 0;
     /* Jarak antar item antrian */
 }
-.row-space{
+
+.row-tabs {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.row-tabss {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tabs-suster {
+    margin-right: 2rem;
+}
+
+.row-space {
     padding-top: 1rem;
 }
 
@@ -19229,7 +19244,7 @@ input .deksripsi {
     font-weight: 400
 }
 
-.sidebar-linkk{
+.sidebar-linkk {
     color: #2A3547;
     display: -webkit-box;
     display: -ms-flexbox;
