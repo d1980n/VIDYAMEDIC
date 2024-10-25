@@ -25,6 +25,8 @@ function DataSuster() {
   const [formData, setFormData] = useState({});
   const [personList, setPersonList] = useState([]);
   const [susterList, setSusterList] = useState([]);
+  const [searchP, setSearchP] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -124,26 +126,39 @@ function DataSuster() {
   const [targetPasien, setTargetPasien] = useState(null); // State untuk menyimpan pasien yang dicari
 
   const handleInputChange = async (e) => {
-    const searchTerm = e.target.value;
-  
-    if (searchTerm) {
-      try {
-        // Pencarian berdasarkan nomor MR
-        const response = await fetch(`http://localhost:3000/patients/search?term=${searchTerm}`);
-        const data = await response.json();
-  
-        if (response.ok && data.patients.length > 0) {
-          setTargetPasien(data.patients[0]); // Menyimpan pasien yang cocok ke state
-        } else {
-          setTargetPasien(null); // Jika tidak ada pasien, kosongkan state
-        }
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-        setTargetPasien(null);
-      }
-    } else {
-      setTargetPasien(null); // Jika search field kosong, hapus target
+    const searchP = e.target.value;
+    setSearchP(searchP); // Update state pencarian
+
+    // Jangan lakukan pencarian jika input kosong
+    if (!searchP.trim()) {
+      setTargetPasien([]); // Kosongkan hasil pencarian
+      return;
     }
+
+    try {
+      // Pencarian pasien berdasarkan input di API
+      const response = await fetch(`http://localhost:3000/person`);
+      const data = await response.json();
+
+      if (response.ok) {
+        // Filter pasien berdasarkan nama dan role Suster
+        const filteredPatients = data.person.filter(p => 
+          p.nama.toLowerCase().includes(searchP.toLowerCase()) && p.role === 'Suster'
+        );
+        setTargetPasien(filteredPatients); // Simpan hasil pencarian yang sesuai
+      } else {
+        setTargetPasien([]); // Kosongkan state jika tidak ada pasien
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+      setTargetPasien([]); // Kosongkan state jika ada error
+    }
+  };
+
+  const handlePatientClick = (pasien) => {
+    setSelectedPatient(pasien); // Simpan pasien yang diklik ke state
+    setSearchP(pasien.nama); // Update input dengan nama pasien yang diklik
+    setTargetPasien([]); // Kosongkan hasil pencarian setelah pasien dipilih
   };
 
   const updateAntrianStatus = async () => {
@@ -381,22 +396,38 @@ function DataSuster() {
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
                           <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Suster</h5>
                           <input
-                                type="text"
-                                id="search-input"
-                                className="form-sels"
-                                placeholder="Masukkan nama atau email"
-                                style={{ width: '67%' }}
-                                onChange={handleInputChange} 
-                                // Memanggil fungsi pencarian saat pengguna mengetik
-                              />
-                              {targetPasien && (
-                                <div className="patient-info">
-                                  <p>Nama: {targetPasien.namaLengkap}</p>
-                                  <p>Nomor MR: {targetPasien.nomorMR}</p>
-                                  <p>Nomor Telepon: {targetPasien.phone_number}</p>
-                               
-                                </div>
-                              )} 
+                            type="text"
+                            id="search-input"
+                            className="form-sels"
+                            placeholder="Masukkan nama suster"
+                            style={{ width: "67%" }}
+                            onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
+                            value={searchP} // Set nilai input sesuai searchP
+                          />
+
+                          <div className="popup">
+                            {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
+                              <div className="flex">
+                                {targetPasien.map((pasien, index) => (
+                                  <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
+                                    <p>
+                                      <strong>Nama:</strong> {pasien.nama}
+                                    </p>{" "}
+                                    {/* Mengubah field ke `nama` */}
+                                    <p>
+                                      <strong>NIK:</strong> {pasien.nik}
+                                    </p>{" "}
+                                    {/* Menampilkan NIK sebagai ganti dari `nomorMR` */}
+                                    <p>
+                                      <strong>Nomor Telepon:</strong> {pasien.no_hp}
+                                      
+                                    </p>{" "}
+                                    {/* Menampilkan nomor telepon dari field `no_hp` */}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                               <button 
                                 type="button" 
                                 className="btn btn-secondary m-1" 

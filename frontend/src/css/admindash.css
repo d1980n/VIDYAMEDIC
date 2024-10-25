@@ -17907,7 +17907,7 @@ fieldset:disabled .btn {
     font-weight: 400
 }
 
-.sidebar-nav ul .sidebar-item .sidebar-link span:first-child {
+.sidebar-nav ul .sidebar-item .sidebar-link  span:first-child {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex
@@ -19205,4 +19205,52 @@ input .deksripsi {
     font-size: 18px;
     margin: 5px 0;
     /* Jarak antar item antrian */
+}
+.row-space{
+    padding-top: 1rem;
+}
+
+.sidebar-nav ul .sidebar-item .sidebar-link {
+    color: #2A3547;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 14px;
+    white-space: nowrap;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    line-height: 25px;
+    position: relative;
+    margin: 0px 0px 2px;
+    padding: 10px;
+    border-radius: 7px;
+    gap: 15px;
+    font-weight: 400
+}
+
+.sidebar-linkk{
+    color: #2A3547;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 14px;
+    white-space: nowrap;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    line-height: 25px;
+    position: relative;
+    margin: 0px 0px 2px;
+    padding: 10px;
+    border-radius: 7px;
+    gap: 15px;
+    font-weight: 400;
+    color: #B7B7B7;
+}
+
+.sidebar-nav ul .sidebar-item .sidebar-linkk .ti {
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    font-size: 21px
 }

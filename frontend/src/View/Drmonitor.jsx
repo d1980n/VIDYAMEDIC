@@ -391,37 +391,16 @@ function Drmonitor() {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink
-                      className={`sidebar-link ${isDisabled ? "disabled-link" : ""}`}
-                      to="/Drdashboard"
-                      aria-expanded="false"
-                      onClick={(e) => {
-                        if (isDisabled) {
-                          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
-                        } else {
-                          handleSetActivePage("Dashboard"); // Jalankan fungsi jika tidak disabled
-                        }
-                      }}
-                    >
+                  
+                    <NavLink className={`sidebar-linkk ${activePage === "Monitoring" ? "active" : ""}`} to="/Drmonitor" aria-expanded="false" onClick={() => handleSetActivePage("Monitoring")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
-                      <span className="hide-menu">Dashboard</span>
+                      <span className="hide-menu">Monitor</span>
                     </NavLink>
-                    <NavLink
-                      className={`sidebar-link ${isDisabled ? "disabled-link" : ""}`}
-                      to="/DrAntri"
-                      aria-expanded="false"
-                      onClick={(e) => {
-                        if (isDisabled) {
-                          e.preventDefault(); // Mencegah navigasi saat tombol dalam kondisi disabled
-                        } else {
-                          handleSetActivePage("DrAntri"); // Jalankan fungsi jika tidak disabled
-                        }
-                      }}
-                    >
+                    <NavLink className={`sidebar-linkk ${activePage === "Monitoring" ? "active" : ""}`} to="/Drmonitor" aria-expanded="false" onClick={() => handleSetActivePage("Monitoring")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-clipboard"></i>
                       </span>
                       <span className="hide-menu">Antrian</span>
                     </NavLink>
@@ -429,7 +408,7 @@ function Drmonitor() {
                       <span>
                         <i className="ti ti-heart-rate-monitor"></i>
                       </span>
-                      <span className="hide-menu">Monitoring</span>
+                      <span className="hide-menu">Periksa</span>
                     </NavLink>
 
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}
