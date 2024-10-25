@@ -3,6 +3,7 @@ import profiles from "../source/user-1.jpg";
 import logo from "../source/logo.png";
 import "../css/login.css";
 import "../css/admindash.css";
+import Swal from "sweetalert2";
 import images from "../source/Picture1.png";
 import { NavLink } from "react-router-dom";
 import images2 from "../source/img2.png";
@@ -23,7 +24,7 @@ function DataAdmin() {
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({});
   const [adminList, setAdminList] = useState([]);
-  const [searchP, setSearchP] = useState('');
+  const [searchP, setSearchP] = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -132,15 +133,13 @@ function DataAdmin() {
 
       if (response.ok) {
         // Filter pasien berdasarkan nama dan role Suster
-        const filteredPatients = data.person.filter(p => 
-          p.nama.toLowerCase().includes(searchP.toLowerCase()) && p.role === 'Dokter'
-        );
+        const filteredPatients = data.person.filter((p) => p.nama.toLowerCase().includes(searchP.toLowerCase()) && p.role === "Dokter");
         setTargetPasien(filteredPatients); // Simpan hasil pencarian yang sesuai
       } else {
         setTargetPasien([]); // Kosongkan state jika tidak ada pasien
       }
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      console.error("Error fetching patients:", error);
       setTargetPasien([]); // Kosongkan state jika ada error
     }
   };
@@ -235,6 +234,43 @@ function DataAdmin() {
   useEffect(() => {
     fetchDaftarAdmin();
   }, []);
+
+  const handleDelete = async (id) => {
+    // Konfirmasi sebelum menghapus dengan SweetAlert
+    Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Anda tidak dapat mengembalikan data yang sudah dihapus!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Lakukan penghapusan setelah konfirmasi
+          const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) {
+            throw new Error("HTTP error! Status: " + response.status);
+          }
+
+          // Tampilkan pesan sukses setelah penghapusan
+          Swal.fire("Terhapus!", "Data berhasil dihapus.", "success").then(() => {
+            // Reload halaman setelah SweetAlert sukses
+            window.location.reload();
+          });
+        } catch (error) {
+          console.error("Error deleting person:", error);
+
+          // Tampilkan pesan error jika gagal menghapus
+          Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data.", "error");
+        }
+      }
+    });
+  };
 
   return (
     <html className="Admin">
@@ -384,7 +420,6 @@ function DataAdmin() {
                                     {/* Menampilkan NIK sebagai ganti dari `nomorMR` */}
                                     <p>
                                       <strong>Nomor Telepon:</strong> {pasien.no_hp}
-                                      
                                     </p>{" "}
                                     {/* Menampilkan nomor telepon dari field `no_hp` */}
                                   </div>
@@ -429,9 +464,13 @@ function DataAdmin() {
                                     <td>{index + 1}</td>
                                     <td>{admin.nama}</td>
                                     <td>{admin.email}</td>
+                                   
                                     <td>
                                       <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(admin._id)}>
                                         Detail
+                                      </button>
+                                      <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(admin._id)}>
+                                        Hapus
                                       </button>
                                     </td>
                                   </tr>
