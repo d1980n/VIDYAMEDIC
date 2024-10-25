@@ -19206,3 +19206,17 @@ input .deksripsi {
     margin: 5px 0;
     /* Jarak antar item antrian */
 }
+
+.row-tabs {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.row-tabss {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tabs-suster {
+    margin-right: 2rem;
+}

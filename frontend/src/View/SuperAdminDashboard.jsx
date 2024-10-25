@@ -171,21 +171,8 @@ function SuperAdminDashboard() {
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
-                      <span className="hide-menu">Data Dokter</span>
+                      <span className="hide-menu">Data Tenaga Kesehatan</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
-                      <span>
-                        <i className="ti ti-nurse"></i>
-                      </span>
-                      <span className="hide-menu">Data Suster</span>
-                    </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
-                      <span>
-                        <i className="ti ti-accessible"></i>
-                      </span>
-                      <span className="hide-menu">Data Admin</span>
-                    </NavLink>
-
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}
                   </li>
                   <li className="nav-small-cap">
@@ -210,6 +197,50 @@ function SuperAdminDashboard() {
           {/* <!--  Main wrapper --> */}
           <div class="body-wrapper">
             {/* <!--  Header Start --> */}
+            <header className="app-header">
+              <nav className="navbar navbar-expand-lg navbar-light">
+                <ul className="navbar-nav">
+                  <li className="nav-item d-block d-xl-none">
+                    <a className="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                      <i className="ti ti-menu-2"></i>
+                    </a>
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link nav-icon-hover" href="javascript:void(0)">
+                      <i className="ti ti-bell-ringing"></i>
+                      <div className="notification bg-primary rounded-circle"></div>
+                    </a>
+                  </li>
+                </ul>
+                <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
+                  <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                    <li className="nav-item dropdown">
+                      <a className="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <img src={profiles} alt="" width="35" height="35" className="rounded-circle"/>
+                      </a>
+                      <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                        <div className="message-body">
+                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
+                            <i className="ti ti-user fs-6"></i>
+                            <p className="mb-0 fs-3">My Profile</p>
+                          </a>
+                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
+                            <i className="ti ti-mail fs-6"></i>
+                            <p className="mb-0 fs-3">My Account</p>
+                          </a>
+                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
+                            <i className="ti ti-list-check fs-6"></i>
+                            <p className="mb-0 fs-3">My Task</p>
+                          </a>
+                          <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+            </header>
             <header class="app-header"></header>
             {/* <!--  Header End --> */}
             <div class="container-fluid" style={{ paddingTop: "24px" }}>
@@ -262,142 +293,7 @@ function SuperAdminDashboard() {
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
-                  <div class="card w-100">
-                    <div class="card-body p-4 width">
-                      <h5 class="card-title fw-semibold mb-4">Antrian Pasien</h5>
-                      <div class="table-responsive">
-                        <table class="table text-nowrap mb-0 align-middle">
-                          <thead class="text-dark fs-4">
-                            <tr>
-                              <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">No</h6>
-                              </th>
-
-                              <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">Nama Pasien</h6>
-                              </th>
-                              <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">Nomor MR</h6>
-                              </th>
-                              <th style={{width: '18rem'}} class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">Action</h6>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {daftarPasien.map((pasien, index) => (
-                              <tr key={pasien.nomorMR}>
-                                <td class="border-bottom-0">
-                                  <h6 class="fw-semibold mb-0">{index + 1}</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <p class="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-normal">{pasien.nomorMR}</span>
-                                  </div>
-                                </td>
-                                <td class="border-bottom-0">
-                                  <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(pasien.nomorMR)}>
-                                    Periksa
-                                  </button>
-                                  <button type="button" className="btn btn-danger m-1">
-                                    Batal
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      {showModal && (
-                        <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
-                          <div className="modal-dialog">
-                            <div className="modal-content">
-                              <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">Tambah Pengukuran Medis</h5>
-                                <button type="button" className="btn-close" onClick={toggleModal}></button>
-                              </div>
-                              <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                  {/* Input pengukuran medis */}
-                                  <div className="row" style={{ padding: '0px' }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tekanan Darah Sistolik</h6>
-                                      <input type="text" name="TDS" className="form-control" placeholder="mmHg" value={TDS} onChange={(e) => setTekananDarahSistolik(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tekanan Darah Diastolik</h6>
-                                      <input type="text" name="TDD" className="form-control" placeholder="mmHg" value={TDD} onChange={(e) => setTekanandarahDiastolik(e.target.value)} />
-                                    </div>
-                                  </div>
-
-                                  <div className="row" style={{ padding: '0px' }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Temperatur</h6>
-                                      <input type="text" name="Temperatur" className="form-control" placeholder="C" value={Temperatur} onChange={(e) => setTemperatur(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Nadi</h6>
-                                      <input type="text" name="Nadi" className="form-control" placeholder="Nadi" value={Nadi} onChange={(e) => setNadi(e.target.value)} />
-                                    </div>
-                                  </div>
-
-                                  <div className="row" style={{ padding: '0px' }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Laju Pernafasan</h6>
-                                      <input type="text" name="LP" className="form-control" placeholder="LP" value={LP} onChange={(e) => setLajuPernafasan(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Presentase SpO2</h6>
-                                      <input type="text" name="Spot" className="form-control" placeholder="SpO2" value={Spot} onChange={(e) => setSpot(e.target.value)} />
-                                    </div>
-                                  </div>
-
-                                  <div className="row" style={{ padding: '0px' }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tinggi Badan</h6>
-                                      <input type="text" name="TB" className="form-control" placeholder="Cm" value={TB} onChange={(e) => setTinggiBadan(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Berat Badan</h6>
-                                      <input type="text" name="BB" className="form-control" placeholder="Kg" value={BB} onChange={(e) => setBeratBadan(e.target.value)} />
-                                    </div>
-                                  </div>
-
-                                  <div className="row" style={{ padding: '0px' }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">LILA</h6>
-                                      <input type="text" name="LILA" className="form-control" placeholder="LILA" value={LILA} onChange={(e) => setLILA(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">AVPU</h6>
-                                      <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="modal-footer">
-                                  <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-                                  <button type="submit" className="btn btn-primary">
-                                    <i className="ti ti-playlist-add"></i> Tambah MR
-                                  </button>
-                                  {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
-                                </div>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {showModal && <div className="modal-backdrop fade show"></div>}
-
-                    </div>
-                  </div>
-                </div>
-              </div>
+              
               <div class="row"></div>
             </div>
           </div>
