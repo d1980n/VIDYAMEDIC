@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
@@ -10,20 +11,20 @@ import images2 from '../source/img2.png';
 
 function DataDokter() {
   const [showModal, setShowModal] = useState(false);
-  const [namaLengkap, setNamaLengkap] = useState('');
+  const [nama, setNama] = useState('');
+  const [nik, setNik] = useState('');
   // const [fotoKTP, setFotoKTP] = useState(null);
   const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamatLengkap, setAlamatLengkap] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
+  const [tl, setTl] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [ttl, setTtl] = useState('');
+  const [konfPassword, setKonfPassword] = useState('');
   const [poli, setPoli] = useState('');
   const [role, setRole] = useState('');
   const [formData, setFormData] = useState({});
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [dokters, setDokters] = useState([]);
+  const [dokterList, setDokterList] = useState([]);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -112,100 +113,75 @@ function DataDokter() {
 //   return `D${randomNumber}`;
 // };
 
-const resetForm = () => {
-  setNamaLengkap("");
-  setJenisKelamin("");
-  setAlamatLengkap("");
-  setPhoneNumber("");
-  setPoli("");
-  setEmail("");
-  setPassword("");
-  setConfirmPassword("");
-};
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Menyusun data form
+    const formData = {
+      nama,
+      jenisKelamin,
+      nik,
+      poli,
+      role,
+      alamat,
+      email,
+      password,
+      role: 'Dokter',
+      no_hp,
+      tl,
 
-  // Validasi jika password dan konfirmasi password tidak cocok
-  if (password !== confirmPassword) {
-    setError('Password dan konfirmasi password tidak cocok');
-    return;
-  }
-
-  // Pastikan kode_dok dan role diisi secara otomatis
-  const finalRole = role || 'Dokter';
-
-  // Menyusun data form
-  const formData = {
-    namaLengkap,
-    jenisKelamin,
-    email,
-    phone_number,
-    role: finalRole,
-    alamatLengkap,
-    ttl,
-    poli,
-    password
-  };
-
-  // Log data untuk memeriksa
-  console.log('Form Data:', formData);
-
-  try {
-    const response = await fetch('http://localhost:5000/api/dokter', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-
-    const data = await response.json();
-    console.log('Response Data:', data);
-
-    // Reset form dan refresh daftar pasien setelah berhasil
-    setShowModal(false); // Tutup modal setelah sukses
-    resetForm(); // Reset input
-    console.log("well");
-    window.location.reload();
- } catch (error) {
-   alert('Terjadi kesalahan saat menambahkan dokter: ' + error.message);
- }
-};
-
-  useEffect(() => {
-    const fetchDokters = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/dokter');
-        setDokters(response.data);
-      } catch (error) {
-        alert('Error fetching dokter data: ' + error.message);
-      }
     };
+  
+    // Log data untuk memeriksa
+    console.log('Form Data:', formData);
+  
+    if (password !== konfPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Password dan konfirmasi password tidak sesuai!',
+      });
+      return; // Berhenti jika validasi gagal
+    }
 
-    fetchDokters();
-  }, []);
-
-  // Fungsi untuk menghapus dokter berdasarkan kode_dok dari API
-  const deleteDokter = async (kode_dok) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/dokter/${kode_dok}`, {
-        method: 'DELETE',
+      const response = await fetch('http://localhost:3000/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+  
+      const data = await response.json();
+      console.log('Response Data:', data);
+  
+      // Reset form setelah pengiriman berhasil
+      setNama('');
+      setJenisKelamin('');
+      setNik('');
+      setPoli('');
+      setAlamat('');
+      setNoHp('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+      setRole('Dokter');
+      setShowModal(false);
+  
+       // Tampilkan SweetAlert sukses dengan nama dokter
+       Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: `Dokter ${nama} berhasil ditambahkan.`,
       });
 
-      if (!response.ok) {
-        throw new Error('Error deleting dokter');
-      }
-
-      const data = await response.json();
-      console.log(data.message); // Log response message
-
-      // Hapus dokter dari state setelah berhasil dihapus dari backend
-      const updatedDokters = dokters.filter(dokter => dokter.kode_dok !== kode_dok);
-      setDokters(updatedDokters);
+      // Fetch data again after adding a new patient
+      fetchDaftarDokter();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error:', error.message);
     }
   };
 
@@ -216,6 +192,72 @@ const handleSubmit = async (e) => {
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
+
+  const [showOverlay, setShowOverlay] = useState(false);
+
+
+  const fetchDaftarDokter = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+        console.log("response : ", response);
+        console.log("data dokter: ", data.person); // Menampilkan data dokter yang diterima
+
+        if (data.success) {
+            // Memfilter dokter berdasarkan role "Dokter"
+            const filteredDokter = data.person.filter((person) => person.role === 'Dokter');
+            setDokterList(filteredDokter); // Mungkin perlu diubah menjadi setDokterList jika variabelnya berbeda
+        } else {
+            console.error("Failed to fetch dokter:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching dokter:", error);
+        // Tangani kesalahan dengan baik, misalnya menampilkan pesan kesalahan kepada pengguna
+    }
+};
+
+// Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
+useEffect(() => {
+    fetchDaftarDokter();
+}, []);
+
+  const [targetDokter, setTargetDokter] = useState(null); // State untuk menyimpan dokter yang dicari
+
+  const [selectedDokter, setSelectedDokter] = useState(null);
+  const [searchD, setSearchD] = useState('');
+
+  const handleInputChange = async (e) => {
+    const searchD = e.target.value;
+    setSearchD(searchD); // Update searchP state
+
+    // Jangan lakukan pencarian jika input kosong
+    if (!searchD.trim()) {
+      setTargetDokter([]); // Kosongkan hasil pencarian
+      return;
+    }
+
+    try {
+      // Pencarian berdasarkan nomor MR
+      const response = await fetch(`http://localhost:3000/person/search?term=${searchD}`);
+      const data = await response.json();
+
+      if (response.ok && data.person.length > 0) {
+        setTargetDokter(data.person); // Menyimpan array pasien yang cocok ke state
+      } else {
+        setTargetDokter([]); // Jika tidak ada pasien, kosongkan state
+      }
+    } catch (error) {
+      console.error('Error fetching dokter:', error);
+      setTargetDokter([]); // Kosongkan state jika ada error
+    }
+  };
+
+  const handleDokterClick = (dokter) => {
+    setSelectedDokter(dokter); // Simpan pasien yang diklik ke state
+    setSearchD(dokter.nama); // Update input dengan nama pasien yang diklik
+    setTargetDokter([]); // Kosongkan hasil pencarian setelah pasien dipilih
+  };
+
 
   return (
     <html className='Admin'>
@@ -246,23 +288,29 @@ const handleSubmit = async (e) => {
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("DataDokter")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Dokter</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("DataSuster")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-nurse"></i>
                       </span>
                       <span className="hide-menu">Data Suster</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataAdmin")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-accessible"></i>
                       </span>
                       <span className="hide-menu">Data Admin</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                      <span>
+                        <i className="ti ti-accessible"></i>
+                      </span>
+                      <span className="hide-menu">Data Pasien</span>
                     </NavLink>
                   </li>
                   <li className="nav-small-cap">
@@ -339,14 +387,29 @@ const handleSubmit = async (e) => {
                       <div className="card-body p-4 width">
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
                           <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Dokter</h5>
-                          <input
+                              <input
                                 type="text"
                                 id="search-input"
                                 className="form-sels"
-                                placeholder="Masukkan nama atau email"
+                                placeholder="Masukkan nama dokter"
                                 style={{ width: '67%' }}
-                                // Memanggil fungsi pencarian saat pengguna mengetik
+                                onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
+                                value={searchD} // Set nilai input sesuai searchP
                               />
+                              
+                              <div className="popup">
+
+                              {searchD && Array.isArray(targetDokter) && targetDokter.length > 0 && (
+                                <div className="flex">
+                                  {targetDokter.map((dokter, index) => (
+                                    <div key={index} className="search_list" onClick={() => handleDokterClick(dokter)}>
+                                      <p>Nama: {dokter.nama}</p>
+                                      <p>Email: {dokter.email}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              </div>
                               
                               <button 
                                 type="button" 
@@ -369,39 +432,29 @@ const handleSubmit = async (e) => {
                                 <th className="border-bottom-0">
                                   <h6 className="fw-semibold mb-0">Email</h6>
                                 </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Password</h6>
-                                </th>
                                 <th style={{width: '10rem'}} className="border-bottom-0">
                                   <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                            {dokters.map((dokter, index) => (
-                                <tr key={dokter.kode_dok}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">{dokter.namaLengkap}</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2"> 
-                                      <span className="fw-normal">{dokter.email}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">{dokter.password}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-success m-1">Detail</button>
-                                    <button type="button" className="btn btn-danger m-1" onClick={() => deleteDokter(dokter.kode_dok)}>Delete</button>
-                                  </td>
-                                </tr>
-                            ))}
-
-                        </tbody>
+                    {dokterList.length > 0 ? (
+                        dokterList.map((dokter, index) => (
+                            <tr key={dokter._id}>
+                                <td>{index + 1}</td>
+                                <td>{dokter.nama}</td>
+                                <td>{dokter.email}</td>
+                                <td>
+                                    <button type="button" className="btn btn-primary">Detail</button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+                        </tr>
+                    )}
+                </tbody>
 
 
                           </table>
@@ -412,71 +465,77 @@ const handleSubmit = async (e) => {
                 </div>
 
                 {showModal && (
-  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block', zIndex: 1050 }}>
-    <div className="modal-dialog">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
-          <button type="button" className="btn-close" onClick={toggleModal}></button>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body">
-            <div className="mb-3">
-              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} autoFocus />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-              <select className="form-select" id="jenisKelamin" name="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                <option value="Select">Select</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
-              </select>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-              <textarea className="form-control" id="alamatLengkap" name="alamat" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-              <input type="text" className="form-control" id="phone_number" name="no_hp" value={phone_number} onChange={(e) => setPhoneNumber(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">Alamat Email</label>
-              <input type="text" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="ttl" className="form-label">Tanggal Lahir</label>
-              <input type="date" className="form-control" id="ttl" name="ttl" value={ttl} onChange={(e) => setTtl(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="poli" className="form-label">Poli</label>
-              <input type="text" className="form-control" id="poli" name="poli" value={poli} onChange={(e) => setPoli(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
-              <input type="password" className="form-control" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password</label>
-              <input type="password" className="form-control" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            </div>
-          </div>
-
-          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Menampilkan pesan error jika ada */}
-
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-            <button type="submit" className="btn btn-primary">Tambah Dokter</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-)}
-{showModal && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>}
-
-
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block' }}>
+                    <div className="modal-dialog">
+                      <div className="modal-content">
+                        <div className="modal-header">
+                          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
+                          <button type="button" className="btn-close" onClick={toggleModal}></button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="nama" className="form-label">Nama Lengkap</label>
+                                    <input type="text" className="form-control" id="nama" value={nama} onChange={(e) => setNama(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="nik" className="form-label">NIK</label>
+                                    <input type="text" className="form-control" id="nik" value={nik} onChange={(e) => setNik(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="poli" className="form-label">Poli</label>
+                                    <select className="form-select" id="poli" value={poli} onChange={(e) => setPoli(e.target.value)}>
+                                        <option value="">Select</option>
+                                        <option value="Poli Umum">Umum</option>
+                                        <option value="Poli Anak">Poli Anak</option>
+                                        <option value="Poli Gigi">Poli Gigi</option>
+                                        <option value="Poli THT">Poli THT</option>
+                                    </select>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+                                    <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                                        <option value="">Select</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="no_hp" className="form-label">Nomor Telepon</label>
+                                    <input type="text" className="form-control" id="no_hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="alamat" className="form-label">Alamat Lengkap</label>
+                                    <textarea className="form-control" id="alamat" rows="3" value={alamat} onChange={(e) => setAlamat(e.target.value)}></textarea>
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="tl" className="form-label">Tanggal Lahir</label>
+                                    <input type="date" className="form-control" id="tl" value={tl} onChange={(e) => setTl(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="email" className="form-label">Alamat Email</label>
+                                    <input type="text" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="password" className="form-label">Password</label>
+                                    <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="password" className="form-label">Konfirmasi Password</label>
+                                    <input type="password" className="form-control" id="password" value={konfPassword} onChange={(e) => setKonfPassword(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+                                <button type="submit" className="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {showModal && <div className="modal-backdrop fade show">
+                  </div>}
               </div>
             </div>
           </div>

@@ -161,29 +161,35 @@ function SuperAdminDashboard() {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                  <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("DataDokter")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Dokter</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataSuster" ? "active" : ""}`} to="/DataSuster" aria-expanded="false" onClick={() => handleSetActivePage("DataSuster")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-nurse"></i>
                       </span>
                       <span className="hide-menu">Data Suster</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataAdmin" ? "active" : ""}`} to="/DataAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataAdmin")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-accessible"></i>
                       </span>
                       <span className="hide-menu">Data Admin</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                      <span>
+                        <i className="ti ti-accessible"></i>
+                      </span>
+                      <span className="hide-menu">Data Pasien</span>
                     </NavLink>
 
                     {/* Tambahkan tautan lainnya dengan pola yang sama */}

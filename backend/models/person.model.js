@@ -6,6 +6,10 @@ const personSchema = new mongoose.Schema({
         unique: true,
         type: String,
     },
+    jenisKelamin: {
+        required: false,
+        type: String,
+    },
     nama: {
         required: true,
         type: String,
@@ -24,17 +28,14 @@ const personSchema = new mongoose.Schema({
         required: true,
         type: String,
     },
-    alamat: [{
-        kabkot: String,
-        kecamatan: String,
-        kelurahan: String,
-        desa: String,
-        kodepos: String
-    }],
-    ttl: [{
-        tempat: String,
-        tanggal: Date
-    }],
+    alamat: {
+        type: String,
+        required: true,
+    },
+    tl: {
+        type: Date,
+        required: false,
+    },
     password: {
         required: true,
         type: String,
