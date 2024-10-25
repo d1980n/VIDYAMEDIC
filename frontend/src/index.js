@@ -8,11 +8,12 @@ import RiwayatMedis from './View/RiwayatMedis.jsx';
 import Faktorresiko from './View/Faktorresiko.jsx';
 import Prediksiresiko from './View/prediksiresiko.jsx';
 import Riwayatdeteksi from './View/Riwayatdeteksi.jsx';
-import Treatment from './View/Treatment.jsx'
-import Rekomendasi from './View/Rekomendasi.jsx'
-import Drdashboard from './View/Drdashboard.jsx'
+import Treatment from './View/Treatment.jsx';
+import Rekomendasi from './View/Rekomendasi.jsx';
+import DrDashboard from './View/Drdashboard.jsx';
 import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
+import SusAntri from './View/SusAntri.jsx'
 import DataPasien from './View/DataPasien.jsx';
 import DataDokter from './View/DataDokter.jsx';
 import DataSuster from './View/DataSuster.jsx';
@@ -27,6 +28,8 @@ import {
 import App from './App.js';
 import Login from './View/login.jsx';
 import Target from './View/Target.jsx';
+
+import DrAntri from './View/DrAntri.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -73,12 +76,16 @@ const router = createBrowserRouter([
     element: <Rekomendasi/>
   },
   {
-    path: "/Drdashboard",
-    element: <Drdashboard/>
+    path: "/DrAntri",
+    element: <DrAntri/>
   },
   {
     path: "/Susterdashboard",
     element: <Susterdashboard/>
+  },
+  {
+    path: "/SusAntri",
+    element: <SusAntri/>
   },
   {
     path: "/Antrian",
@@ -107,6 +114,10 @@ const router = createBrowserRouter([
   {
     path: "/Target",
     element: <Target/>
+  },
+  {
+    path: "/DrDashboard",
+    element: <DrDashboard/>
   },
   {
     path: "/DashboardGamma",

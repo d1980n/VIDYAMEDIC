@@ -44,6 +44,10 @@ const personSchema = new mongoose.Schema({
         type: String,
         default: 'https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg',
     },
+    poli: {
+        required: false,
+        type: String,
+    }
 })
 const Person = mongoose.model("person", personSchema);
 module.exports = Person;
