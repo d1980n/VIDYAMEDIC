@@ -161,19 +161,24 @@ function SuperAdminDashboard() {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                  <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataNakes" ? "active" : ""}`} to="/DataNakes" aria-expanded="false" onClick={() => handleSetActivePage("DataNakes")}>
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Tenaga Kesehatan</span>
                     </NavLink>
-                    {/* Tambahkan tautan lainnya dengan pola yang sama */}
+                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                      <span>
+                        <i className="ti ti-accessible"></i>
+                      </span>
+                      <span className="hide-menu">Data Pasien</span>
+                    </NavLink>
                   </li>
                   <li className="nav-small-cap">
                     <i className="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -273,10 +278,10 @@ function SuperAdminDashboard() {
                 <div class="row" style={{ width: "49%", marginRight: "2px" }}>
                   <div class="card overflow-hidden">
                     <div class="card-body p-4">
-                      <h5 class="card-title mb-9 fw-semibold">Suster</h5>
+                      <h5 class="card-title mb-9 fw-semibold">Admin</h5>
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Perawat. Sarah Namban</h4>
+                          <h4 class="fw-semibold mb-3">Helo, Petugas. Udin Simanjuntak</h4>
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
                               <i class="ti ti-arrow-down-right text-danger"></i>
@@ -289,6 +294,40 @@ function SuperAdminDashboard() {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "15rem" }}>
+                <div class="row" style={{ width: "23%", marginLeft: "1px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "23%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "50%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "25rem"}}>
+                <div class="row" style={{ width: "100%", marginLeft: "1px",}}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
                     </div>
                   </div>
                 </div>

@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
 import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import images2 from '../source/img2.png';
 
-function DataDokter() {
+function DataNakes() {
   const [showModal, setShowModal] = useState(false);
   const [nama, setNama] = useState("");
   const [nik, setNik] = useState("");
   // const [fotoKTP, setFotoKTP] = useState(null);
-  const [jenisKelamin, setJenisKelamin] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [no_hp, setNoHp] = useState("");
-  const [tl, setTl] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [konfpassword, setKonfPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [daftarPasien, setDaftarPasien] = useState([]);
+  const [jenisKelamin, setJenisKelamin] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
+  const [tl, setTl] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [konfPassword, setKonfPassword] = useState('');
+  const [poli, setPoli] = useState('');
+  const [role, setRole] = useState('');
+  const [profilePict, setProfilePict] = useState('');
   const [formData, setFormData] = useState({});
   const [personList, setPersonList] = useState([]);
   const [currentRole, setCurrentRole] = useState("Dokter");
@@ -31,12 +33,90 @@ function DataDokter() {
     setShowModal(!showModal);
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+//   const handleChange = (e) => {
+//     setFormData({
+//       ...formData,
+//       [e.target.id]: e.target.value,
+//     });
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     // Remove the window.confirm line
+//     const formData = {
+//       namaLengkap,
+//       jenisKelamin,
+//       alamatLengkap,
+//       phone_number,
+//       email,
+//       password,
+//       role,
+//       poli
+//     };
+
+//     try {
+//       const response = await fetch("http://localhost:3000/medical/tambah", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(formData),
+//       });
+
+//       console.log("Response Status:", response.status);
+//       const contentType = response.headers.get("content-type");
+
+//       if (contentType && contentType.includes("application/json")) {
+//         const data = await response.json();
+//         console.log("Response Data:", data);
+
+//         // Reset form dan refresh daftar pasien setelah berhasil
+
+//         setShowModal(false); // Tutup modal setelah sukses
+//         resetForm(); // Reset input
+//         fetchDaftarDokter();
+//         console.log("well");
+//         window.location.reload();
+//       } else {
+//         const text = await response.text();
+//         console.error("Error: Response is not JSON. Response text:", text);
+//       }
+//     } catch (error) {
+//       console.error("Error:", error.message);
+//     }
+// };
+
+//   const fetchDaftarDokter = async () => {
+//     try {
+//         const response = await fetch('http://localhost:3000/doctor');
+//         const data = await response.json();
+
+//         if (response.ok) { // Check if the response is successful
+//           const data = await response.json();
+//           console.log("Response Data:", data);
+//             // Save the filtered patients to state
+//         } else {
+//             console.error('Failed to fetch dokter:', data.message);
+//         }
+//     } catch (error) {
+//         console.error('Error fetching dokter:', error);
+//         // Handle error appropriately, e.g., displaying an error message to the user
+//     }
+// };
+  
+//   useEffect(() => {
+//     fetchDaftarDokter();
+//   }, []);
+
+
+
+// Fungsi untuk membuat kode dokter otomatis dengan awalan "D" dan 3 angka acak
+// const generateKodeDokter = () => {
+//   const randomNumber = Math.floor(100 + Math.random() * 900); // Menghasilkan angka acak antara 100 dan 999
+//   return `D${randomNumber}`;
+// };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,19 +124,28 @@ function DataDokter() {
     // Menyusun data form
     const formData = {
       nama,
-      jenisKelamin,
       nik,
-      role,
+      jenisKelamin,
+      poli,
+      no_hp,
       alamat,
+      role,
       email,
       password,
-      role: "Dokter",
-      no_hp,
       tl,
     };
 
     // Log data untuk memeriksa
-    console.log("Form Data:", formData);
+    console.log('Form Data:', formData);
+  
+    if (password !== konfPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Password dan konfirmasi password tidak sesuai!',
+      });
+      return; // Berhenti jika validasi gagal
+    }
 
     try {
       const response = await fetch("http://localhost:3000/auth/signup", {
@@ -71,46 +160,38 @@ function DataDokter() {
       console.log("Response Data:", data);
 
       // Reset form setelah pengiriman berhasil
-      setNama("");
-      setJenisKelamin("");
-      setAlamat("");
-      setNoHp("");
-      setEmail("");
-      setPassword("");
-      setKonfPassword("");
-      setRole("Dokter");
+      setNama('');
+      setJenisKelamin('');
+      setNik('');
+      setPoli('');
+      setAlamat('');
+      setNoHp('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+      setRole('Dokter');
       setShowModal(false);
+  
+       // Tampilkan SweetAlert sukses dengan nama dokter
+       Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: `Dokter ${nama} berhasil ditambahkan.`,
+      });
 
       // Fetch data again after adding a new patient
-      fetchDaftarPasien();
+      fetchPersonData();
     } catch (error) {
       console.error("Error:", error.message);
     }
   };
 
-  const fetchDaftarPasien = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/patients");
-      const data = await response.json();
+  // ===============================================================================================================================
 
-      if (response.ok) {
-        // Check if the response is successful
-        const filteredPatients = data.patients.filter(
-          (patient) => patient.antrianStatus && patient.antrianStatus.status === true && patient.is_active !== true // Exclude patients with is_active = true
-        );
-        setDaftarPasien(filteredPatients); // Save the filtered patients to state
-      } else {
-        console.error("Failed to fetch patients:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-      // Handle error appropriately, e.g., displaying an error message to the user
-    }
-  };
 
-  useEffect(() => {
-    fetchDaftarPasien();
-  }, []);
+
+  // Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
+
 
   // ===============================================================================================================================
   
@@ -279,11 +360,17 @@ const handleInputChange = (event) => {
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataNakes" ? "active" : ""}`} to="/DataNakes" aria-expanded="false" onClick={() => handleSetActivePage("DataNakes")}>
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Tenaga Kesehatan</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                      <span>
+                        <i className="ti ti-accessible"></i>
+                      </span>
+                      <span className="hide-menu">Data Pasien</span>
                     </NavLink>
                   </li>
                   <li className="nav-small-cap">
@@ -422,7 +509,7 @@ const handleInputChange = (event) => {
                       <div className="modal-content">
                         <div className="modal-header">
                           <h5 className="modal-title" id="exampleModalLabel">
-                            Tambah Pengukuran Medis
+                            Tambah User
                           </h5>
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
@@ -432,61 +519,77 @@ const handleInputChange = (event) => {
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Nama</h6>
-                                <input type="text" name="Nama" className="form-control" placeholder="Nama" />
+                                <input type="text" name="Nama" className="form-control" placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)}/>
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">NIK</h6>
-                                <input type="number" name="Nama" className="form-control" placeholder="NIK" />
+                                <input type="number" name="Nama" className="form-control" placeholder="NIK" value={nik} onChange={(e) => setNik(e.target.value)}/>
                               </div>
                             </div>
 
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Jenis Kelamin</h6>
-                                <select className="form-select" id="jenisKelamin">
+                                <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
                                   <option value="Select">Select</option>
                                   <option value="Laki-laki">Laki-laki</option>
                                   <option value="Perempuan">Perempuan</option>
                                 </select>
                               </div>
                               <div className="col-lg-6">
-                                <h6 className="fw-bold">Email</h6>
-                                <input type="email" name="Email" className="form-control" placeholder="Email" />
-                              </div>
-                            </div>
-
-                            <div className="row row-space">
-                              <div className="col-lg-6">
-                                <h6 className="fw-bold">No HP</h6>
-                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" />
-                              </div>
-                              <div className="col-lg-6">
-                                <h6 className="fw-bold">Role</h6>
-                                <select className="form-select" id="jenisKelamin">
-                                  <option value="Select">Select</option>
-                                  <option value="Laki-laki">Dokter</option>
-                                  <option value="Perempuan">Antrian</option>
-                                  <option value="Perempuan">Suster</option>
-                                  
+                                <h6 className="fw-bold">Poli</h6>
+                                <select className="form-select" id="poli" value={poli} onChange={(e) => setPoli(e.target.value)}>
+                                  <option value="">Select</option>
+                                  <option value="Poli Umum">Umum</option>
+                                  <option value="Poli Anak">Poli Anak</option>
+                                  <option value="Poli Gigi">Poli Gigi</option>
+                                  <option value="Poli THT">Poli THT</option>
                                 </select>
                               </div>
                             </div>
 
                             <div className="row row-space">
                               <div className="col-lg-6">
-                                <h6 className="fw-bold">Alamat</h6>
-                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" />
+                                <h6 className="fw-bold">No HP</h6>
+                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
                               </div>
                               <div className="col-lg-6">
-                                <h6 className="fw-bold">Profile PIcture</h6>
-                                <input type="text" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" />
+                                <h6 className="fw-bold">Alamat</h6>
+                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                              </div>
+                            </div>
+
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Email</h6>
+                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Role</h6>
+                                <select className="form-select" id="jenisKelamin" value={role} onChange={(e) => setRole(e.target.value)}>
+                                  <option value="Select">Select</option>
+                                  <option value="Laki-laki">Dokter</option>
+                                  <option value="Perempuan">Antrian</option>
+                                  <option value="Perempuan">Suster</option>
+                                </select>
                               </div>
                             </div>
 
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Password</h6>
-                                <input type="password" name="Password" className="form-control" placeholder="Password" />
+                                <input type="password" name="Password" className="form-control" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Konfirmasi Password</h6>
+                                <input type="password" name="konfPassword" className="form-control" placeholder="Konfrimasi Password" value={konfPassword} onChange={(e) => setKonfPassword(e.target.value)} />
+                              </div>
+                            </div>
+                            
+                            <div className="row row-space">
+                              <div className="col-lg-12">
+                                <h6 className="fw-bold">Profile PIcture</h6>
+                                <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
                               </div>
                             </div>
                           </div>
@@ -525,4 +628,4 @@ const handleInputChange = (event) => {
   );
 }
 
-export default DataDokter;
+export default DataNakes;

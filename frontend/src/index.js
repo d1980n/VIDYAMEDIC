@@ -13,9 +13,13 @@ import Rekomendasi from './View/Rekomendasi.jsx';
 import DrDashboard from './View/Drdashboard.jsx';
 import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
+import SusAntri from './View/SusAntri.jsx'
 import DataPasien from './View/DataPasien.jsx';
-import DataDokter from './View/Datadokter.jsx';
+import DataNakes from './View/DataNakes.jsx';
+import DataSuperAdmin from './View/DataSuperAdmin.jsx'
+import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -79,6 +83,10 @@ const router = createBrowserRouter([
     element: <Susterdashboard/>
   },
   {
+    path: "/SusAntri",
+    element: <SusAntri/>
+  },
+  {
     path: "/Antrian",
     element: <Antrian/>
   },
@@ -91,8 +99,8 @@ const router = createBrowserRouter([
     element: <SuperAdminDashboard/>
   },
   {
-    path: "/DataDokter",
-    element: <DataDokter/>
+    path: "/DataNakes",
+    element: <DataNakes/>
   },
   {
     path: "/Target",
@@ -101,6 +109,14 @@ const router = createBrowserRouter([
   {
     path: "/DrDashboard",
     element: <DrDashboard/>
+  },
+  {
+    path: "/DashboardGamma",
+    element: <DashboardGamma/>
+  },
+  {
+    path: "/DataSuperAdmin",
+    element: <DataSuperAdmin/>
   }
 ]);
 

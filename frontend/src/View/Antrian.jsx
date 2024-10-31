@@ -28,6 +28,8 @@ function Antrian() {
   const clientId = query.get('id'); 
   const [clientData, setClientData] = useState(null);
   const [error, setError] = useState(null); 
+  const [jumlahPasien, setJumlahPasien] = useState([]);
+  const [pasienSus, setPasienSus] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const patientsPerPage = 5;
   const [soundQueue, setSoundQueue] = useState([
@@ -273,7 +275,19 @@ function Antrian() {
                 patient.antrianStatus.status === true && 
                 patient.is_active !== true // Exclude patients with is_active = true
             );
-            setDaftarPasien(filteredPatients); // Save the filtered patients to state
+            
+            // filter pasien yang ada di suster
+            const susPasien = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
+            
+            // Menghitung jumlah pasien yang sesuai dengan filter
+            const jumlahPasien = filteredPatients.length;
+            const pasienSus = susPasien.length;
+            console.log("Jumlah pasien yang sesuai:", jumlahPasien);
+    
+            // Mengatur daftar pasien dan jumlah pasien ke dalam state
+            setDaftarPasien(filteredPatients);
+            setJumlahPasien(jumlahPasien); // jumlah pasien di antrian
+            setPasienSus(pasienSus); // jumlah pasien di suster
         } else {
             console.error('Failed to fetch patients:', data.message);
         }
@@ -657,6 +671,33 @@ const susterAntri = async (index, nomorMR) => {
             </header>
             <div className="container-fluid">
               <body className="login"></body>
+
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "15rem" }}>
+                <div class="row" style={{ width: "23%", marginLeft: "1px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                    <h5 class="card-title mb-9 fw-semibold text-center">Jumlah Antrian: </h5>
+                    <h1 class="mb-9 fw-semibold text-center">{jumlahPasien}</h1> {/* Menampilkan jumlah pasien di sini */}
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "23%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                    <h5 class="card-title mb-9 fw-semibold text-center">Jumlah Antrian Suster: </h5>
+                    <h1 class="mb-9 fw-semibold text-center">{pasienSus}</h1> {/* Menampilkan jumlah pasien suster */}
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "50%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Pasien</button>
                 <div className="row">

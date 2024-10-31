@@ -10,6 +10,8 @@ import images2 from "../source/img2.png";
 import { useState, useEffect } from "react";
 const DrDashboard = () => {
   const [activePage, setActivePage] = useState("");
+  const [daftarPasien, setDaftarPasien] = useState([]);
+  const [jumlahPasien, setJumlahPasien] = useState([]);
 
   const [isDisabled, setIsDisabled] = useState(false); // Contoh inisialisasi
   const location = useLocation();
@@ -24,6 +26,35 @@ const DrDashboard = () => {
       setIsDisabled(false);
     }
   }, [location.pathname]);
+
+  const fetchDaftarPasien = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/patients");
+      const data = await response.json();
+      console.log("response : ", response);
+      console.log("data pasien: ", data.patients);
+      if (data.success) {
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true && patient.antrianStatus.dokterPeriksaStatus === false);
+
+        // Menghitung jumlah pasien yang sesuai dengan filter
+        const jumlahPasien = filteredPatients.length;
+        console.log("Jumlah pasien yang sesuai:", jumlahPasien);
+        
+        // Mengatur daftar pasien dan jumlah pasien ke dalam state
+        setDaftarPasien(filteredPatients);
+        setJumlahPasien(jumlahPasien); // Atur state ini jika Anda ingin menampilkannya di UI
+      } else {
+        console.error("Failed to fetch patients:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      // Handle the error gracefully, e.g., display an error message to the user
+    }
+  };
+  useEffect(() => {
+    fetchDaftarPasien();
+  }, []);
+
   return (
     <>
       <html className="Admin">
@@ -131,22 +162,48 @@ const DrDashboard = () => {
                         <div class="row align-items-center">
                           <div class="col-8">
                             <h4 class="fw-semibold mb-3">Helo, Dr. Santoso Sutetjo</h4>
-                            <div class="d-flex align-items-center pb-1">
-                              <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                                <i class="ti ti-arrow-down-right text-danger"></i>
-                              </span>
-                              <p class="fs-3 mb-0" style={{ marginLeft: "10px" }}>
-                                <p class="text-dark me-1 fs-5 mb-0">
-                                  Jumlah Antrian: <p class="text-dark me-1 fs-4 mb-0">5</p>
-                                </p>
-                              </p>
-                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "15rem" }}>
+                <div class="row" style={{ width: "23%", marginLeft: "1px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                    <h5 class="card-title mb-9 fw-semibold text-center">Jumlah Antrian: </h5>
+                    <h1 class="mb-9 fw-semibold text-center">{jumlahPasien}</h1> {/* Menampilkan jumlah pasien di sini */}
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "23%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style={{ width: "50%", marginRight: "2px" }}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "25rem"}}>
+                <div class="row" style={{ width: "100%", marginLeft: "1px",}}>
+                  <div class="card overflow-hidden">
+                    <div class="card-body p-4">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               </div>
             </div>
           </div>

@@ -18,6 +18,7 @@ const AuthRoute = require('./routes/auth.router');
 const PersonRoute = require('./routes/person.route');
 const DashboardRoute = require('./routes/dashboard.route');
 const MedicalRoute = require('./routes/medical.router');
+const DoctorRoute = require('./routes/doctor.router');
 const patientRoutes = require('./routes/patients.routes');
 // const MRroutes = require('./routes/medical.router');
 // Connect to mongo
@@ -37,6 +38,7 @@ app.use('/auth', AuthRoute);
 app.use('/person', PersonRoute);
 app.use('/dashboard', DashboardRoute);
 app.use('/medical', MedicalRoute);
+app.use('/doctor', DoctorRoute);
 app.use('/patients', patientRoutes);
 
 app.listen(3000, () => {
@@ -51,6 +53,16 @@ app.get('/patients', async(req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 });
+
+app.get('/doctor', async(req, res) => {
+    try {
+        const doctor = await doctor.find();
+        res.json({ success: true, doctor });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 app.get('/medical', async(req, res) => {
     try {
         const medicalRecords = await Medical.find();

@@ -20,6 +20,7 @@
     "crypto-browserify": "^3.12.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
+    "firebase": "^11.0.1",
     "garmin-connect": "^1.6.2",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",

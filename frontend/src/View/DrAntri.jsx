@@ -322,53 +322,6 @@ function DrAntri() {
             <div class="container-fluid" style={{ paddingTop: "24px" }}>
               <body className="login"></body>
               {/* <!--  Row 1 --> */}
-              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                <div class="row" style={{ width: "49%", marginLeft: "1px" }}>
-                  <div class="card overflow-hidden">
-                    <div class="card-body p-4">
-                      <h5 class="card-title mb-9 fw-semibold">Klinik</h5>
-
-                      <div class="row align-items-center">
-                        <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Klinik VidyaMedic</h4>
-
-                          <div class="d-flex align-items-center pb-1">
-                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                              <i class="ti ti-arrow-down-right text-danger"></i>
-                            </span>
-
-                            <p class="fs-3 mb-0">
-                              <p class="text-dark me-1 fs-3 mb-0">Alamat:</p> JL. Jamaludinsurak jawa barat, andalan 12 nomor 19 rw 12
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style={{ width: "49%", marginRight: "2px" }}>
-                  <div class="card overflow-hidden">
-                    <div class="card-body p-4">
-                      <h5 class="card-title mb-9 fw-semibold">Dokter</h5>
-                      <div class="row align-items-center">
-                        <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Dr. Santoso Sutetjo</h4>
-                          <div class="d-flex align-items-center pb-1">
-                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                              <i class="ti ti-arrow-down-right text-danger"></i>
-                            </span>
-                            <p class="fs-3 mb-0" style={{ marginLeft: "10px" }}>
-                              <p class="text-dark me-1 fs-5 mb-0">
-                                Jumlah Antrian: <p class="text-dark me-1 fs-4 mb-0">5</p>
-                              </p>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div class="row">
                 <div class="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
                   <div class="card w-100">
