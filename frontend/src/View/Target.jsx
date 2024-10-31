@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 const Target = () => {
   const [currentSound, setCurrentSound] = useState(null);
   const [previousSound, setPreviousSound] = useState(null);
@@ -55,6 +55,12 @@ const Target = () => {
     }
   }, [currentSound]);
 
+
+
+
+  
+  
+
   return (
     <div className='container-target'>
       <div className="left-side">
@@ -83,9 +89,10 @@ const Target = () => {
       </div>
       <div className="right-side">
         <iframe 
-          width="100%" 
-          height="100%" 
+          width="90%" 
+          height="50%" 
           src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1" 
+          
           title="YouTube video player" 
           frameBorder="0" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
