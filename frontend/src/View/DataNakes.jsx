@@ -9,7 +9,7 @@ import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
 
-function DataDokter() {
+function DataNakes() {
   const [showModal, setShowModal] = useState(false);
   const [nama, setNama] = useState("");
   const [nik, setNik] = useState("");
@@ -360,7 +360,7 @@ const handleInputChange = (event) => {
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("DataDokter")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataNakes" ? "active" : ""}`} to="/DataNakes" aria-expanded="false" onClick={() => handleSetActivePage("DataNakes")}>
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
@@ -628,4 +628,4 @@ const handleInputChange = (event) => {
   );
 }
 
-export default DataDokter;
+export default DataNakes;

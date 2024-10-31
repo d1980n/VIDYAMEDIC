@@ -4,6 +4,10 @@ const Target = () => {
   const [previousSound, setPreviousSound] = useState(null);
   // const [nextQueue, setNextQueue] = useState([]); // State untuk menyimpan antrian selanjutnya
   const [isIntroPlaying, setIsIntroPlaying] = useState(false);
+  const [videoIndex, setVideoIndex] = useState(0);
+
+  // Daftar URL video YouTube (hanya ID video YouTube)
+  const videoList = ['YtjFvbD4HYk', 'yZntRvXNQhc', 'oBeekPgF_Hc'];
 
   const fetchSoundFromTarget = () => {
     fetch('http://localhost:3000/api/target') // ganti URL dengan URL API kamu
@@ -55,6 +59,42 @@ const Target = () => {
     }
   }, [currentSound]);
 
+  // Mengatur pemutar YouTube saat video selesai
+  useEffect(() => {
+    const onPlayerStateChange = (event) => {
+      if (event.data === 0) { // Status 0 = video selesai diputar
+        setVideoIndex((prevIndex) => (prevIndex + 1) % videoList.length);
+      }
+    };
+
+    const loadYouTubeAPI = () => {
+      if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        tag.onload = () => {
+          window.YT.ready(() => {
+            new window.YT.Player('youtube-player', {
+              events: {
+                'onStateChange': onPlayerStateChange,
+              }
+            });
+          });
+        };
+      } else {
+        new window.YT.Player('youtube-player', {
+          events: {
+            'onStateChange': onPlayerStateChange,
+          }
+        });
+      }
+    };
+
+    loadYouTubeAPI();
+  }, [videoIndex]);
+
   return (
     <div className='container-target'>
       <div className="left-side">
@@ -82,10 +122,11 @@ const Target = () => {
         </div> */}
       </div>
       <div className="right-side">
-        <iframe 
-          width="100%" 
-          height="100%" 
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1" 
+      <iframe 
+          id="youtube-player"
+          width="90%" 
+          height="50%" 
+          src={`https://www.youtube.com/embed/${videoList[videoIndex]}?enablejsapi=1&autoplay=1&mute=1`} 
           title="YouTube video player" 
           frameBorder="0" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 

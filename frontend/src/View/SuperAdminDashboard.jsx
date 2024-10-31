@@ -167,13 +167,18 @@ function SuperAdminDashboard() {
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataDokter" ? "active" : ""}`} to="/DataDokter" aria-expanded="false" onClick={() => handleSetActivePage("DataDokter")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataNakes" ? "active" : ""}`} to="/DataNakes" aria-expanded="false" onClick={() => handleSetActivePage("DataNakes")}>
                       <span>
                         <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Tenaga Kesehatan</span>
                     </NavLink>
-                    {/* Tambahkan tautan lainnya dengan pola yang sama */}
+                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                      <span>
+                        <i className="ti ti-accessible"></i>
+                      </span>
+                      <span className="hide-menu">Data Pasien</span>
+                    </NavLink>
                   </li>
                   <li className="nav-small-cap">
                     <i className="ti ti-dots nav-small-cap-icon fs-4"></i>

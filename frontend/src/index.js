@@ -15,7 +15,7 @@ import Antrian from './View/Antrian.jsx';
 import Susterdashboard from './View/Susterdashboard.jsx'
 import SusAntri from './View/SusAntri.jsx'
 import DataPasien from './View/DataPasien.jsx';
-import DataDokter from './View/Datadokter.jsx';
+import DataNakes from './View/DataNakes.jsx';
 import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
@@ -99,8 +99,8 @@ const router = createBrowserRouter([
     element: <SuperAdminDashboard/>
   },
   {
-    path: "/DataDokter",
-    element: <DataDokter/>
+    path: "/DataNakes",
+    element: <DataNakes/>
   },
   {
     path: "/Target",
