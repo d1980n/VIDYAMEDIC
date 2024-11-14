@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import profiles from "../source/user-1.jpg";
 import logo from "../source/logo.png";
 import "../css/login.css";
@@ -127,11 +127,29 @@ function SuperAdminDashboard() {
     }
 };
 
-  
-  
-  
-  
-  
+  const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
+  const dropdownRef = useRef(null); // Referensi untuk dropdown
+
+  // Toggle untuk membuka atau menutup dropdown
+  const handleToggle = () => {
+    setIsOpen(prevState => !prevState);
+  };
+
+  // Menutup dropdown ketika klik di luar
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  // Event listener untuk mendeteksi klik di luar dropdown
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
@@ -219,34 +237,44 @@ function SuperAdminDashboard() {
                 </ul>
                 <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
                   <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                    <li className="nav-item dropdown">
-                      <a className="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <img src={profiles} alt="" width="35" height="35" className="rounded-circle"/>
+                    <li className="nav-item dropdown" ref={dropdownRef}>
+                      <a
+                        className="nav-link nav-icon-hover"
+                        href="#"
+                        onClick={handleToggle} // Kaitkan fungsi handleToggle ke sini
+                        id="drop2"
+                        aria-expanded={isOpen}
+                      >
+                        <img src={profiles} alt="Profile" width="35" height="35" className="rounded-circle" />
                       </a>
-                      <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                        <div className="message-body">
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-user fs-6"></i>
-                            <p className="mb-0 fs-3">My Profile</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-mail fs-6"></i>
-                            <p className="mb-0 fs-3">My Account</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-list-check fs-6"></i>
-                            <p className="mb-0 fs-3">My Task</p>
-                          </a>
-                          <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+
+                      {/* Dropdown menu muncul jika `isOpen` bernilai true */}
+                      {isOpen && (
+                        <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up show" aria-labelledby="drop2">
+                          <div className="message-body">
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-user fs-6"></i>
+                              <p className="mb-0 fs-3">My Profile</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-mail fs-6"></i>
+                              <p className="mb-0 fs-3">My Account</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-list-check fs-6"></i>
+                              <p className="mb-0 fs-3">My Task</p>
+                            </a>
+                            <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">
+                              Logout
+                            </a>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </li>
                   </ul>
                 </div>
               </nav>
             </header>
-            <header class="app-header"></header>
             {/* <!--  Header End --> */}
             <div class="container-fluid" style={{ paddingTop: "24px" }}>
               <body className="login"></body>
