@@ -26,6 +26,9 @@ function Login() {
       case 'Suster':
         navigate('/Susterdashboard');
         break;
+      case 'Beta':
+        navigate('/SuperAdmin');
+        break;
       default:
         navigate('/');
         break;

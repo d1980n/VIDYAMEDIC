@@ -413,7 +413,7 @@ const handleInputChange = (event) => {
                                       <div className="d-flex">
                                         {" "}
                                         {/* Mengatur kolom untuk input dan label */}
-                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Dokter"} onChange={() => setCurrentRole("Dokter")} />
+                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Doctor"} onChange={() => setCurrentRole("Doctor")} />
                                         <label htmlFor="tabDokter"  style={{height:"40px",}}>Data Dokter</label>
                                       </div>
                                       <div className="d-flex">

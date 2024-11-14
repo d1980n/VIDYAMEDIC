@@ -73,6 +73,10 @@ function Register() {
                         <label htmlFor="email" className="form-label">Email Address</label>
                         <input type="email" className="form-control" onChange={handleChange} id="email" aria-describedby="emailHelp"/>
                       </div>
+                      <div className="mb-3">
+                        <label htmlFor="alamat" className="form-label">Alamat</label>
+                        <input type="alamat" className="form-control" onChange={handleChange} id="alamat" aria-describedby="emailHelp"/>
+                      </div>
                       <div className="mb-4">
                         <label htmlFor="password" className="form-label">Password</label>
                         <input type="password" className="form-control" onChange={handleChange} id="password"/>

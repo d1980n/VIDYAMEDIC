@@ -107,7 +107,7 @@ function Antrian() {
         setLoading(true); // Start loading
 
         try {
-          const response = await fetch('/panggilStatus', {
+          const response = await fetch('http://localhost:3000/patients/panggilStatus', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
