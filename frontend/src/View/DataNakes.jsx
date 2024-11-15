@@ -118,46 +118,57 @@ function DataNakes() {
 // };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Menyusun data form
-    const formData = {
-      nama,
-      nik,
-      jenisKelamin,
-      poli,
-      no_hp,
-      alamat,
-      role,
-      email,
-      password,
-      tl,
-    };
+  // Menyusun data form
+  const formData = {
+    nama,
+    nik,
+    jenisKelamin,
+    poli,
+    no_hp,
+    alamat,
+    role,
+    email,
+    password,
+    tl,
+  };
 
-    // Log data untuk memeriksa
-    console.log('Form Data:', formData);
-  
-    if (password !== konfPassword) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal!',
-        text: 'Password dan konfirmasi password tidak sesuai!',
-      });
-      return; // Berhenti jika validasi gagal
-    }
+  // Log data untuk memeriksa
+  console.log('Form Data:', formData);
 
-    try {
-      const response = await fetch("http://localhost:3000/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+  if (password !== konfPassword) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Password dan konfirmasi password tidak sesuai!',
+    });
+    return; // Berhenti jika validasi gagal
+  }
 
-      const data = await response.json();
-      console.log("Response Data:", data);
+  // Tampilkan konfirmasi sebelum submit
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, kirim data!',
+    cancelButtonText: 'Batal',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      // Jika pengguna mengkonfirmasi, lanjutkan dengan pengiriman data
+      try {
+        const response = await fetch("http://localhost:3000/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        console.log("Response Data:", data);
 
       // Reset form setelah pengiriman berhasil
       setNama('');
@@ -179,12 +190,22 @@ function DataNakes() {
         text: `${role} ${nama} berhasil ditambahkan.`,
       });
 
-      // Fetch data again after adding a new patient
-      fetchPersonData();
-    } catch (error) {
-      console.error("Error:", error.message);
+        // Fetch data again after adding a new patient
+        fetchPersonData();
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    } else {
+      // Jika pengguna membatalkan, tidak ada tindakan lebih lanjut
+      Swal.fire({
+        icon: 'info',
+        title: 'Dibatalkan',
+        text: 'Pengiriman data dibatalkan.',
+      });
     }
-  };
+  });
+};
+
 
   // ===============================================================================================================================
 

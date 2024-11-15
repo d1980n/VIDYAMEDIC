@@ -762,14 +762,14 @@ function Drmonitor() {
                                 <div className="accord">
                                   <details>
                                   {filteredRecords.map((medicalRec) => {
-        const { tanggalFormatted, waktuFormatted } = formatWaktuMedicalCheck(medicalRec.WaktuMedicalCheck);
-        return (
-          <summary className="fw-semibold" key={medicalRec._id}>
-            {tanggalFormatted} <br />
-            <h8 className="fw-light">{waktuFormatted}</h8>
-          </summary>
-        );
-      })}
+                                    const { tanggalFormatted, waktuFormatted } = formatWaktuMedicalCheck(medicalRec.WaktuMedicalCheck);
+                                    return (
+                                      <summary className="fw-semibold" key={medicalRec._id}>
+                                        {tanggalFormatted} <br />
+                                        <h8 className="fw-light">{waktuFormatted}</h8>
+                                      </summary>
+                                    );
+                                  })}
                                     {medicalRec ? (
                                       <div>
                                         <h5>Pemeriksaan Tanda Vital</h5>

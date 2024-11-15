@@ -47,28 +47,6 @@ function Antrian() {
   const [loading, setLoading] = useState(false);
 
 
-  const handleCancelation = (message, index, nomorMR, namaLengkap) => {
-    console.log('handleCancelation called');
-    Swal.fire({
-      title: 'Batal Antrian',
-      text: `Apakah anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Iya',
-      cancelButtonText: 'Tidak',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        cancelPasien(index, nomorMR); // Jalankan fungsi saat user mengonfirmasi "Iya"
-        Swal.fire(
-          'Terkonfirmasi!',
-          'Berhasil membatalkan antrian',
-          'success'
-        );
-      }
-    });
-  };
   
   const handleValidation = (message, index, nomorMR, namaLengkap) => {
     Swal.fire({
@@ -388,37 +366,56 @@ function Antrian() {
 
 
 // Fungsi untuk membatalkan antrian pasien
-const cancelPasien = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  setDaftarPasien(newDaftarPasien);
-  
-  try {
-      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+const cancelPasien = async (index, nomorMR, namaLengkap) => {
+  Swal.fire({
+    title: 'Batal Antrian',
+    text: `Apakah Anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Iya',
+    cancelButtonText: 'Tidak',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const newDaftarPasien = [...daftarPasien];
+      newDaftarPasien.splice(index, 1);  // Menghapus pasien dari daftar berdasarkan index
+      setDaftarPasien(newDaftarPasien);  // Update state
+
+      try {
+        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
           method: 'PUT',
           headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ nomorMR }),
-      });
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
+        const data = await response.json();
+
+        if (!response.ok) {
           throw new Error(data.message || 'Gagal membatalkan antrian pasien');
-      }
-      else{
-        window.location.reload(); 
-      }
+        } else {
+          Swal.fire(
+            'Terkonfirmasi!',
+            'Berhasil membatalkan antrian',
+            'success'
+          );
+          window.location.reload(); // Reload page after success
+        }
 
-      console.log('Antrian dibatalkan:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
+        console.log('Antrian dibatalkan:', data);
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    }
+  });
 };
 
 // Fungsi untuk memperbarui status antrian suster
 const susterAntri = async (index, nomorMR) => {
   const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index,1);
   setDaftarPasien(newDaftarPasien);
 
   try {
@@ -728,8 +725,8 @@ const susterAntri = async (index, nomorMR) => {
                 <div className="dimrow">
                 <button className="btn btn-primary mb-3 dimton" onClick={toggleModal}>Tambah Pasien</button>
                     <div className="dimcol">
-                      <h5 >Jumlah Antrian: {jumlahPasien}</h5>
-                      <h5 >Antrian Suster: {pasienSus}</h5>
+                      <h6 >Jumlah Antrian: {jumlahPasien}</h6>
+                      <h6 >Antrian Suster: {pasienSus}</h6>
                     </div>
                 </div>
                 <div className="row">
@@ -815,12 +812,13 @@ const susterAntri = async (index, nomorMR) => {
                   Masuk
                 </button>
                 <button
-                  type="button"
-                  className="btn btn-danger m-1"
-                  onClick={() => handleCancelation(index)}
-                >
-                  Batal
-                </button>
+                    type="button"
+                    className="btn btn-danger m-1"
+                    onClick={() => cancelPasien(index, pasien.nomorMR, pasien.namaLengkap)}
+                  >
+                    Batal
+                  </button>
+
 
                 {soundQueue[index] && (
                   <button

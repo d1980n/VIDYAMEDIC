@@ -19272,27 +19272,27 @@ input .deksripsi {
 .profile-dropdown {
     position: relative;
     display: inline-block;
-  }
-  
-  .profile-button {
+}
+
+.profile-button {
     background: none;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-  }
-  
-  .profile-pic {
+}
+
+.profile-pic {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-  }
-  
-  .arrow-down {
+}
+
+.arrow-down {
     margin-left: 8px;
-  }
-  
-  .dropdown-menu {
+}
+
+.dropdown-menu {
     position: absolute;
     top: 130%;
     right: 0;
@@ -19301,49 +19301,53 @@ input .deksripsi {
     border-radius: 4px;
     width: 150px;
     z-index: 1;
-    display: block; /* pastikan ini tidak 'none' */
-  }
-  
-  .dropdown-menu ul {
+    display: block;
+    /* pastikan ini tidak 'none' */
+}
+
+.dropdown-menu ul {
     list-style: none;
     margin: 0;
     padding: 0;
-  }
-  
-  .dropdown-menu li {
+}
+
+.dropdown-menu li {
     padding: 10px 15px;
     cursor: pointer;
-  }
-  
-  .dropdown-menu li:hover {
+}
+
+.dropdown-menu li:hover {
     background-color: #f0f0f0;
-    
-  }
-  .navbar {
+}
+
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #fff;
-  }
-  
-  .navbar-nav {
-    display: flex;
-    gap: 15px; /* Jarak antar elemen nav-item */
-  }
+    background-color: #ffffff;
+}
 
-.dimrow{
-    display: flex; 
+.navbar-nav {
+    display: flex;
+    gap: 15px;
+    /* Jarak antar elemen nav-item */
+}
+
+.dimrow {
+    display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
-.dimcol{
+
+.dimcol {
     display: flex;
     gap: 4rem;
     margin-right: 5rem;
 }
-.dimton{
+
+.dimton {
     max-width: 10rem;
     min-width: 10rem;
 }
