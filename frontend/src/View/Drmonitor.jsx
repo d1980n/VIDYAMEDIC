@@ -13,6 +13,7 @@ function Drmonitor() {
   const [loading, setLoading] = useState(true);
   const [showLabOverlay, setShowLabOverlay] = useState(false);
   const [showXRayOverlay, setShowXRayOverlay] = useState(false);
+  const [showDetailOverlay, setShowDetailOverlay] = useState(false);
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [selectedNomorMR, setSelectedNomorMR] = useState("");
@@ -25,20 +26,101 @@ function Drmonitor() {
   const [Penunjang, setPenunjang] = useState("");
   const [RTP, setRTP] = useState("");
   const [DiagnosaICD11, setDiagnosaICD11] = useState("");
-  const [Rujukan, setRujukan] = useState("");
   const [medicalRec, setMedicalRec] = useState([]);
+  const [selectedLabTests, setSelectedLabTests] = useState([]);
+  const [selectedXRay, setSelectedXRay] = useState("");
+  const [isSimpanClicked, setIsSimpanClicked] = useState(false);
+  
+  const [TDS, setTekananDarahSistolik] = useState("");
+  const [TDD, setTekanandarahDiastolik] = useState("");
+  const [Temperatur, setTemperatur] = useState("");
+  const [Nadi, setNadi] = useState("");
+  const [LP, setLajuPernafasan] = useState("");
+  const [Spot, setSpot] = useState("");
+  const [TB, setTinggiBadan] = useState("");
+  const [BB, setBeratBadan] = useState("");
+  const [LILA, setLILA] = useState("");
+  const [AVPU, setAVPU] = useState("");
+  const [Keluhan, setKeluhan] = useState("");
+
+
+  const [selectedRecordId, setSelectedRecordId] = useState(null);
+
+
   const navigate = useNavigate();
 
   const [labSelections, setLabSelections] = useState([]);
-
-  const handleLabChange = (event) => {
-    const { value, checked } = event.target;
+  const handleLabChange = (e) => {
+    const value = e.target.value;
+    const checked = e.target.checked;
+    
+    console.log('Value:', value);  // Cek nilai checkbox
+    console.log('Checked:', checked);  // Cek status apakah checkbox dicentang
+    
     if (checked) {
-      setLabSelections([...labSelections, value]);
+      setLab([...Lab, value]);  // Tambah nilai jika dicentang
     } else {
-      setLabSelections(labSelections.filter((item) => item !== value));
+      setLab(Lab.filter((test) => test !== value));  // Hapus nilai jika tidak dicentang
     }
+    
+    console.log('Updated Lab:', Lab);  // Lihat perubahan state
   };
+  
+  
+  const handleSaveLabData = () => {
+    // Tampilkan alert konfirmasi dengan SweetAlert
+    Swal.fire({
+      title: 'Konfirmasi',
+      text: `Apakah Anda yakin ingin menyimpan data lab berikut: ${Lab.join(', ')}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, simpan!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Jika pengguna mengkonfirmasi, lakukan sesuatu dengan data yang dipilih
+        console.log(Lab);
+        
+        // Setelah penyimpanan data, tutup modal
+        toggleLabOverlay();
+        Swal.fire('Simpan!', 'Data lab telah disimpan.', 'success'); // Menampilkan pesan sukses
+      } else {
+        // Jika pengguna tidak mengkonfirmasi, tidak perlu melakukan apa-apa
+        console.log("Penyimpanan data lab dibatalkan.");
+      }
+    });
+  };
+
+  
+// Handle X-Ray referral selection
+const handleXRayChange = (e) => {
+  setXray(e.target.value);
+};
+
+const handleSaveXrayData = () => {
+  // Tampilkan alert konfirmasi dengan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi',
+    text: `Apakah Anda yakin ingin menyimpan data X-Ray berikut: ${Xray}`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, simpan!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Jika pengguna mengkonfirmasi, lakukan sesuatu dengan data yang dipilih
+      console.log(Xray);
+      
+      // Setelah penyimpanan data, tutup modal
+      toggleXRayOverlay();
+      Swal.fire('Simpan!', 'Data X-Ray telah disimpan.', 'success'); // Menampilkan pesan sukses
+    } else {
+      // Jika pengguna tidak mengkonfirmasi, tidak perlu melakukan apa-apa
+      console.log("Penyimpanan data X-Ray dibatalkan.");
+    }
+  });
+};
+
 
   const [summary, setSummary] = useState(null);
 
@@ -48,6 +130,15 @@ function Drmonitor() {
 
   const toggleXRayOverlay = () => {
     setShowXRayOverlay(!showXRayOverlay);
+  };
+  const toggleDetailOverlay = () => {
+    setShowDetailOverlay(!showDetailOverlay);
+  };
+  const handleDetailClick = (id) => {
+    setSelectedRecordId(id);
+  };
+  const handleCloseDetails = () => {
+    setSelectedRecordId(null);
   };
 
   const [medicines, setMedicines] = useState([{ namaObat: "", jumlah: "", kandungan: "", waktuMakan: "", berapaKali: "", harga: "" }]);
@@ -103,13 +194,24 @@ function Drmonitor() {
       const data = await response.json();
       console.log("Response: ", response);
       console.log("Data pasien: ", data.medicalRecords);
-
+  
       if (data.success) {
-        // Set all records to state
         setMedicalRecords(data.medicalRecords);
+  
         // Filter records where statusMRPeriksa === true
         const recordsWithStatusTrue = data.medicalRecords.filter((record) => record.statusMRPeriksa === true);
-        setFilteredRecords(recordsWithStatusTrue); // Simpan data yang sesuai filter
+        setFilteredRecords(recordsWithStatusTrue); // Save filtered data
+  
+        // Extract nomorMR values from filtered records
+        const filteredNomorMR = recordsWithStatusTrue.map((record) => record.nomorMR);
+  
+        // Filter all medical records to include only records with matching nomorMRs
+        const allMatchingRecords = data.medicalRecords.filter((record) =>
+          filteredNomorMR.includes(record.nomorMR)
+        );
+  
+        // Set all matching records to state for rendering
+        setFilteredRecords(allMatchingRecords);
       } else {
         console.error("Failed to fetch patients:", data.message);
       }
@@ -119,9 +221,24 @@ function Drmonitor() {
       setLoading(false);
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const labData = Array.isArray(Lab) ? Lab.join(", ") : "";
+    // Konfirmasi pengguna sebelum melanjutkan
+    const confirmation = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: 'Data yang Anda masukkan akan disimpan.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, simpan!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (!confirmation.isConfirmed) {
+      return; // Hentikan eksekusi jika pengguna membatalkan
+    }
 
     const formData = {
       Anamnesis,
@@ -131,9 +248,9 @@ function Drmonitor() {
       Penunjang,
       RTP,
       DiagnosaICD11,
-      Rujukan,
+      Lab: labData,
     };
-
+    console.log("Form Data:", formData); 
     const result = await Swal.fire({
       title: "Apakah Anda yakin?",
       text: "Data akan diperbarui, pastikan semua informasi sudah benar.",
@@ -156,35 +273,33 @@ function Drmonitor() {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          console.log("Data berhasil diperbarui:", data);
-
-          // Tampilkan alert sukses setelah submit berhasil
+          const result = await response.json();
+          console.log("Form submitted successfully:", result);
+          setIsSimpanClicked(true);
           Swal.fire({
-            title: "Sukses!",
-            text: "Data berhasil diperbarui!",
-            icon: "success",
-            confirmButtonText: "OK",
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Data berhasil diperbarui!',
           });
 
           // Hapus atau komentari baris di bawah ini jika tidak menggunakan resetForm
           // resetForm();
         } else {
-          console.error("Error:", response.statusText);
+          const errorText = await response.text();
+          console.error("Error submitting the form:", errorText);
+          console.error("Status Code:", response.status); // Log status code
           Swal.fire({
-            title: "Error!",
-            text: "Gagal memperbarui data, coba lagi!",
-            icon: "error",
-            confirmButtonText: "OK",
+            icon: 'error',
+            title: 'Gagal!',
+            text: `Gagal memperbarui data`,
           });
         }
-      } catch (error) {
-        console.error("Error:", error);
+      }  catch (error) {
+        console.error("Network error:", error);
         Swal.fire({
-          title: "Error!",
-          text: "Terjadi kesalahan, coba lagi!",
-          icon: "error",
-          confirmButtonText: "OK",
+          icon: 'error',
+          title: 'Error!',
+          text: `Terjadi kesalahan saat mengirim data: ${error.message}`,
         });
       }
     }
@@ -314,55 +429,7 @@ function Drmonitor() {
   const [activePagee, setActivePagee] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch data from /medical API
-        const medicalResponse = await fetch("http://localhost:3000/medical");
-        const medicalData = await medicalResponse.json();
-
-        // Cek apakah medicalRecords ada dan merupakan array
-        if (medicalData.success && Array.isArray(medicalData.medicalRecords)) {
-          // Mencari jika ada statusMRPeriksa = true
-          const hasMRPeriksaTrue = medicalData.medicalRecords.some((record) => record.statusMRPeriksa === true);
-          setIsDisabled(hasMRPeriksaTrue); // Set state disabled
-        }
-      } catch (error) {
-        console.error("Error fetching medical data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-  useEffect(() => {
-    // Fetch data dari API
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/medical");
-        const data = await response.json();
-
-        // Log respons API untuk debugging
-        console.log("API Response:", data);
-
-        // Pastikan bahwa data.medicalRecords memang ada dan merupakan array
-        if (data && data.medicalRecords && Array.isArray(data.medicalRecords)) {
-          // Temukan entri pertama yang memiliki statusMRPeriksa: true
-          const foundRecord = data.medicalRecords.find((record) => record.statusMRPeriksa === true);
-
-          if (foundRecord) {
-            console.log("Found Record:", foundRecord);
-            setMedicalRec(foundRecord);
-          } else {
-            console.log("No records with statusMRPeriksa: true found.");
-          }
-        } else {
-          console.error("Unexpected API response structure");
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
+    fetchMedical();
   }, []);
 
   return (
@@ -651,73 +718,109 @@ function Drmonitor() {
                               <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">Waktu</h6>
                               </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0"></h6>Detail
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
+  {filteredRecords
+    .sort((a, b) => new Date(b.WaktuMedicalCheck) - new Date(a.WaktuMedicalCheck)) // Sort by date in descending order
+    .map((record, index) => (
+      <tr key={record._id}>
+        <td>{index + 1}</td> {/* Index for numbering */}
+        <td>{record.Diagnosa}</td>
+        <td>{record.StatusLokalis}</td>
+        <td>{new Date(record.WaktuMedicalCheck).toLocaleString()}</td>
+        <td className="border-bottom-0">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              toggleDetailOverlay();
+              handleDetailClick(record._id);
+            }}
+          >
+            Detail
+          </button>
+        </td>
+      </tr>
+    ))}
+</tbody>
+
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {showDetailOverlay && (
+                              <div className="modal fade show" id="detailOverlay" tabIndex="-1" aria-labelledby="detailOverlayLabel" aria-hidden="true" style={{ display: "block" }}>
+                                <div className="modal-dialog">
+                                  <div className="modal-content">
+                                  <div class="row">
+                <div class="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
+                  <div class="card w-100">
+                    <div class="card-body p-4 width">
+                      <h5 class="card-title fw-semibold mb-4">Hasil Pemeriksaan Suster</h5>
+                      <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                          <thead class="text-dark fs-4">
                             <tr>
-                              <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">1</h6>
-                              </td>
-                              <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">Sakit di bagian dada</p>
-                              </td>
-                              <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                  <span class="badge bg-danger rounded-3 fw-semibold">High</span>
-                                </div>
-                              </td>
-                              <td class="border-bottom-0">
-                                <h6 class="fw mb-0 fs-4">17/02/23</h6>
-                              </td>
+                              
+
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">TDS</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">TDD</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Temperatur</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Nadi</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">LP</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Spot</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">TB</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">BB</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">LP</h6>
+                              </th>
+                              <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Keluhan</h6>
+                              </th>
+                              
                             </tr>
-                            <tr>
-                              <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">2</h6>
-                              </td>
-                              <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">Sesak Nafas</p>
-                              </td>
-                              <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                  <span class="badge bg-secondary rounded-3 fw-semibold">Medium</span>
-                                </div>
-                              </td>
-                              <td class="border-bottom-0">
-                                <h6 class="fw mb-0 fs-4">17/02/23</h6>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">3</h6>
-                              </td>
-                              <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">Rasa panas yang tinggi tapi pusing dan meriang</p>
-                              </td>
-                              <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                  <span class="badge bg-secondary rounded-3 fw-semibold">Medium</span>
-                                </div>
-                              </td>
-                              <td class="border-bottom-0">
-                                <h6 class="fw mb-0 fs-4">17/02/23</h6>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">4</h6>
-                              </td>
-                              <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">gelisah galau merana</p>
-                              </td>
-                              <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                  <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
-                                </div>
-                              </td>
-                              <td class="border-bottom-0">
-                                <h6 class="fw mb-0 fs-4">17/02/23</h6>
-                              </td>
-                            </tr>
+                          </thead>
+                          <tbody>
+                          {filteredRecords.map((record) =>
+        record._id === selectedRecordId ? (
+            <tr key={record._id}>
+              
+              <td>{record.TDS}</td>
+              <td>{record.TDD}</td>
+              <td>{record.Temperatur}</td>
+              <td>{record.Nadi}</td>
+              <td>{record.LP}</td>
+              <td>{record.Spot}</td>
+              <td>{record.TB}</td>
+              <td>{record.BB}</td>
+              <td>{record.LP}</td>
+              <td>{record.Keluhan}</td>
+              
+            </tr>
+          ) : null
+          )}
                           </tbody>
                         </table>
                       </div>
@@ -725,6 +828,90 @@ function Drmonitor() {
                   </div>
                 </div>
               </div>
+                                  <div class="row">
+                <div class="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
+                  <div class="card w-100">
+                    <div class="card-body p-4 width">
+                      <h5 class="card-title fw-semibold mb-4">Hasil Pemeriksaan Dokter</h5>
+                      <div class="table-responsivee">
+                        <table class="table text-nowrap mb-0 align-middle">
+                          <thead class="text-dark fs-4">
+                            <tr>
+                              
+
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Anamnesis</h6>
+                              </th>
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Diagnosa</h6>
+                              </th>
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Status Lokalis</h6>
+                              </th>
+                            
+                             
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {filteredRecords.map((record) =>
+        record._id === selectedRecordId ? (
+            <tr key={record._id}>
+              
+              <td>{record.Anamnesis}</td>
+              <td>{record.Diagnosa}</td>
+              <td>{record.StatusLokalis}</td>
+          
+              
+            </tr>
+           ) : null
+          )}
+                          </tbody>
+                        </table>
+                        <table class="table text-nowrap mb-0 align-middle">
+                          <thead class="text-dark fs-4">
+                            <tr>
+                              
+
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Pemsriksaan Penunjang</h6>
+                              </th>
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Rencana dan Terapi</h6>
+                              </th>
+                              <th class="border-bottom-0 maxxx">
+                                <h6 class="fw-semibold mb-0">Diagnosa (ICD-11)</h6>
+                              </th>
+                             
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {filteredRecords.map((record) =>
+        record._id === selectedRecordId ? (
+            <tr key={record._id}>
+            <td>{record.Penunjang}</td>
+              <td>{record.RTP}</td>
+              <td>{record.DiagnosaICD11}</td>
+              
+            </tr>
+           ) : null
+          )}
+          <tr>
+          <td><button type="button" className="btn btn-primary left" onClick={toggleDetailOverlay}>
+                                  Selesai
+                                  </button>
+                                  </td>
+          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
               <div class="row">
                 <div class="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
                   <div class="card w-100">
@@ -738,6 +925,7 @@ function Drmonitor() {
                             <h4 className="fw-semibold" style={{ paddingTop: "20px" }}>
                               Observasi Nurse
                             </h4>
+                            
 
                             <div className="row">
                               <div className="col-md-4" style={{ width: "100%" }}>
@@ -747,7 +935,7 @@ function Drmonitor() {
                                       12 Maret 2039 <br />
                                       <h8 className="fw-light">08:21</h8>
                                     </summary>
-                                    {medicalRec ? (
+                                    {medicalRec? (
                                       <div>
                                         <h5>Pemeriksaan Tanda Vital</h5>
                                         <h6>
@@ -817,11 +1005,12 @@ function Drmonitor() {
                                   <button type="button" className="btn btn-primary" onClick={toggleXRayOverlay}>
                                     X-Ray
                                   </button>
+                                 
                                   <button type="submit" className="btn btn-primary">
                                     Simpan
                                   </button>
 
-                                  <button type="button" className="btn btn-primary" onClick={handleUpdateStatus}>
+                                  <button type="button" className="btn btn-primary" onClick={handleUpdateStatus}  disabled={!isSimpanClicked}>
                                     Selesai
                                   </button>
                                 </div>
@@ -1100,7 +1289,7 @@ function Drmonitor() {
                                     </div>
 
                                     <div className="modal-footer">
-                                      <button type="button" className="btn btn-secondary">
+                                      <button type="button" className="btn btn-secondary" onClick={handleSaveLabData}>
                                         Simpan
                                       </button>
                                     </div>
@@ -1121,10 +1310,10 @@ function Drmonitor() {
                                     <div className="modal-body">
                                       {/* Konten overlay untuk memilih jenis pemeriksaan X-Ray */}
                                       <h6>Jenis Pemeriksaan X-Ray:</h6>
-                                      <textarea name="Xray" className="form-sels" />
+                                      <textarea name="Xray" className="form-sels"  onChange={handleXRayChange}/>
                                     </div>
                                     <div className="modal-footer">
-                                      <button type="button" className="btn btn-secondary" onClick={toggleXRayOverlay}>
+                                      <button type="button" className="btn btn-secondary" onClick={() => { toggleXRayOverlay(); handleSaveXrayData(); }}>
                                         Simpan
                                       </button>
                                     </div>
