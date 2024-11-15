@@ -179,6 +179,10 @@ const dokterPeriksa = async(req, res) => {
     }
 };
 
+
+
+
+
 const statusSelesai = async(req, res) => {
     console.log('Request diterima di /statusSelesai', req.body); // Menambahkan log ini
     try {

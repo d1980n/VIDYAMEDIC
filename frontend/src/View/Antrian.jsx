@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
@@ -47,28 +47,6 @@ function Antrian() {
   const [loading, setLoading] = useState(false);
 
 
-  const handleCancelation = (message, index, nomorMR, namaLengkap) => {
-    console.log('handleCancelation called');
-    Swal.fire({
-      title: 'Batal Antrian',
-      text: `Apakah anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Iya',
-      cancelButtonText: 'Tidak',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        cancelPasien(index, nomorMR); // Jalankan fungsi saat user mengonfirmasi "Iya"
-        Swal.fire(
-          'Terkonfirmasi!',
-          'Berhasil membatalkan antrian',
-          'success'
-        );
-      }
-    });
-  };
   
   const handleValidation = (message, index, nomorMR, namaLengkap) => {
     Swal.fire({
@@ -107,7 +85,7 @@ function Antrian() {
         setLoading(true); // Start loading
 
         try {
-          const response = await fetch('/panggilStatus', {
+          const response = await fetch('http://localhost:3000/patients/panggilStatus', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -388,39 +366,56 @@ function Antrian() {
 
 
 // Fungsi untuk membatalkan antrian pasien
-const cancelPasien = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1);
-  setDaftarPasien(newDaftarPasien);
-  
-  try {
-      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+const cancelPasien = async (index, nomorMR, namaLengkap) => {
+  Swal.fire({
+    title: 'Batal Antrian',
+    text: `Apakah Anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Iya',
+    cancelButtonText: 'Tidak',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const newDaftarPasien = [...daftarPasien];
+      newDaftarPasien.splice(index, 1);  // Menghapus pasien dari daftar berdasarkan index
+      setDaftarPasien(newDaftarPasien);  // Update state
+
+      try {
+        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
           method: 'PUT',
           headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ nomorMR }),
-      });
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
+        const data = await response.json();
+
+        if (!response.ok) {
           throw new Error(data.message || 'Gagal membatalkan antrian pasien');
-      }
-      else{
-        window.location.reload(); 
-      }
+        } else {
+          Swal.fire(
+            'Terkonfirmasi!',
+            'Berhasil membatalkan antrian',
+            'success'
+          );
+          window.location.reload(); // Reload page after success
+        }
 
-      console.log('Antrian dibatalkan:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
+        console.log('Antrian dibatalkan:', data);
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    }
+  });
 };
 
 // Fungsi untuk memperbarui status antrian suster
 const susterAntri = async (index, nomorMR) => {
   const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
+  newDaftarPasien.splice(index,1);
   setDaftarPasien(newDaftarPasien);
 
   try {
@@ -567,6 +562,50 @@ const susterAntri = async (index, nomorMR) => {
     });
   };
 
+  const [queue, setQueue] = useState(currentPatients.map((pasien) => ({
+    ...pasien,
+    isActive: true
+  })));
+
+  // Function to add new patient to the queue
+  const addPatientToQueue = (newPatient) => {
+    setQueue((prevQueue) => [
+      ...prevQueue,
+      { ...newPatient, queueNumber: prevQueue.length + 1, isActive: true }
+    ]);
+  };
+
+  // Handle cancellation without reordering queue
+  const cancelPatient = (index) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((pasien, i) => (i === index ? { ...pasien, isActive: false } : pasien))
+    );
+  };
+
+
+  const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
+  const dropdownRef = useRef(null); // Referensi untuk dropdown
+
+  // Toggle untuk membuka atau menutup dropdown
+  const handleToggle = () => {
+    setIsOpen(prevState => !prevState);
+  };
+
+  // Menutup dropdown ketika klik di luar
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  // Event listener untuk mendeteksi klik di luar dropdown
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   return (
     <html className='Admin'>
@@ -642,28 +681,39 @@ const susterAntri = async (index, nomorMR) => {
                 </ul>
                 <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
                   <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                    <li className="nav-item dropdown">
-                      <a className="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <img src={profiles} alt="" width="35" height="35" className="rounded-circle"/>
+                    <li className="nav-item dropdown" ref={dropdownRef}>
+                      <a
+                        className="nav-link nav-icon-hover"
+                        href="#"
+                        onClick={handleToggle} // Kaitkan fungsi handleToggle ke sini
+                        id="drop2"
+                        aria-expanded={isOpen}
+                      >
+                        <img src={profiles} alt="Profile" width="35" height="35" className="rounded-circle" />
                       </a>
-                      <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                        <div className="message-body">
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-user fs-6"></i>
-                            <p className="mb-0 fs-3">My Profile</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-mail fs-6"></i>
-                            <p className="mb-0 fs-3">My Account</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-list-check fs-6"></i>
-                            <p className="mb-0 fs-3">My Task</p>
-                          </a>
-                          <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+
+                      {/* Dropdown menu muncul jika `isOpen` bernilai true */}
+                      {isOpen && (
+                        <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up show" aria-labelledby="drop2">
+                          <div className="message-body">
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-user fs-6"></i>
+                              <p className="mb-0 fs-3">My Profile</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-mail fs-6"></i>
+                              <p className="mb-0 fs-3">My Account</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-list-check fs-6"></i>
+                              <p className="mb-0 fs-3">My Task</p>
+                            </a>
+                            <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">
+                              Logout
+                            </a>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </li>
                   </ul>
                 </div>
@@ -671,77 +721,56 @@ const susterAntri = async (index, nomorMR) => {
             </header>
             <div className="container-fluid">
               <body className="login"></body>
-
-              <div className="col-lg-5" style={{ display: "flex", justifyContent: "space-between", width: "100%", height: "15rem" }}>
-                <div class="row" style={{ width: "23%", marginLeft: "1px" }}>
-                  <div class="card overflow-hidden">
-                    <div class="card-body p-4">
-                    <h5 class="card-title mb-9 fw-semibold text-center">Jumlah Antrian: </h5>
-                    <h1 class="mb-9 fw-semibold text-center">{jumlahPasien}</h1> {/* Menampilkan jumlah pasien di sini */}
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style={{ width: "23%", marginRight: "2px" }}>
-                  <div class="card overflow-hidden">
-                    <div class="card-body p-4">
-                    <h5 class="card-title mb-9 fw-semibold text-center">Jumlah Antrian Suster: </h5>
-                    <h1 class="mb-9 fw-semibold text-center">{pasienSus}</h1> {/* Menampilkan jumlah pasien suster */}
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style={{ width: "50%", marginRight: "2px" }}>
-                  <div class="card overflow-hidden">
-                    <div class="card-body p-4">
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <div>
-                <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Pasien</button>
+                <div className="dimrow">
+                <button className="btn btn-primary mb-3 dimton" onClick={toggleModal}>Tambah Pasien</button>
+                    <div className="dimcol">
+                      <h6 >Jumlah Antrian: {jumlahPasien}</h6>
+                      <h6 >Antrian Suster: {pasienSus}</h6>
+                    </div>
+                </div>
                 <div className="row">
                   <div className="col-lg-8 d-flex align-items-stretch" style={{ width: '100%' }}>
                     <div className="card w-100">
                       <div className="card-body p-4 width">
                       <div className="AntrianBox  ">
-      <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>
-        Antrian Pasien
-      </h5>
-        <input
-          type="text"
-          id="search-input"
-          className="form-sels"
-          placeholder="Masukkan nama pasien"
-          style={{ width: '67%' }}
-          onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
-          value={searchP} // Set nilai input sesuai searchP
-        />
-        
-        <div className="popup">
+                        <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>
+                          Antrian Pasien
+                        </h5>
+                          <input
+                            type="text"
+                            id="search-input"
+                            className="form-sels"
+                            placeholder="Masukkan nama pasien"
+                            style={{ width: '67%' }}
+                            onChange={handleInputChange} // Memanggil fungsi pencarian saat pengguna mengetik
+                            value={searchP} // Set nilai input sesuai searchP
+                          />
+                          
+                          <div className="popup">
 
-        {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
-          <div className="flex">
-            {targetPasien.map((pasien, index) => (
-              <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
-                <p>Nama: {pasien.namaLengkap}</p>
-                <p>Nomor MR: {pasien.nomorMR}</p>
-                <p>Nomor Telepon: {pasien.phone_number}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        </div>
-      {/* Tampilkan hasil pencarian hanya jika searchP tidak kosong */}
-      <button
-        type="button"
-        className="btn btn-secondary m-1"
-        onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
-        disabled={!selectedPatient} // Disable tombol jika pasien belum dipilih
-      >
-       Antri
-      </button>
-    </div>
+                          {searchP && Array.isArray(targetPasien) && targetPasien.length > 0 && (
+                            <div className="flex">
+                              {targetPasien.map((pasien, index) => (
+                                <div key={index} className="search_list" onClick={() => handlePatientClick(pasien)}>
+                                  <p>Nama: {pasien.namaLengkap}</p>
+                                  <p>Nomor MR: {pasien.nomorMR}</p>
+                                  <p>Nomor Telepon: {pasien.phone_number}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          </div>
+                        {/* Tampilkan hasil pencarian hanya jika searchP tidak kosong */}
+                        <button
+                          type="button"
+                          className="btn btn-secondary m-1"
+                          onClick={updateAntrianStatus} // Memanggil fungsi update status saat tombol ditekan
+                          disabled={!selectedPatient} // Disable tombol jika pasien belum dipilih
+                        >
+                        Antri
+                        </button>
+                      </div>
 
                         <div className="table-responsive">
                           <table className="table text-nowrap mb-0 align-middle">
@@ -763,51 +792,57 @@ const susterAntri = async (index, nomorMR) => {
                             </thead>
                             <tbody>
                             {currentPatients.map((pasien, index) => (
-    <tr key={pasien.nomorMR}>
-      <td>{index + 1}</td>
-      <td className="border-bottom-0">
-        <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
-      </td>
-      <td className="border-bottom-0">
-        <div className="d-flex align-items-center gap-2">
-          <span className="fw-normal">{pasien.nomorMR}</span>
-        </div>
-      </td>
-      <td className="border-bottom-0">
-        <button type="button" className="btn btn-primary m-1" onClick={() => handleValidation('Pasien Masuk', index, pasien.nomorMR, pasien.namaLengkap)}>
-          Masuk
-        </button>
-        <button type="button" className="btn btn-danger m-1" onClick={() => handleCancelation('Batal Antrian', index, pasien.nomorMR, pasien.namaLengkap)}>
-          Batal
-        </button>
+            <tr key={pasien.nomorMR}>
+              {/* Calculate and display the queue number dynamically */}
+              <td>{indexOfFirstPatient + index + 1}</td>
+              <td className="border-bottom-0">
+                <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+              </td>
+              <td className="border-bottom-0">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-normal">{pasien.nomorMR}</span>
+                </div>
+              </td>
+              <td className="border-bottom-0">
+                <button
+                  type="button"
+                  className="btn btn-primary m-1"
+                  onClick={() => handleValidation('Pasien Masuk', index, pasien.nomorMR, pasien.namaLengkap)}
+                >
+                  Masuk
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-danger m-1"
+                    onClick={() => cancelPasien(index, pasien.nomorMR, pasien.namaLengkap)}
+                  >
+                    Batal
+                  </button>
 
-        {/* Display 'Panggil' button if the patient's sound is available */}
-        {soundQueue[index] && (
-        <button
-          type="button"
-          className="btn btn-success m-1"
-          onClick={() => panggilStatus(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}
-          disabled={loading} // Disable button when loading
-        >
-          {loading ? 'Memanggil...' : 'Panggil'}
-        </button>
-      )}
-      </td>
-    </tr>
-  ))}
+
+                {soundQueue[index] && (
+                  <button
+                    type="button"
+                    className="btn btn-success m-1"
+                    onClick={() => panggilStatus(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}
+                  >
+                    Panggil
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
 
                         </tbody>
-
-
-                          </table>
+                        </table>
                           <div className="pagination-controls mt-3">
-                  <button className="btn btn-secondary mx-2" onClick={prevPage} disabled={currentPage === 1}>
-                    Previous
-                  </button>
-                  <button className="btn btn-secondary" onClick={nextPage} disabled={currentPage === Math.ceil(daftarPasien.length / patientsPerPage)}>
-                    Next
-                  </button>
-</div>
+                            <button className="btn btn-secondary mx-2" onClick={prevPage} disabled={currentPage === 1}>
+                              Previous
+                            </button>
+                            <button className="btn btn-secondary" onClick={nextPage} disabled={currentPage === Math.ceil(daftarPasien.length / patientsPerPage)}>
+                              Next
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
