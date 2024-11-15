@@ -47,28 +47,6 @@ function Antrian() {
   const [loading, setLoading] = useState(false);
 
 
-  const handleCancelation = (message, index, nomorMR, namaLengkap) => {
-    console.log('handleCancelation called');
-    Swal.fire({
-      title: 'Batal Antrian',
-      text: `Apakah anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Iya',
-      cancelButtonText: 'Tidak',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        cancelPasien(index, nomorMR); // Jalankan fungsi saat user mengonfirmasi "Iya"
-        Swal.fire(
-          'Terkonfirmasi!',
-          'Berhasil membatalkan antrian',
-          'success'
-        );
-      }
-    });
-  };
   
   const handleValidation = (message, index, nomorMR, namaLengkap) => {
     Swal.fire({
@@ -264,34 +242,38 @@ function Antrian() {
       }
     });
   };
-
-
-
   const fetchDaftarPasien = async () => {
-  try {
-    const response = await fetch('http://localhost:3000/patients');
-    const data = await response.json();
+    try {
+        const response = await fetch('http://localhost:3000/patients');
+        const data = await response.json();
 
-    if (response.ok) {
-      const filteredPatients = data.patients.filter(patient =>
-        patient.antrianStatus &&
-        patient.antrianStatus.status === true &&
-        patient.is_active !== true
-      );
-
-      // Apply sorting by `sortIndex` to ensure updated patients appear last
-      const sortedPatients = filteredPatients.sort((a, b) => (a.sortIndex || 0) - (b.sortIndex || 0));
-
-      setDaftarPasien(sortedPatients);
-    } else {
-      console.error('Failed to fetch patients:', data.message);
+        if (response.ok) { // Check if the response is successful
+            const filteredPatients = data.patients.filter(patient => 
+                patient.antrianStatus && 
+                patient.antrianStatus.status === true && 
+                patient.is_active !== true // Exclude patients with is_active = true
+            );
+            
+            // filter pasien yang ada di suster
+            const susPasien = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
+            
+            // Menghitung jumlah pasien yang sesuai dengan filter
+            const jumlahPasien = filteredPatients.length;
+            const pasienSus = susPasien.length;
+            console.log("Jumlah pasien yang sesuai:", jumlahPasien);
+    
+            // Mengatur daftar pasien dan jumlah pasien ke dalam state
+            setDaftarPasien(filteredPatients);
+            setJumlahPasien(jumlahPasien); // jumlah pasien di antrian
+            setPasienSus(pasienSus); // jumlah pasien di suster
+        } else {
+            console.error('Failed to fetch patients:', data.message);
+        }
+    } catch (error) {
+        console.error('Error fetching patients:', error);
+        // Handle error appropriately, e.g., displaying an error message to the user
     }
-  } catch (error) {
-    console.error('Error fetching patients:', error);
-  }
 };
-
-  
   
   useEffect(() => {
     fetchDaftarPasien();
@@ -337,6 +319,9 @@ function Antrian() {
   };
 
   const updateAntrianStatus = async () => {
+    console.log(selectedPatient); // Gunakan selectedPatient di sini
+  
+    // Pastikan selectedPatient sudah dipilih
     if (selectedPatient) {
       try {
         const response = await fetch(`http://localhost:3000/patients/update/${selectedPatient.nomorMR}`, {
@@ -344,37 +329,24 @@ function Antrian() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ antrianStatus: { status: true } }),
+          body: JSON.stringify({ antrianStatus: { status: true } }), // Sesuai dengan backend
         });
-  
+
+        const data = await response.json();
+
         if (response.ok) {
-          // Directly add the updated patient to the end of `daftarPasien`
-          setDaftarPasien((prevDaftarPasien) => {
-            // Filter out any existing instance of the patient, then append
-            const filteredPatients = prevDaftarPasien.filter(
-              (patient) => patient.nomorMR !== selectedPatient.nomorMR
-            );
-            return [...filteredPatients, { ...selectedPatient, antrianStatus: { status: true } }];
-          });
-  
-          console.log('Updated patient moved to the end of the queue');
+          console.log('Status antrian berhasil diperbarui:', data);
+          window.location.reload();
         } else {
-          console.error('Error updating antrian status:', response.message);
+          console.error('Error updating antrian status:', data.message);
         }
       } catch (error) {
         console.error('Error updating antrian status:', error);
       }
     } else {
-      console.log('Patient not found');
+      console.log('Pasien tidak ditemukan');
     }
   };
-  
-  
-  
-  
-  
-  
-  
 
 
 
@@ -394,37 +366,56 @@ function Antrian() {
 
 
 // Fungsi untuk membatalkan antrian pasien
-const cancelPasien = async (index, nomorMR) => {
-  const newDaftarPasien = [...daftarPasien];
-  setDaftarPasien(newDaftarPasien);
-  
-  try {
-      const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
+const cancelPasien = async (index, nomorMR, namaLengkap) => {
+  Swal.fire({
+    title: 'Batal Antrian',
+    text: `Apakah Anda ingin membatalkan antrian dengan nama ${namaLengkap}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Iya',
+    cancelButtonText: 'Tidak',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const newDaftarPasien = [...daftarPasien];
+      newDaftarPasien.splice(index, 1);  // Menghapus pasien dari daftar berdasarkan index
+      setDaftarPasien(newDaftarPasien);  // Update state
+
+      try {
+        const response = await fetch(`http://localhost:3000/patients/cancelAntrian`, {
           method: 'PUT',
           headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ nomorMR }),
-      });
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
+        const data = await response.json();
+
+        if (!response.ok) {
           throw new Error(data.message || 'Gagal membatalkan antrian pasien');
-      }
-      else{
-        window.location.reload(); 
-      }
+        } else {
+          Swal.fire(
+            'Terkonfirmasi!',
+            'Berhasil membatalkan antrian',
+            'success'
+          );
+          window.location.reload(); // Reload page after success
+        }
 
-      console.log('Antrian dibatalkan:', data);
-  } catch (error) {
-      console.error('Error:', error.message);
-  }
+        console.log('Antrian dibatalkan:', data);
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    }
+  });
 };
 
 // Fungsi untuk memperbarui status antrian suster
 const susterAntri = async (index, nomorMR) => {
   const newDaftarPasien = [...daftarPasien];
+  newDaftarPasien.splice(index,1);
   setDaftarPasien(newDaftarPasien);
 
   try {
@@ -734,8 +725,8 @@ const susterAntri = async (index, nomorMR) => {
                 <div className="dimrow">
                 <button className="btn btn-primary mb-3 dimton" onClick={toggleModal}>Tambah Pasien</button>
                     <div className="dimcol">
-                      <h5 >Jumlah Antrian: {jumlahPasien}</h5>
-                      <h5 >Antrian Suster: {pasienSus}</h5>
+                      <h6 >Jumlah Antrian: {jumlahPasien}</h6>
+                      <h6 >Antrian Suster: {pasienSus}</h6>
                     </div>
                 </div>
                 <div className="row">
@@ -821,12 +812,13 @@ const susterAntri = async (index, nomorMR) => {
                   Masuk
                 </button>
                 <button
-                  type="button"
-                  className="btn btn-danger m-1"
-                  onClick={() => handleCancelation(index)}
-                >
-                  Batal
-                </button>
+                    type="button"
+                    className="btn btn-danger m-1"
+                    onClick={() => cancelPasien(index, pasien.nomorMR, pasien.namaLengkap)}
+                  >
+                    Batal
+                  </button>
+
 
                 {soundQueue[index] && (
                   <button
