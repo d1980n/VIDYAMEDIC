@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
@@ -36,6 +36,29 @@ function DataSuperAdmin() {
     setActivePage(page);
   };
 
+  const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
+  const dropdownRef = useRef(null); // Referensi untuk dropdown
+
+  // Toggle untuk membuka atau menutup dropdown
+  const handleToggle = () => {
+    setIsOpen(prevState => !prevState);
+  };
+
+  // Menutup dropdown ketika klik di luar
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  // Event listener untuk mendeteksi klik di luar dropdown
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <html className='Admin'>
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -59,17 +82,23 @@ function DataSuperAdmin() {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                  <NavLink className={`sidebar-link ${activePage === "DashboardGamma" ? "active" : ""}`} to="/DashboardGamma" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                  <NavLink className={`sidebar-link ${activePage === "DashboardGamma" ? "active" : ""}`} to="/DashboardGamma" aria-expanded="false" onClick={() => handleSetActivePage("DashboarGammad")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataSuperAdmin" ? "active" : ""}`} to="/DataSuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Datapasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataSuperAdmin" ? "active" : ""}`} to="/DataSuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataSuperAdmin")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Data Admin Klinik</span>
+                    </NavLink>
+                    <NavLink className={`sidebar-link ${activePage === "DataMitra" ? "active" : ""}`} to="/DataMitra" aria-expanded="false" onClick={() => handleSetActivePage("DataMitra")}>
+                      <span>
+                        <i className="ti ti-layout-dashboard"></i>
+                      </span>
+                      <span className="hide-menu">Data Mitra</span>
                     </NavLink>
                   </li>
                   <li className="nav-small-cap">
@@ -92,7 +121,7 @@ function DataSuperAdmin() {
             </div>
           </aside>
           <div className="body-wrapper">
-            <header className="app-header">
+          <header className="app-header">
               <nav className="navbar navbar-expand-lg navbar-light">
                 <ul className="navbar-nav">
                   <li className="nav-item d-block d-xl-none">
@@ -109,33 +138,45 @@ function DataSuperAdmin() {
                 </ul>
                 <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
                   <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                    <li className="nav-item dropdown">
-                      <a className="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <img src={profiles} alt="" width="35" height="35" className="rounded-circle"/>
+                    <li className="nav-item dropdown" ref={dropdownRef}>
+                      <a
+                        className="nav-link nav-icon-hover"
+                        href="#"
+                        onClick={handleToggle} // Kaitkan fungsi handleToggle ke sini
+                        id="drop2"
+                        aria-expanded={isOpen}
+                      >
+                        <img src={profiles} alt="Profile" width="35" height="35" className="rounded-circle" />
                       </a>
-                      <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                        <div className="message-body">
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-user fs-6"></i>
-                            <p className="mb-0 fs-3">My Profile</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-mail fs-6"></i>
-                            <p className="mb-0 fs-3">My Account</p>
-                          </a>
-                          <a href="javascript:void(0)" className="d-flex align-items-center gap-2 dropdown-item">
-                            <i className="ti ti-list-check fs-6"></i>
-                            <p className="mb-0 fs-3">My Task</p>
-                          </a>
-                          <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+
+                      {/* Dropdown menu muncul jika `isOpen` bernilai true */}
+                      {isOpen && (
+                        <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up show" aria-labelledby="drop2">
+                          <div className="message-body">
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-user fs-6"></i>
+                              <p className="mb-0 fs-3">My Profile</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-mail fs-6"></i>
+                              <p className="mb-0 fs-3">My Account</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-list-check fs-6"></i>
+                              <p className="mb-0 fs-3">My Task</p>
+                            </a>
+                            <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">
+                              Logout
+                            </a>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </li>
                   </ul>
                 </div>
               </nav>
             </header>
+            {/* <!--  Header End --> */}
             <div className="container-fluid">
               <body className="login"></body>
               <div>
@@ -145,7 +186,7 @@ function DataSuperAdmin() {
                     <div className="card w-100">
                       <div className="card-body p-4 width">
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
-                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Dokter</h5>
+                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Admin Klinik</h5>
                           <input
                                 type="text"
                                 id="search-input"

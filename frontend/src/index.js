@@ -19,6 +19,7 @@ import DataNakes from './View/DataNakes.jsx';
 import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
+import DataMitra from './View/DataMitra.jsx';
 
 import {
   createBrowserRouter,
@@ -117,6 +118,10 @@ const router = createBrowserRouter([
   {
     path: "/DataSuperAdmin",
     element: <DataSuperAdmin/>
+  },
+  {
+    path: "/DataMitra",
+    element: <DataMitra/>
   }
 ]);
 

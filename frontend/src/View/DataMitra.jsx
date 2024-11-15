@@ -1,43 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
+import axios from 'axios';
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
 import images from '../source/Picture1.png';
-import Swal from 'sweetalert2';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
 
-const MedicalRecords = () => {
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filteredData, setFilteredData] = useState([]);
+function DataSuperAdmin() {
+  const [showModal, setShowModal] = useState(false);
+  const [namaLengkap, setNamaLengkap] = useState('');
+  // const [fotoKTP, setFotoKTP] = useState(null);
+  const [jenisKelamin, setJenisKelamin] = useState('');
+  const [alamatLengkap, setAlamatLengkap] = useState('');
+  const [phone_number, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [ttl, setTtl] = useState('');
+  const [poli, setPoli] = useState('');
+  const [role, setRole] = useState('');
+  const [formData, setFormData] = useState({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [dokters, setDokters] = useState([]);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/patients");
-        const data = await response.json();
-        if (data.success) {
-            // Menyimpan semua person ke dalam state
-            setPatients(data.patients);
-            
-            // Filter untuk Suster
-            const filteredPatients = data.patients.filter(item => item.nomorMR);
-            
-            // Jika ingin menyimpan filteredSuster ke dalam state terpisah, bisa menggunakan setSusterList
-            setPatients(filteredPatients); // Pastikan Anda mendefinisikan state setSusterList sebelumnya
-        } else {
-            console.error("Failed to fetch persons:", data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching persons:", error);
-    }
-    };
-
-    fetchPatients();
-  }, []);
+  // ===============================================================================================================================
 
   const [activePage, setActivePage] = useState('');
 
@@ -68,9 +59,6 @@ const MedicalRecords = () => {
     };
   }, []);
 
-  // if (loading) return <div>Loading...</div>;
-  // if (error) return <div>Error: {error}</div>;
-
   return (
     <html className='Admin'>
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -94,23 +82,23 @@ const MedicalRecords = () => {
                     <span className="hide-menu">Home</span>
                   </li>
                   <li className="sidebar-item">
-                  <NavLink className={`sidebar-link ${activePage === "SuperAdminDashboard" ? "active" : ""}`} to="/SuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("Dashboard")}>
+                  <NavLink className={`sidebar-link ${activePage === "DashboardGamma" ? "active" : ""}`} to="/DashboardGamma" aria-expanded="false" onClick={() => handleSetActivePage("DashboarGammad")}>
                       <span>
                         <i className="ti ti-layout-dashboard"></i>
                       </span>
                       <span className="hide-menu">Dashboard</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataNakes" ? "active" : ""}`} to="/DataNakes" aria-expanded="false" onClick={() => handleSetActivePage("DataNakes")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataSuperAdmin" ? "active" : ""}`} to="/DataSuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataSuperAdmin")}>
                       <span>
-                        <i className="ti ti-square-plus"></i>
+                        <i className="ti ti-layout-dashboard"></i>
                       </span>
-                      <span className="hide-menu">Data Tenaga Kesehatan</span>
+                      <span className="hide-menu">Data Admin Klinik</span>
                     </NavLink>
-                    <NavLink className={`sidebar-link ${activePage === "DataPasien" ? "active" : ""}`} to="/DataPasien" aria-expanded="false" onClick={() => handleSetActivePage("DataPasien")}>
+                    <NavLink className={`sidebar-link ${activePage === "DataMitra" ? "active" : ""}`} to="/DataMitra" aria-expanded="false" onClick={() => handleSetActivePage("DataMitra")}>
                       <span>
-                        <i className="ti ti-accessible"></i>
+                        <i className="ti ti-layout-dashboard"></i>
                       </span>
-                      <span className="hide-menu">Data Pasien</span>
+                      <span className="hide-menu">Data Mitra</span>
                     </NavLink>
                   </li>
                   <li className="nav-small-cap">
@@ -188,15 +176,17 @@ const MedicalRecords = () => {
                 </div>
               </nav>
             </header>
+            {/* <!--  Header End --> */}
             <div className="container-fluid">
               <body className="login"></body>
               <div>
+                <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Admin</button>
                 <div className="row">
                   <div className="col-lg-8 d-flex align-items-stretch" style={{ width: '100%' }}>
                     <div className="card w-100">
                       <div className="card-body p-4 width">
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
-                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Pasien</h5>
+                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Mitra</h5>
                           <input
                                 type="text"
                                 id="search-input"
@@ -219,13 +209,16 @@ const MedicalRecords = () => {
                             <thead className="text-dark fs-4">
                               <tr>
                                 <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Nomor MR</h6>
+                                  <h6 className="fw-semibold mb-0">No</h6>
                                 </th>
                                 <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Nama Pasien</h6>
+                                  <h6 className="fw-semibold mb-0">Logo</h6>
                                 </th>
                                 <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Diagnosis</h6>
+                                  <h6 className="fw-semibold mb-0">Nama Klinik</h6>
+                                </th>
+                                <th className="border-bottom-0">
+                                  <h6 className="fw-semibold mb-0">Alamat</h6>
                                 </th>
                                 <th style={{width: '10rem'}} className="border-bottom-0">
                                   <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
@@ -233,24 +226,30 @@ const MedicalRecords = () => {
                               </tr>
                             </thead>
                             <tbody>
-                            {patients.length > 0 ? (
-                                patients.map((patients) => (
-                                    <tr key={patients.nomorMR}>
-                                        <td>{patients.nomorMR}</td>
-                                        <td>{patients.namaLengkap}</td>
-                                        <td>{patients.email}</td>
-                                        <td>
-                                            <button type="button" className="btn btn-primary">Detail</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="4" className="text-center">Tidak ada data untuk ditampilkan</td>
+                            {dokters.map((dokter, index) => (
+                                <tr key={dokter.kode_dok}>
+                                  <td>{index + 1}</td>
+                                  <td className="border-bottom-0">
+                                    <p className="mb-0 fw-normal">{dokter.namaLengkap}</p>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <div className="d-flex align-items-center gap-2"> 
+                                      <span className="fw-normal">{dokter.email}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <div className="d-flex align-items-center gap-2">
+                                      <span className="fw-normal">{dokter.password}</span>
+                                    </div>
+                                  </td>
+                                  <td className="border-bottom-0">
+                                    <button type="button" className="btn btn-success m-1">Detail</button>
+                                    <button type="button" className="btn btn-danger m-1" onClick="">Delete</button>
+                                  </td>
                                 </tr>
-                            )}
-                          </tbody>
+                            ))}
 
+                        </tbody>
 
 
                           </table>
@@ -260,7 +259,72 @@ const MedicalRecords = () => {
                   </div>
                 </div>
 
-                
+                {showModal && (
+  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block', zIndex: 1050 }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
+          <button type="button" className="btn-close" onClick={toggleModal}></button>
+        </div>
+        <form onSubmit="">
+          <div className="modal-body">
+            <div className="mb-3">
+              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
+              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} autoFocus />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
+              <select className="form-select" id="jenisKelamin" name="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                <option value="Select">Select</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
+              <textarea className="form-control" id="alamatLengkap" name="alamat" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
+              <input type="text" className="form-control" id="phone_number" name="no_hp" value={phone_number} onChange={(e) => setPhoneNumber(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">Alamat Email</label>
+              <input type="text" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="ttl" className="form-label">Tanggal Lahir</label>
+              <input type="date" className="form-control" id="ttl" name="ttl" value={ttl} onChange={(e) => setTtl(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="poli" className="form-label">Poli</label>
+              <input type="text" className="form-control" id="poli" name="poli" value={poli} onChange={(e) => setPoli(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">Password</label>
+              <input type="password" className="form-control" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password</label>
+              <input type="password" className="form-control" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </div>
+          </div>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Menampilkan pesan error jika ada */}
+
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
+            <button type="submit" className="btn btn-primary">Tambah Dokter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
+{showModal && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>}
+
+
               </div>
             </div>
           </div>
@@ -275,20 +339,7 @@ const MedicalRecords = () => {
         <script src="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.js"></script>
       </body>
     </html>
-    // <div>
-    //   <h1>Medical Records</h1>
-    //   <ul>
-    //     {medicalRecords.map((record) => (
-    //       <li key={record._id}>
-    //         <h3>Record ID: {record._id}</h3>
-    //         <p>Patient Name: {record.patientName}</p>
-    //         <p>Diagnosis: {record.diagnosis}</p>
-    //         {/* Add other fields as necessary */}
-    //       </li>
-    //     ))}
-    //   </ul>
-    // </div>
   );
-};
+}
 
-export default MedicalRecords;
+export default DataSuperAdmin;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
@@ -170,25 +170,25 @@ const handleSubmit = async (e) => {
         const data = await response.json();
         console.log("Response Data:", data);
 
-        // Reset form setelah pengiriman berhasil
-        setNama('');
-        setJenisKelamin('');
-        setNik('');
-        setPoli('');
-        setAlamat('');
-        setNoHp('');
-        setEmail('');
-        setPassword('');
-        setKonfPassword('');
-        setRole('Dokter');
-        setShowModal(false);
-
-         // Tampilkan SweetAlert sukses dengan nama dokter
-         Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: `Dokter ${nama} berhasil ditambahkan.`,
-        });
+      // Reset form setelah pengiriman berhasil
+      setNama('');
+      setJenisKelamin('');
+      setNik('');
+      setPoli('');
+      setAlamat('');
+      setNoHp('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+      setRole('');
+      setShowModal(false);
+  
+       // Tampilkan SweetAlert sukses dengan nama dokter
+       Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: `${role} ${nama} berhasil ditambahkan.`,
+      });
 
         // Fetch data again after adding a new patient
         fetchPersonData();
@@ -353,6 +353,29 @@ const handleInputChange = (event) => {
   setSearchQuery(event.target.value); // Update search query
     };
 
+  const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
+  const dropdownRef = useRef(null); // Referensi untuk dropdown
+
+  // Toggle untuk membuka atau menutup dropdown
+  const handleToggle = () => {
+    setIsOpen(prevState => !prevState);
+  };
+
+  // Menutup dropdown ketika klik di luar
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  // Event listener untuk mendeteksi klik di luar dropdown
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -411,7 +434,61 @@ const handleInputChange = (event) => {
             </div>
           </aside>
           <div className="body-wrapper">
-            
+          <header className="app-header">
+              <nav className="navbar navbar-expand-lg navbar-light">
+                <ul className="navbar-nav">
+                  <li className="nav-item d-block d-xl-none">
+                    <a className="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                      <i className="ti ti-menu-2"></i>
+                    </a>
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link nav-icon-hover" href="javascript:void(0)">
+                      <i className="ti ti-bell-ringing"></i>
+                      <div className="notification bg-primary rounded-circle"></div>
+                    </a>
+                  </li>
+                </ul>
+                <div className="navbar-collapse justify-content-end px-0" id="navbarNav">
+                  <ul className="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                    <li className="nav-item dropdown" ref={dropdownRef}>
+                      <a
+                        className="nav-link nav-icon-hover"
+                        href="#"
+                        onClick={handleToggle} // Kaitkan fungsi handleToggle ke sini
+                        id="drop2"
+                        aria-expanded={isOpen}
+                      >
+                        <img src={profiles} alt="Profile" width="35" height="35" className="rounded-circle" />
+                      </a>
+
+                      {/* Dropdown menu muncul jika `isOpen` bernilai true */}
+                      {isOpen && (
+                        <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up show" aria-labelledby="drop2">
+                          <div className="message-body">
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-user fs-6"></i>
+                              <p className="mb-0 fs-3">My Profile</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-mail fs-6"></i>
+                              <p className="mb-0 fs-3">My Account</p>
+                            </a>
+                            <a href="#" className="d-flex align-items-center gap-2 dropdown-item">
+                              <i className="ti ti-list-check fs-6"></i>
+                              <p className="mb-0 fs-3">My Task</p>
+                            </a>
+                            <a href="./authentication-login.html" className="btn btn-outline-primary mx-3 mt-2 d-block">
+                              Logout
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+            </header>
             <div className="container-fluid">
               <body className="login"></body>
               <div>
@@ -434,7 +511,7 @@ const handleInputChange = (event) => {
                                       <div className="d-flex">
                                         {" "}
                                         {/* Mengatur kolom untuk input dan label */}
-                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Dokter"} onChange={() => setCurrentRole("Dokter")} />
+                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Doctor"} onChange={() => setCurrentRole("Doctor")} />
                                         <label htmlFor="tabDokter"  style={{height:"40px",}}>Data Dokter</label>
                                       </div>
                                       <div className="d-flex">
@@ -583,15 +660,15 @@ const handleInputChange = (event) => {
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Email</h6>
-                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Role</h6>
-                                <select className="form-select" id="jenisKelamin" value={role} onChange={(e) => setRole(e.target.value)}>
+                                <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
-                                  <option value="Laki-laki">Dokter</option>
-                                  <option value="Perempuan">Antrian</option>
-                                  <option value="Perempuan">Suster</option>
+                                  <option value="Doctor">Doctor</option>
+                                  <option value="Antrian">Antrian</option>
+                                  <option value="Suster">Suster</option>
                                 </select>
                               </div>
                             </div>
@@ -609,7 +686,7 @@ const handleInputChange = (event) => {
                             
                             <div className="row row-space">
                               <div className="col-lg-12">
-                                <h6 className="fw-bold">Profile PIcture</h6>
+                                <h6 className="fw-bold">Profile Picture</h6>
                                 <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
                               </div>
                             </div>
@@ -620,7 +697,7 @@ const handleInputChange = (event) => {
                               Tutup
                             </button>
                             <button type="submit" className="btn btn-primary">
-                              <i className="ti ti-playlist-add"></i> Detail
+                              <i className="ti ti-playlist-add"></i> Simpan
                             </button>
                             {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
                           </div>
