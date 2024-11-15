@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { format } from 'date-fns';
 import profiles from "../source/user-1.jpg";
 import logo from "../source/logo.png";
 import "../css/login.css";
@@ -744,7 +745,9 @@ function Drmonitor() {
                                 <div className="accord">
                                   <details>
                                     <summary className="fw-semibold">
-                                      12 Maret 2039 <br />
+                                    {medicalRecords.WaktuMedicalCheck
+                                  ? format(new Date(medicalRecords.WaktuMedicalCheck), "MMMM, dd, yyyy 'at' HH:mm:ss")
+                                  : 'N/A'}
                                       <h8 className="fw-light">08:21</h8>
                                     </summary>
                                     {medicalRec ? (

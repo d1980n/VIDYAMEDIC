@@ -1,5 +1,5 @@
 const express = require('express');
-const { tambahPasien, getAllPatients, getPatientById, cancelAntrian, searchPatients, updateAntrianStatus, susterAntri, dokterAntri, dokterPeriksa, statusSelesai } = require('../controllers/patients.controller');
+const { tambahPasien, getAllPatients, getPatientById, cancelAntrian, searchPatients, updateAntrianStatus, susterAntri, dokterAntri, dokterPeriksa, statusSelesai, panggilStatus } = require('../controllers/patients.controller');
 
 const router = express.Router();
 
@@ -17,6 +17,7 @@ router.put('/update/:nomorMR', updateAntrianStatus);
 router.put('/dokterAntri', dokterAntri);
 router.put('/dokterPeriksa', dokterPeriksa);
 router.post('/statusSelesai', statusSelesai);
+router.post('/panggilStatus', panggilStatus);
 
 
 

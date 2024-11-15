@@ -169,14 +169,14 @@ function DataNakes() {
       setEmail('');
       setPassword('');
       setKonfPassword('');
-      setRole('Dokter');
+      setRole('');
       setShowModal(false);
   
        // Tampilkan SweetAlert sukses dengan nama dokter
        Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: `Dokter ${nama} berhasil ditambahkan.`,
+        text: `${role} ${nama} berhasil ditambahkan.`,
       });
 
       // Fetch data again after adding a new patient
@@ -639,15 +639,15 @@ const handleInputChange = (event) => {
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Email</h6>
-                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Role</h6>
-                                <select className="form-select" id="jenisKelamin" value={role} onChange={(e) => setRole(e.target.value)}>
+                                <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
-                                  <option value="Laki-laki">Dokter</option>
-                                  <option value="Perempuan">Antrian</option>
-                                  <option value="Perempuan">Suster</option>
+                                  <option value="Dokter">Dokter</option>
+                                  <option value="Suster">Suster</option>
+                                  <option value="Antrian">Antrian</option>
                                 </select>
                               </div>
                             </div>
@@ -665,7 +665,7 @@ const handleInputChange = (event) => {
                             
                             <div className="row row-space">
                               <div className="col-lg-12">
-                                <h6 className="fw-bold">Profile PIcture</h6>
+                                <h6 className="fw-bold">Profile Picture</h6>
                                 <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
                               </div>
                             </div>
@@ -676,7 +676,7 @@ const handleInputChange = (event) => {
                               Tutup
                             </button>
                             <button type="submit" className="btn btn-primary">
-                              <i className="ti ti-playlist-add"></i> Detail
+                              <i className="ti ti-playlist-add"></i> Simpan
                             </button>
                             {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
                           </div>

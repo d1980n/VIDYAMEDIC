@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 const Target = () => {
   const [currentSound, setCurrentSound] = useState(null);
   const [previousSound, setPreviousSound] = useState(null);

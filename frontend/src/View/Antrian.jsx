@@ -44,6 +44,7 @@ function Antrian() {
     { id: '8', name: '8', file: '8.mp3' },
     { id: '9', name: '9', file: '9.mp3' }
   ]);
+  const [loading, setLoading] = useState(false);
 
 
   const handleCancelation = (message, index, nomorMR, namaLengkap) => {
@@ -90,7 +91,8 @@ function Antrian() {
       }
     });
   };
-  const handleCallPatient = (index, nomorMR, namaLengkap, sound) => {
+
+   const panggilStatus = async (index, nomorMR, namaLengkap, sound) => {
     Swal.fire({
       title: 'Panggil Pasien',
       text: `Apakah ingin memanggil pasien dengan nomor urut ${index + 1}?`,
@@ -100,15 +102,36 @@ function Antrian() {
       cancelButtonText: 'Tidak',
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        // Pass the `sound` object to sendSoundIdToTarget
-        sendSoundIdToTarget(sound); // Run this function when the user confirms
-        Swal.fire(
-          'Terkonfirmasi!',
-          `Pasien dengan nama ${namaLengkap} telah dipanggil.`,
-          'success'
-        );
+        setLoading(true); // Start loading
+
+        try {
+          const response = await fetch('http://localhost:3000/patients/panggilStatus', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nomorMR }), // Send nomorMR to backend
+          });
+
+          const resultApi = await response.json();
+
+          if (response.ok) {
+            Swal.fire(
+              'Terkonfirmasi!',
+              `Pasien dengan nama ${namaLengkap} telah dipanggil.`,
+              'success'
+            );
+            sendSoundIdToTarget(sound); // Execute sound logic here
+          } else {
+            Swal.fire('Gagal!', resultApi.message, 'error');
+          }
+        } catch (error) {
+          Swal.fire('Terjadi kesalahan!', 'Silakan coba lagi.', 'error');
+        } finally {
+          setLoading(false); // End loading
+        }
       }
     });
   };
@@ -771,21 +794,21 @@ const susterAntri = async (index, nomorMR) => {
                                     Batal
                                   </button>
 
-                                  {/* Display 'Panggil' button if the patient's sound is available */}
-                                  {soundQueue[index] && (
-                                    
-                                    <button 
-                                    type="button" 
-                                    className="btn btn-success m-1" 
-                                    onClick={() => handleCallPatient(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}>
-                                    Panggil
-                                  </button>
-                                  
-                                    
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
+        {/* Display 'Panggil' button if the patient's sound is available */}
+        {soundQueue[index] && (
+        <button
+          type="button"
+          className="btn btn-success m-1"
+          onClick={() => panggilStatus(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}
+          disabled={loading} // Disable button when loading
+        >
+          {loading ? 'Memanggil...' : 'Panggil'}
+        </button>
+      )}
+      </td>
+    </tr>
+  ))}
+
                         </tbody>
                         </table>
                           <div className="pagination-controls mt-3">

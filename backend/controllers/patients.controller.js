@@ -23,7 +23,7 @@ const tambahPasien = async(req, res, next) => {
         });
 
         const savedPasien = await newPasien.save();
-        console.log('Pasien berhasil disimpan:', savedPasien);
+        console.log('Pasien berhasil disim                                                      :', savedPasien);
         res.status(201).json(savedPasien);
     } catch (error) {
         console.error('Error saat menyimpan pasien:', error);
@@ -189,11 +189,9 @@ const statusSelesai = async(req, res) => {
 
             // Update statusMRPeriksa dan statusMR di MedicalRecord
             const updatedMedicalRecords = await MedicalRecord.updateMany({ nomorMR: { $in: nomorMR } }, {
-                $set: {
-                    statusMRPeriksa: false
-                },
                 $unset: {
-                    statusMR: ""
+                    statusMR: "",
+                    statusMRPeriksa: ""
                 }
             }, { new: true });
 
@@ -294,6 +292,30 @@ const updateAntrianStatus = async(req, res) => {
     }
 };
 
+const panggilStatus = async(req, res) => {
+    const { nomorMR } = req.body; // Mengambil nomorMR dari body request
+
+    try {
+        // Set panggilStatus to true
+        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, { $set: { 'panggilStatus': true } }, { new: true } // Mengembalikan data yang sudah diupdate
+        );
+
+        if (!pasien) {
+            return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
+        }
+
+        // Send immediate response to client
+        res.json({ success: true, message: 'Status antrian suster berhasil diperbarui', pasien });
+
+        // Wait 10 seconds, then set panggilStatus to false
+        setTimeout(async() => {
+            await Patient.findOneAndUpdate({ nomorMR: nomorMR }, { $set: { 'panggilStatus': false } }, { new: true });
+        }, 10000); // 10000 ms = 10 seconds
+    } catch (error) {
+        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status antrian suster', error });
+    }
+};
+
 
 
 
@@ -310,4 +332,5 @@ module.exports = {
     dokterAntri,
     dokterPeriksa,
     statusSelesai,
+    panggilStatus,
 };
