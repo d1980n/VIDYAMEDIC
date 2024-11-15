@@ -490,7 +490,7 @@ const handleInputChange = (event) => {
                                       <div className="d-flex">
                                         {" "}
                                         {/* Mengatur kolom untuk input dan label */}
-                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Dokter"} onChange={() => setCurrentRole("Dokter")} />
+                                        <input type="radio" name="tabs" id="tabDokter" checked={currentRole === "Doctor"} onChange={() => setCurrentRole("Doctor")} />
                                         <label htmlFor="tabDokter"  style={{height:"40px",}}>Data Dokter</label>
                                       </div>
                                       <div className="d-flex">
@@ -645,9 +645,9 @@ const handleInputChange = (event) => {
                                 <h6 className="fw-bold">Role</h6>
                                 <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
-                                  <option value="Dokter">Dokter</option>
-                                  <option value="Suster">Suster</option>
+                                  <option value="Doctor">Doctor</option>
                                   <option value="Antrian">Antrian</option>
+                                  <option value="Suster">Suster</option>
                                 </select>
                               </div>
                             </div>

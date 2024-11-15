@@ -390,7 +390,6 @@ function Antrian() {
 // Fungsi untuk membatalkan antrian pasien
 const cancelPasien = async (index, nomorMR) => {
   const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1);
   setDaftarPasien(newDaftarPasien);
   
   try {
@@ -420,7 +419,6 @@ const cancelPasien = async (index, nomorMR) => {
 // Fungsi untuk memperbarui status antrian suster
 const susterAntri = async (index, nomorMR) => {
   const newDaftarPasien = [...daftarPasien];
-  newDaftarPasien.splice(index, 1); // Menghapus pasien dari daftar
   setDaftarPasien(newDaftarPasien);
 
   try {
@@ -566,6 +564,27 @@ const susterAntri = async (index, nomorMR) => {
       console.error('Error:', error);
     });
   };
+
+  const [queue, setQueue] = useState(currentPatients.map((pasien) => ({
+    ...pasien,
+    isActive: true
+  })));
+
+  // Function to add new patient to the queue
+  const addPatientToQueue = (newPatient) => {
+    setQueue((prevQueue) => [
+      ...prevQueue,
+      { ...newPatient, queueNumber: prevQueue.length + 1, isActive: true }
+    ]);
+  };
+
+  // Handle cancellation without reordering queue
+  const cancelPatient = (index) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((pasien, i) => (i === index ? { ...pasien, isActive: false } : pasien))
+    );
+  };
+
 
   const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
   const dropdownRef = useRef(null); // Referensi untuk dropdown
@@ -776,38 +795,45 @@ const susterAntri = async (index, nomorMR) => {
                             </thead>
                             <tbody>
                             {currentPatients.map((pasien, index) => (
-                              <tr key={pasien.nomorMR}>
-                                <td>{index + 1}</td>
-                                <td className="border-bottom-0">
-                                  <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
-                                </td>
-                                <td className="border-bottom-0">
-                                  <div className="d-flex align-items-center gap-2">
-                                    <span className="fw-normal">{pasien.nomorMR}</span>
-                                  </div>
-                                </td>
-                                <td className="border-bottom-0">
-                                  <button type="button" className="btn btn-primary m-1" onClick={() => handleValidation('Pasien Masuk', index, pasien.nomorMR, pasien.namaLengkap)}>
-                                    Masuk
-                                  </button>
-                                  <button type="button" className="btn btn-danger m-1" onClick={() => handleCancelation('Batal Antrian', index, pasien.nomorMR, pasien.namaLengkap)}>
-                                    Batal
-                                  </button>
+            <tr key={pasien.nomorMR}>
+              {/* Calculate and display the queue number dynamically */}
+              <td>{indexOfFirstPatient + index + 1}</td>
+              <td className="border-bottom-0">
+                <p className="mb-0 fw-normal">{pasien.namaLengkap}</p>
+              </td>
+              <td className="border-bottom-0">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-normal">{pasien.nomorMR}</span>
+                </div>
+              </td>
+              <td className="border-bottom-0">
+                <button
+                  type="button"
+                  className="btn btn-primary m-1"
+                  onClick={() => handleValidation('Pasien Masuk', index, pasien.nomorMR, pasien.namaLengkap)}
+                >
+                  Masuk
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger m-1"
+                  onClick={() => handleCancelation(index)}
+                >
+                  Batal
+                </button>
 
-        {/* Display 'Panggil' button if the patient's sound is available */}
-        {soundQueue[index] && (
-        <button
-          type="button"
-          className="btn btn-success m-1"
-          onClick={() => panggilStatus(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}
-          disabled={loading} // Disable button when loading
-        >
-          {loading ? 'Memanggil...' : 'Panggil'}
-        </button>
-      )}
-      </td>
-    </tr>
-  ))}
+                {soundQueue[index] && (
+                  <button
+                    type="button"
+                    className="btn btn-success m-1"
+                    onClick={() => panggilStatus(index, pasien.nomorMR, pasien.namaLengkap, soundQueue[index + 1])}
+                  >
+                    Panggil
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
 
                         </tbody>
                         </table>
