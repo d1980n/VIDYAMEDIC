@@ -226,6 +226,31 @@ function DrAntri() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch("http://localhost:3000/patients");
+        const data = await response.json();
+  
+        if (data.success) {
+          const newPatients = data.patients.filter(
+            (patient) => patient.antrianStatus.dokterAntriStatus === true
+          );
+          setDaftarPasien((prevDaftarPasien) => {
+            const uniquePatients = newPatients.filter(
+              (newPatient) => !prevDaftarPasien.some((patient) => patient.nomorMR === newPatient.nomorMR)
+            );
+            return [...prevDaftarPasien, ...uniquePatients];
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching new patients:", error);
+      }
+    }, 5000); // Polling setiap 5 detik
+  
+    return () => clearInterval(interval); // Bersihkan interval saat komponen dibongkar
+  }, []);
+
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
