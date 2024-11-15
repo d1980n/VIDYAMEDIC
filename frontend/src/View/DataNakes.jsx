@@ -562,15 +562,15 @@ const handleInputChange = (event) => {
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Email</h6>
-                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Role</h6>
                                 <select className="form-select" id="jenisKelamin" value={role} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
-                                  <option value="Laki-laki">Dokter</option>
-                                  <option value="Perempuan">Antrian</option>
-                                  <option value="Perempuan">Suster</option>
+                                  <option value="Doctor">Doctor</option>
+                                  <option value="Antrian">Antrian</option>
+                                  <option value="Suster">Suster</option>
                                 </select>
                               </div>
                             </div>

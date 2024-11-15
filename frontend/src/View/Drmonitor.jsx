@@ -101,24 +101,27 @@ function Drmonitor() {
     try {
       const response = await fetch("http://localhost:3000/medical");
       const data = await response.json();
-      console.log("Response: ", response);
-      console.log("Data pasien: ", data.medicalRecords);
 
       if (data.success) {
-        // Set all records to state
         setMedicalRecords(data.medicalRecords);
-        // Filter records where statusMRPeriksa === true
-        const recordsWithStatusTrue = data.medicalRecords.filter((record) => record.statusMRPeriksa === true);
-        setFilteredRecords(recordsWithStatusTrue); // Simpan data yang sesuai filter
+
+        const recordsWithStatusTrue = data.medicalRecords.filter(
+          (record) => record.statusMR === true
+        );
+        setFilteredRecords(recordsWithStatusTrue);
       } else {
-        console.error("Failed to fetch patients:", data.message);
+        console.error("Failed to fetch records:", data.message);
       }
     } catch (error) {
-      console.error("Error fetching patients:", error);
+      console.error("Error fetching records:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchMedical();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -365,6 +368,21 @@ function Drmonitor() {
     fetchData();
   }, []);
 
+
+  const formatWaktuMedicalCheck = (datetime) => {
+    const date = new Date(datetime);
+    const optionsTanggal = { day: "numeric", month: "long", year: "numeric" };
+    const optionsWaktu = { hour: "2-digit", minute: "2-digit" };
+
+    const tanggalFormatted = date.toLocaleDateString("id-ID", optionsTanggal);
+    const waktuFormatted = date.toLocaleTimeString("id-ID", optionsWaktu);
+
+    return { tanggalFormatted, waktuFormatted };
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -743,10 +761,15 @@ function Drmonitor() {
                               <div className="col-md-4" style={{ width: "100%" }}>
                                 <div className="accord">
                                   <details>
-                                    <summary className="fw-semibold">
-                                      12 Maret 2039 <br />
-                                      <h8 className="fw-light">08:21</h8>
-                                    </summary>
+                                  {filteredRecords.map((medicalRec) => {
+        const { tanggalFormatted, waktuFormatted } = formatWaktuMedicalCheck(medicalRec.WaktuMedicalCheck);
+        return (
+          <summary className="fw-semibold" key={medicalRec._id}>
+            {tanggalFormatted} <br />
+            <h8 className="fw-light">{waktuFormatted}</h8>
+          </summary>
+        );
+      })}
                                     {medicalRec ? (
                                       <div>
                                         <h5>Pemeriksaan Tanda Vital</h5>
