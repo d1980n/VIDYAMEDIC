@@ -40,9 +40,9 @@ const signin = async (req, res) => {
 
 const signup = async(req, res) => {
     try {
-        const { nama, nik, no_hp, role, email, password, tl, jenisKelamin, alamat } = req.body;
+        const { nama, nik, no_hp, role, poli, email, password, tl, jenisKelamin, alamat } = req.body;
 
-    if (!nama || !nik || !no_hp || !role || !email || !password) {
+    if (!nama || !nik || !no_hp || !role || !poli || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -61,6 +61,7 @@ const signup = async(req, res) => {
             nik,
             no_hp,
             role,
+            poli,
             email,
             password: hashedPassword,
             tl: tl || null, // Jika `tl` tidak ada, atur ke `null`

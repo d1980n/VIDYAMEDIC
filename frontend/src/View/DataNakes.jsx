@@ -11,7 +11,11 @@ import images2 from '../source/img2.png';
 
 function DataNakes() {
   const [showModal, setShowModal] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState(null);
   const [nama, setNama] = useState("");
+  const [id, setId] = useState("");
   const [nik, setNik] = useState("");
   // const [fotoKTP, setFotoKTP] = useState(null);
   const [jenisKelamin, setJenisKelamin] = useState('');
@@ -26,11 +30,49 @@ function DataNakes() {
   const [profilePict, setProfilePict] = useState('');
   const [formData, setFormData] = useState({});
   const [personList, setPersonList] = useState([]);
-  const [currentRole, setCurrentRole] = useState("Dokter");
+  const [currentRole, setCurrentRole] = useState("Doctor");
   const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const toggleModal = () => {
+  const roles = ["Doctor", "Suster", "Antrian"];
+  const toggleModal = (selectedPerson = null) => {
+    if (selectedPerson) {
+      // Edit mode: populate form with existing data
+      setId(selectedPerson._id);
+      setNama(selectedPerson.nama);
+      setNik(selectedPerson.nik);
+      setJenisKelamin(selectedPerson.jenisKelamin);
+      setPoli(selectedPerson.poli);
+      setNoHp(selectedPerson.no_hp);
+      setAlamat(selectedPerson.alamat);
+      setRole(selectedPerson.role);
+      setEmail(selectedPerson.email);
+      setPassword(''); // Clear password field
+      setKonfPassword('');
+    } else {
+      // Add mode: clear form
+      setId('');
+      setNama('');
+      setNik('');
+      setJenisKelamin('');
+      setPoli('');
+      setNoHp('');
+      setAlamat('');
+      setRole('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+    }
+    setShowDetail(false); // Close the detail modal
     setShowModal(!showModal);
+  };
+
+  const handleShowDetail = (person) => {
+    setSelectedPerson(person);
+    setShowDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetail(!showDetail);
   };
 
 //   const handleChange = (e) => {
@@ -123,6 +165,7 @@ const handleSubmit = async (e) => {
 
   // Menyusun data form
   const formData = {
+    id,
     nama,
     nik,
     jenisKelamin,
@@ -134,6 +177,8 @@ const handleSubmit = async (e) => {
     password,
     tl,
   };
+
+  setFormData(formData);
 
   // Log data untuk memeriksa
   console.log('Form Data:', formData);
@@ -149,8 +194,10 @@ const handleSubmit = async (e) => {
 
   // Tampilkan konfirmasi sebelum submit
   Swal.fire({
-    title: 'Apakah Anda yakin?',
-    text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+    title: id ? 'Simpan perubahan?' : 'Tambahkan Data baru?',
+    text: id
+    ? "Perubahan pada Data akan isimpan"
+    : "Data yang Anda masukkan akan dikirimkan untuk diproses.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, kirim data!',
@@ -159,8 +206,14 @@ const handleSubmit = async (e) => {
     if (result.isConfirmed) {
       // Jika pengguna mengkonfirmasi, lanjutkan dengan pengiriman data
       try {
-        const response = await fetch("http://localhost:3000/auth/signup", {
-          method: "POST",
+        const url = id
+          ? `http://localhost:3000/person/update/${id}` // Endpoint for editing
+          : "http://localhost:3000/auth/signup"; // Endpoint for adding
+
+        const method = "POST"; // PUT for edit, POST for add
+
+        const response = await fetch(url, {
+          method: 'POST',
           headers: {
             "Content-Type": "application/json",
           },
@@ -182,12 +235,15 @@ const handleSubmit = async (e) => {
       setKonfPassword('');
       setRole('');
       setShowModal(false);
+      setIsEdit(false);
   
        // Tampilkan SweetAlert sukses dengan nama dokter
        Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: `${role} ${nama} berhasil ditambahkan.`,
+        text: id
+        ? `Data ${role} ${nama} berhasil diperbarui.`
+        : `Data ${role} ${nama} berhasil ditambahkan.`,
       });
 
         // Fetch data again after adding a new patient
@@ -204,6 +260,11 @@ const handleSubmit = async (e) => {
       });
     }
   });
+};
+
+const handleEdit = (selectedPerson) => {
+  setFormData(selectedPerson);
+  setIsEdit(true);
 };
 
 
@@ -569,7 +630,7 @@ const handleInputChange = (event) => {
                                                   <td>{person.nama}</td>
                                                   <td>{person.email}</td>
                                                   <td>
-                                                    <button type="button" className="btn btn-primary m-1" onClick={() => toggleModal(person._id)}>
+                                                    <button type="button" className="btn btn-primary m-1" onClick={() => handleShowDetail(person)}>
                                                       Detail
                                                     </button>
                                                     <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(person._id)}>
@@ -601,13 +662,88 @@ const handleInputChange = (event) => {
                      {/* ============================================================================================================================================================ */}
                        {/* ============================================================================================================================================================ */}
                          {/* ============================================================================================================================================================ */}
+
+                 {/* Modal for showing details */}
+                {showDetail && (
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLabel">
+                        {`Detail ${currentRole}`}
+                        </h5>
+                        <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
+                      </div>
+                      {selectedPerson && (
+                        <div className="modal-body">
+                          {/* Input pengukuran medis */}
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Nama</h6>
+                              <p>{selectedPerson.nama}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">NIK</h6>
+                              <p>{selectedPerson.nik}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Jenis Kelamin</h6>
+                              <p>{selectedPerson.jenisKelamin}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Poli</h6>
+                              <p>{selectedPerson.poli}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">No HP</h6>
+                              <p>{selectedPerson.no_hp}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Alamat</h6>
+                              <p>{selectedPerson.alamat}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Email</h6>
+                              <p>{selectedPerson.email}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Role</h6>
+                              <p>{selectedPerson.role}</p>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      )}
+                        <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
+                            Tutup
+                          </button>
+                          <button type="submit" className="btn btn-primary"  onClick={() => toggleModal(selectedPerson)}>
+                            <i className="ti ti-playlist-add"></i> Edit
+                          </button>
+                          {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {showModal && (
                   <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
                     <div className="modal-dialog">
                       <div className="modal-content">
                         <div className="modal-header">
                           <h5 className="modal-title" id="exampleModalLabel">
-                            Tambah User
+                            { isEdit ? `Edit ${currentRole}` : `Tambah ${currentRole}` }
                           </h5>
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
@@ -664,7 +800,7 @@ const handleInputChange = (event) => {
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Role</h6>
-                                <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
+                                <select className="form-select" id="role" value={currentRole} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
                                   <option value="Doctor">Doctor</option>
                                   <option value="Antrian">Antrian</option>
@@ -672,7 +808,7 @@ const handleInputChange = (event) => {
                                 </select>
                               </div>
                             </div>
-
+                            
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Password</h6>

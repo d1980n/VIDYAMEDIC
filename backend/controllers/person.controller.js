@@ -1,5 +1,6 @@
 // Package
 const bcryptjs = require('bcryptjs');
+const mongoose = require('mongoose');
 const { errorHandler } = require('../utils/error.js');
 
 // Models
@@ -38,9 +39,15 @@ const deletePerson = async(req, res, next) => {
 
 //   Update Person
 const updatePerson = async(req, res, next) => {
-    if (req.user.id !== req.params.id)
+    try {  
+        const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
+        if (!isValidId) {
+            return next(errorHandler(400, 'Invalid ID format'));
+        }
+
+        if (req.user.id !== req.params.id)
         return next(errorHandler(401, 'You can only update your own account!'));
-    try {
+
         if (req.body.password) {
             req.body.password = bcryptjs.hashSync(req.body.password, 10);
         }
@@ -50,6 +57,8 @@ const updatePerson = async(req, res, next) => {
                     nik: req.body.nik,
                     nama: req.body.nama,
                     email: req.body.email,
+                    role: req.body.role,
+                    poli: req.body.poli,
                     no_hp: req.body.no_hp,
                     password: req.body.password,
                     alamat: req.body.alamat,
@@ -59,6 +68,10 @@ const updatePerson = async(req, res, next) => {
                 },
             }, { new: true }
         );
+
+        if (!updatedUser) {
+            return next(errorHandler(404, 'User not found'));
+        }
 
         const { password, ...rest } = updatedUser._doc;
 
