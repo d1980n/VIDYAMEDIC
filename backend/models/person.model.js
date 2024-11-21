@@ -30,7 +30,7 @@ const personSchema = new mongoose.Schema({
     },
     alamat: {
         type: String,
-        required: true,
+        // required: true,
     },
     tl: {
         type: Date,

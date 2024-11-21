@@ -120,42 +120,68 @@ const dokterAntri = async(req, res) => {
 const dokterPeriksa = async(req, res) => {
     const { nomorMR } = req.body; // Mengambil nomorMR dari body request
 
+    // Debug: Log nomorMR yang diterima
+    console.log('nomorMR yang diterima:', nomorMR);
+
     try {
+        // Cari medical record berdasarkan nomorMR dan pastikan statusMR = true
+        const medicalRecord = await MedicalRecord.findOne({ nomorMR, statusMR: true });
+
+        // Debug: Cek apakah medicalRecord ditemukan
+        if (!medicalRecord) {
+            console.log('Medical record dengan nomorMR ini dan statusMR = true tidak ditemukan');
+            return res.status(404).json({ message: 'Medical record dengan nomorMR ini dan statusMR = true tidak ditemukan' });
+        }
+
         // Update antrianStatus.dokterPeriksaStatus pada collection Patient
-        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, {
-                $set: {
-                    'antrianStatus.dokterPeriksaStatus': true
-                }
-            }, { new: true } // Mengembalikan data yang sudah diupdate
+        const updatedPasien = await Patient.findOneAndUpdate({ nomorMR }, { $set: { 'antrianStatus.dokterPeriksaStatus': true } }, { new: true } // Mengembalikan data yang sudah diupdate
         );
 
-        if (!pasien) {
+        if (!updatedPasien) {
+            console.log('Pasien dengan nomorMR ini tidak ditemukan');
             return res.status(404).json({ message: 'Pasien dengan nomorMR ini tidak ditemukan' });
         }
 
-        // Update statusMR menjadi true pada collection medicalrecords
-        const updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({ nomorMR: nomorMR }, {
-                $set: {
-                    'statusMRPeriksa': true
-                }
-            }, { new: true } // Mengembalikan data yang sudah diupdate
+        // Update statusMRPeriksa menjadi true pada collection MedicalRecord
+        const updatedMedicalRecord = await MedicalRecord.findOneAndUpdate({ nomorMR, statusMR: true }, { $set: { 'statusMRPeriksa': true } }, { new: true } // Mengembalikan data yang sudah diupdate
         );
 
+        // Jika tidak ditemukan medical record dengan statusMR = true, buat medical record baru
         if (!updatedMedicalRecord) {
-            return res.status(404).json({ message: 'Medical record untuk nomorMR ini tidak ditemukan' });
+            const newMedicalRecord = new MedicalRecord({
+                nomorMR,
+                statusMR: true,
+                statusMRPeriksa: true
+            });
+
+            await newMedicalRecord.save();
+            return res.json({
+                success: true,
+                message: 'Status periksa dokter dan statusMRPeriksa berhasil diperbarui',
+                pasien: updatedPasien,
+                medicalRecord: newMedicalRecord,
+            });
         }
 
         // Mengirimkan response sukses
         res.json({
             success: true,
             message: 'Status periksa dokter dan statusMRPeriksa berhasil diperbarui',
-            pasien,
-            medicalRecord: updatedMedicalRecord
+            pasien: updatedPasien,
+            medicalRecord: updatedMedicalRecord,
         });
     } catch (error) {
-        res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status periksa dokter atau statusMRPeriksa', error });
+        console.error('Terjadi kesalahan:', error);
+        res.status(500).json({
+            message: 'Terjadi kesalahan saat memperbarui status periksa dokter atau statusMRPeriksa',
+            error: error.message,
+        });
     }
 };
+
+
+
+
 
 const statusSelesai = async(req, res) => {
     console.log('Request diterima di /statusSelesai', req.body); // Menambahkan log ini

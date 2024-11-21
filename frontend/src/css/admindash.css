@@ -7465,6 +7465,7 @@ fieldset:disabled .btn {
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    opacity: 0.95;
     outline: 0
 }
 
@@ -19350,4 +19351,19 @@ input .deksripsi {
 .dimton {
     max-width: 10rem;
     min-width: 10rem;
+}
+
+.maxxx{
+    min-width: 230px;
+    max-width: 230px;
+}
+
+.left{
+    display: flex;
+    margin-left: 280%;
+}
+.center{
+    display: flex;
+    justify-content: center;
+    justify-items: center;
 }
