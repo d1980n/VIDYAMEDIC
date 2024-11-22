@@ -43,13 +43,14 @@ function Drmonitor() {
   const [AVPU, setAVPU] = useState("");
   const [Keluhan, setKeluhan] = useState("");
 
+  const [filteredRecordsNew, setFilteredRecordsNew] = useState([]);
+
 
   const [selectedRecordId, setSelectedRecordId] = useState(null);
 
 
   const navigate = useNavigate();
 
-  const [labSelections, setLabSelections] = useState([]);
   const handleLabChange = (e) => {
     const value = e.target.value;
     const checked = e.target.checked;
@@ -432,6 +433,72 @@ const handleSaveXrayData = () => {
     fetchMedical();
   }, []);
 
+
+  const fetchDaftarPasien = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/medical");
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Log data untuk memastikan formatnya
+        console.log("Received Data:", data);
+  
+        // Akses data medicalRecords
+        const medicalRecords = data.medicalRecords;
+  
+        if (Array.isArray(medicalRecords)) {
+          // Log seluruh data untuk memastikan adanya StatusMRPeriksa
+          medicalRecords.forEach((record, index) => {
+            console.log(`Record ${index}:`, record);
+            console.log(`StatusMRPeriksa for record ${index}:`, record.statusMRPeriksa);
+          });
+  
+          // Filter data berdasarkan StatusMRPeriksa === true
+          const filteredData = medicalRecords.filter(
+            (record) => record.statusMRPeriksa === true
+          );
+  
+          console.log("Filtered Records:", filteredData);
+  
+          setFilteredRecordsNew(filteredData);
+        } else {
+          console.error("medicalRecords is not an array:", medicalRecords);
+        }
+      } else {
+        console.error("Failed to fetch medical records:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchDaftarPasien();
+  }, []);
+  
+  
+ 
+  
+
+
+
+ 
+  
+
+  const formatWaktuMedicalCheck = (datetime) => {
+    const date = new Date(datetime);
+    const optionsTanggal = { day: "numeric", month: "long", year: "numeric" };
+    const optionsWaktu = { hour: "2-digit", minute: "2-digit" };
+
+    const tanggalFormatted = date.toLocaleDateString("id-ID", optionsTanggal);
+    const waktuFormatted = date.toLocaleTimeString("id-ID", optionsWaktu);
+
+    return { tanggalFormatted, waktuFormatted };
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -931,44 +998,57 @@ const handleSaveXrayData = () => {
                               <div className="col-md-4" style={{ width: "100%" }}>
                                 <div className="accord">
                                   <details>
-                                    <summary className="fw-semibold">
-                                      12 Maret 2039 <br />
-                                      <h8 className="fw-light">08:21</h8>
-                                    </summary>
-                                    {medicalRec? (
-                                      <div>
-                                        <h5>Pemeriksaan Tanda Vital</h5>
-                                        <h6>
-                                          Tekanan Darah Sistolik: <h8 className="fw-light">{medicalRec.TDS}</h8>
-                                        </h6>
-                                        <h6>
-                                          Tekanan Darah Diastolik: <h8 className="fw-light">{medicalRec.TDD}</h8>
-                                        </h6>
-                                        <h6>
-                                          Temperatur: <h8 className="fw-light">{medicalRec.Temperatur}</h8>
-                                        </h6>
-                                        <h6>
-                                          Laju Pernafasan: <h8 className="fw-light">{medicalRec.LP}</h8>
-                                        </h6>
-                                        <h6>
-                                          Presentase SpO2: <h8 className="fw-light">{medicalRec.Spot}</h8>
-                                        </h6>
-                                        <h6>
-                                          Tinggi Badan: <h8 className="fw-light">{medicalRec.TB}</h8>
-                                        </h6>
-                                        <h6>
-                                          Berat Badan: <h8 className="fw-light">{medicalRec.BB}</h8>
-                                        </h6>
-                                        <h6>
-                                          LILA: <h8 className="fw-light">{medicalRec.LILA}</h8>
-                                        </h6>
-                                        <h6>
-                                          AVPU: <h8 className="fw-light">{medicalRec.AVPU}</h8>
-                                        </h6>
-                                      </div>
-                                    ) : (
-                                      <p>No medical record with statusMRPeriksa: true found.</p>
-                                    )}
+                                  {filteredRecordsNew.map((medicalRec) => {
+                                    const { tanggalFormatted, waktuFormatted } = formatWaktuMedicalCheck(medicalRec.WaktuMedicalCheck);
+                                    return (
+                                      <summary className="fw-semibold" key={medicalRec._id}>
+                                        {tanggalFormatted} <br />
+                                        <h8 className="fw-light">{waktuFormatted}</h8>
+                                      </summary>
+                                    );
+                                  })}
+                                   {filteredRecordsNew && filteredRecordsNew.length > 0 ? (
+  <div>
+    {/* Iterasi untuk setiap record yang ada */}
+    {filteredRecordsNew.map((medicalRec) => {
+      return (
+        <div key={medicalRec._id}>
+          <h5>Pemeriksaan Tanda Vital</h5>
+          <h6>
+            Tekanan Darah Sistolik: <h8 className="fw-light">{medicalRec.TDS}</h8>
+          </h6>
+          <h6>
+            Tekanan Darah Diastolik: <h8 className="fw-light">{medicalRec.TDD}</h8>
+          </h6>
+          <h6>
+            Temperatur: <h8 className="fw-light">{medicalRec.Temperatur}</h8>
+          </h6>
+          <h6>
+            Laju Pernafasan: <h8 className="fw-light">{medicalRec.LP}</h8>
+          </h6>
+          <h6>
+            Presentase SpO2: <h8 className="fw-light">{medicalRec.Spot}</h8>
+          </h6>
+          <h6>
+            Tinggi Badan: <h8 className="fw-light">{medicalRec.TB}</h8>
+          </h6>
+          <h6>
+            Berat Badan: <h8 className="fw-light">{medicalRec.BB}</h8>
+          </h6>
+          <h6>
+            LILA: <h8 className="fw-light">{medicalRec.LILA}</h8>
+          </h6>
+          <h6>
+            AVPU: <h8 className="fw-light">{medicalRec.AVPU}</h8>
+          </h6>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <p>No medical record with statusMRPeriksa: true found.</p>
+)}
+
                                   </details>
                                 </div>
                               </div>
