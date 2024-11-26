@@ -312,13 +312,13 @@ const susterAntri = async (index, nomorMR) => {
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataSuperAdmin" ? "active" : ""}`} to="/DataSuperAdmin" aria-expanded="false" onClick={() => handleSetActivePage("DataSuperAdmin")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-square-plus"></i>
                       </span>
                       <span className="hide-menu">Data Admin Klinik</span>
                     </NavLink>
                     <NavLink className={`sidebar-link ${activePage === "DataMitra" ? "active" : ""}`} to="/DataMitra" aria-expanded="false" onClick={() => handleSetActivePage("DataMitra")}>
                       <span>
-                        <i className="ti ti-layout-dashboard"></i>
+                        <i className="ti ti-building-hospital"></i>
                       </span>
                       <span className="hide-menu">Data Mitra</span>
                     </NavLink>
