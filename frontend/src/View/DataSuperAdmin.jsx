@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
+import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
@@ -10,22 +11,68 @@ import images2 from '../source/img2.png';
 
 function DataSuperAdmin() {
   const [showModal, setShowModal] = useState(false);
-  const [namaLengkap, setNamaLengkap] = useState('');
-  // const [fotoKTP, setFotoKTP] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [nama, setNama] = useState('');
+  const [nik, setNik] = useState('');
   const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamatLengkap, setAlamatLengkap] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [ttl, setTtl] = useState('');
+  const [konfPassword, setKonfPassword] = useState('');
   const [poli, setPoli] = useState('');
   const [role, setRole] = useState('');
-  const [formData, setFormData] = useState({});
+  const [klinik, setKlinik] = useState('');
+  const [id, setId] = useState('');
+  const [tl, setTl] = useState('');
+  const [profilePict, setProfilePict] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState('');
   const [error, setError] = useState('');
-  const [dokters, setDokters] = useState([]);
-  const toggleModal = () => {
+  const [personList, setPersonList] = useState([]);
+  const [currentRole, setCurrentRole] = useState("Super Admin");
+  const [filteredList, setFilteredList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const toggleModal = (selectedPerson = null) => {
+    if (selectedPerson) {
+      // Edit mode: populate form with existing data
+      setId(selectedPerson._id);
+      setNama(selectedPerson.nama);
+      setNik(selectedPerson.nik);
+      setJenisKelamin(selectedPerson.jenisKelamin);
+      setKlinik(selectedPerson.klinik);
+      setNoHp(selectedPerson.no_hp);
+      setAlamat(selectedPerson.alamat);
+      setRole(selectedPerson.role);
+      setEmail(selectedPerson.email);
+      setPassword(''); // Clear password field
+      setKonfPassword('');
+    } else {
+      // Add mode: clear form
+      setNama('');
+      setNik('');
+      setJenisKelamin('');
+      setKlinik('');
+      setNoHp('');
+      setAlamat('');
+      setRole('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+    }
+    setShowDetail(false); // Close the detail modal
     setShowModal(!showModal);
+  };
+
+  const handleShowDetail = (person) => {
+    setSelectedPerson(person);
+    setShowDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetail(!showDetail);
   };
 
   // ===============================================================================================================================
@@ -51,6 +98,98 @@ function DataSuperAdmin() {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Menyusun data form
+    const formData = {
+      nama,
+      nik,
+      jenisKelamin,
+      poli,
+      no_hp,
+      alamat,
+      role,
+      email,
+      password,
+      tl,
+      klinik,
+    };
+  
+    setFormData(formData);
+  
+    // Log data untuk memeriksa
+    console.log('Form Data:', formData);
+  
+    if (password !== konfPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Password dan konfirmasi password tidak sesuai!',
+      });
+      return; // Berhenti jika validasi gagal
+    }
+  
+    // Tampilkan konfirmasi sebelum submit
+    Swal.fire({
+      title: 'Tambahkan Data baru?',
+      text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, kirim data!',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // Jika pengguna mengkonfirmasi, lanjutkan dengan pengiriman data
+        try {
+         const response = await fetch("http://localhost:3000/auth/signup", {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+  
+          const data = await response.json();
+          console.log("Response Data:", data);
+  
+        // Reset form setelah pengiriman berhasil
+        setNama('');
+        setJenisKelamin('');
+        setNik('');
+        setPoli('');
+        setAlamat('');
+        setNoHp('');
+        setEmail('');
+        setPassword('');
+        setKonfPassword('');
+        setRole('');
+        setKlinik('');
+        setShowModal(false);
+    
+         // Tampilkan SweetAlert sukses dengan nama dokter
+         Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: `Data ${role} ${nama} berhasil ditambahkan.`,
+        });
+  
+          // Fetch data again after adding a new patient
+          fetchPersonData();
+        } catch (error) {
+          console.error("Error:", error.message);
+        }
+      } else {
+        // Jika pengguna membatalkan, tidak ada tindakan lebih lanjut
+        Swal.fire({
+          icon: 'info',
+          title: 'Dibatalkan',
+          text: 'Pengiriman data dibatalkan.',
+        });
+      }
+    });
+  };
+
   // Event listener untuk mendeteksi klik di luar dropdown
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -58,6 +197,194 @@ function DataSuperAdmin() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const fetchPersonData = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+  
+        if (data.success) {
+            setPersonList(data.person); // Menyimpan semua data person
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching persons:", error);
+    }
+  };
+  
+  // Fetch once on component mount
+  useEffect(() => {
+    const filterDataByRole = () => {
+        const filtered = personList.filter(person => person.role === currentRole);
+        setFilteredList(filtered); // Menyimpan data yang sudah difilter ke state
+    };
+    filterDataByRole();
+  }, [currentRole, personList]); // Akan merender ulang ketika currentRole atau personList berubah
+  
+  // Fetch data pada saat komponen dimuat
+  useEffect(() => {
+    fetchPersonData();
+  }, []);
+  
+  useEffect(() => {
+    // Filter data by role and search query
+    const filterData = () => {
+        const filtered = personList
+            .filter(person => person.role === currentRole)
+            .filter(person => 
+                person.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                person.email.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        setFilteredList(filtered);
+    };
+    filterData();
+  }, [currentRole, personList, searchQuery]);
+
+  const handleInputChange = (event) => {
+    setSearchQuery(event.target.value); // Update search query
+      };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+   // Menyusun data form
+   const formData = {
+    id,
+    nama,
+    nik,
+    jenisKelamin,
+    poli,
+    no_hp,
+    alamat,
+    role,
+    email,
+    password,
+    tl,
+    klinik,
+  };
+
+  setFormData(formData);
+
+  // Log data untuk memeriksa
+  console.log('Form Data:', formData);
+
+  if (password !== selectedPerson.password) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Password tidak sesuai!',
+    });
+    return; // Berhenti jika validasi gagal
+  }
+
+  // Tampilkan konfirmasi sebelum submit
+  Swal.fire({
+    title: 'Simpan Perubahan Data?',
+    text: "Data yang Anda masukkan akan disimpan.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, kirim data!',
+    cancelButtonText: 'Batal',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      // Jika pengguna mengkonfirmasi, lanjutkan dengan pengiriman data
+      try {
+       const response = await fetch(`http://localhost:3000/person/upadte/${id}`, {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        console.log("Response Data:", data);
+
+      // Reset form setelah pengiriman berhasil
+      setId('');
+      setNama('');
+      setJenisKelamin('');
+      setNik('');
+      setPoli('');
+      setAlamat('');
+      setNoHp('');
+      setEmail('');
+      setPassword('');
+      setKonfPassword('');
+      setRole('');
+      setKlinik('');
+      setShowModal(false);
+  
+       // Tampilkan SweetAlert sukses dengan nama dokter
+       Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: `Data ${role} ${nama} berhasil disimpan.`,
+      });
+
+        // Fetch data again after adding a new patient
+        fetchPersonData();
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    } else {
+      // Jika pengguna membatalkan, tidak ada tindakan lebih lanjut
+      Swal.fire({
+        icon: 'info',
+        title: 'Dibatalkan',
+        text: 'Pengiriman data dibatalkan.',
+      });
+    }
+  });
+};
+
+
+  const handleDelete = async (id) => {
+    // Konfirmasi sebelum menghapus dengan SweetAlert
+    Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Anda tidak dapat mengembalikan data yang sudah dihapus!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Lakukan penghapusan setelah konfirmasi
+          const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (!response.ok) {
+            throw new Error('HTTP error! Status: ' + response.status);
+          }
+  
+          // Tampilkan pesan sukses setelah penghapusan
+          Swal.fire(
+            'Terhapus!',
+            'Data berhasil dihapus.',
+            'success'
+          ).then(() => {
+            // Reload halaman setelah SweetAlert sukses
+            window.location.reload();
+          });
+  
+        } catch (error) {
+          console.error('Error deleting person:', error);
+  
+          // Tampilkan pesan error jika gagal menghapus
+          Swal.fire(
+            'Gagal!',
+            'Terjadi kesalahan saat menghapus data.',
+            'error'
+          );
+        }
+      }
+    });
+  };
 
   return (
     <html className='Admin'>
@@ -180,150 +507,273 @@ function DataSuperAdmin() {
             <div className="container-fluid">
               <body className="login"></body>
               <div>
-                <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Admin</button>
-                <div className="row">
-                  <div className="col-lg-8 d-flex align-items-stretch" style={{ width: '100%' }}>
-                    <div className="card w-100">
-                      <div className="card-body p-4 width">
-                        <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
-                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Admin Klinik</h5>
-                          <input
-                                type="text"
-                                id="search-input"
-                                className="form-sels"
-                                placeholder="Masukkan nama atau email"
-                                style={{ width: '67%' }}
-                                // Memanggil fungsi pencarian saat pengguna mengetik
-                              />
-                              
-                              <button 
-                                type="button" 
-                                className="btn btn-secondary m-1" 
-                              >
-                                Update Antri
-                              </button>
+              <div className="row">
+                <div className="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
+                  <div className="card w-100">
+                    <div className="card-body p-4 width">
+                      <div className="table-responsive">
+                        <div className="tabs d-flex mb-4 row-tabss  ">
+                          {" "}
+                          {/* Menambahkan kelas d-flex dan flex-column */}
+                          <div className="row-tabs">
+
+                            <div className="d-flex">
+                              {" "}
+                              {/* Mengatur kolom untuk input dan label */}
+                              <input type="radio" name="tabs" id="tabSuperAdmin" checked={currentRole === "Super Admin"} onChange={() => setCurrentRole("Super Admin")} />
+                              <label htmlFor="tabSuperAdmin"  style={{height:"40px",}}>Data Super Admin</label>
+                            </div>
+
+                          </div>
+                          <div clasName="d-flex justify-content-end ms-auto tabs-suster">
+                            <button className="btn btn-primary mb-3" style={{marginRight: "0.75rem",}} onClick={toggleModal}>
+                              Tambah Data
+                            </button>
+                          </div>
+                                      {/* Konten tab yang umum */}
+                                    </div>
+                                    <div className="tab-content">
+                                      <div style={{ display: "flex", gap: "20px", marginBottom: "5vh" }}>
+                                        <h5 className="card-title fw-semibold" style={{ width: "15%", alignItems: "center", display: "flex" }}>
+                                          {`Data ${currentRole}`}
+                                        </h5>
+                                        <input type="text" id="search-input" className="form-sels" placeholder="Masukkan nama atau email" style={{ width: "67%" }} onChange={handleInputChange} />
+                                      </div>
+
+                                      <div className="table-responsive">
+                                        <table className="table text-nowrap mb-0 align-middle">
+                                          <thead className="text-dark fs-4">
+                                            <tr>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">No</h6>
+                                              </th>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Nama {currentRole}</h6>
+                                              </th>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Email</h6>
+                                              </th>
+                                              <th className="border-bottom-0">
+                                                <h6 className="fw-semibold mb-0">Klinik</h6>
+                                              </th>
+                                              <th className="border-bottom-0" style={{ width: "10rem" }}>
+                                                <h6 className="fw-semibold mb-0">Action</h6>
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                          {filteredList.length > 0 ? (
+                                              filteredList.map((person, index) => (
+                                                <tr key={person._id}>
+                                                  <td>{index + 1}</td>
+                                                  <td>{person.nama}</td>
+                                                  <td>{person.email}</td>
+                                                  <td>{person.klinik}</td>
+                                                  <td>
+                                                    <button type="button" className="btn btn-primary m-1" onClick={() => handleShowDetail(person)}>
+                                                      Detail
+                                                    </button>
+                                                    <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(person._id)}>
+                                                      Hapus
+                                                    </button>
+                                                  </td>
+                                                </tr>
+                                              ))
+                                            ) : (
+                                              <tr>
+                                                <td colSpan="4" className="text-center">
+                                                  Tidak ada data untuk ditampilkan
+                                                </td>
+                                              </tr>
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+
+                {/* Modal for showing details */}
+                {showDetail && (
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLabel">
+                        {`Detail ${currentRole}`}
+                        </h5>
+                        <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
+                      </div>
+                      {selectedPerson && (
+                        <div className="modal-body">
+                          {/* Input pengukuran medis */}
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Nama</h6>
+                              <p>{selectedPerson.nama}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">NIK</h6>
+                              <p>{selectedPerson.nik}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Jenis Kelamin</h6>
+                              <p>{selectedPerson.jenisKelamin}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Klinik</h6>
+                              <p>{selectedPerson.klinik}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">No HP</h6>
+                              <p>{selectedPerson.no_hp}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Alamat</h6>
+                              <p>{selectedPerson.alamat}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Email</h6>
+                              <p>{selectedPerson.email}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Role</h6>
+                              <p>{selectedPerson.role}</p>
+                            </div>
+                          </div>
+                          
                         </div>
-
-                        <div className="table-responsive">
-                          <table className="table text-nowrap mb-0 align-middle">
-                            <thead className="text-dark fs-4">
-                              <tr>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">No</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Nama Admin</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Email</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Klinik</h6>
-                                </th>
-                                <th style={{width: '10rem'}} className="border-bottom-0">
-                                  <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            {dokters.map((dokter, index) => (
-                                <tr key={dokter.kode_dok}>
-                                  <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">{dokter.namaLengkap}</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2"> 
-                                      <span className="fw-normal">{dokter.email}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">{dokter.password}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-success m-1">Detail</button>
-                                    <button type="button" className="btn btn-danger m-1" onClick="">Delete</button>
-                                  </td>
-                                </tr>
-                            ))}
-
-                        </tbody>
-
-
-                          </table>
+                      )}
+                        <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
+                            Tutup
+                          </button>
+                          <button type="submit" className="btn btn-primary"  onClick={() => toggleModal(selectedPerson)}>
+                            <i className="ti ti-playlist-add"></i> Edit
+                          </button>
+                          {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {showModal && (
-  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block', zIndex: 1050 }}>
-    <div className="modal-dialog">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
-          <button type="button" className="btn-close" onClick={toggleModal}></button>
-        </div>
-        <form onSubmit="">
-          <div className="modal-body">
-            <div className="mb-3">
-              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} autoFocus />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-              <select className="form-select" id="jenisKelamin" name="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                <option value="Select">Select</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
-              </select>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-              <textarea className="form-control" id="alamatLengkap" name="alamat" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-              <input type="text" className="form-control" id="phone_number" name="no_hp" value={phone_number} onChange={(e) => setPhoneNumber(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">Alamat Email</label>
-              <input type="text" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="ttl" className="form-label">Tanggal Lahir</label>
-              <input type="date" className="form-control" id="ttl" name="ttl" value={ttl} onChange={(e) => setTtl(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="poli" className="form-label">Poli</label>
-              <input type="text" className="form-control" id="poli" name="poli" value={poli} onChange={(e) => setPoli(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
-              <input type="password" className="form-control" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password</label>
-              <input type="password" className="form-control" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            </div>
-          </div>
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                    <div className="modal-dialog">
+                      <div className="modal-content">
+                        <div className="modal-header">
+                          <h5 className="modal-title" id="exampleModalLabel">
+                            { `Tambah ${currentRole}` }
+                          </h5>
+                          <button type="button" className="btn-close" onClick={toggleModal}></button>
+                        </div>
+                        <form onSubmit={selectedPerson._id ? handleEditSubmit : handleSubmit}>
+                          <div className="modal-body">
+                            {/* Input pengukuran medis */}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Nama</h6>
+                                <input type="text" name="Nama" className="form-control" placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)}/>
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">NIK</h6>
+                                <input type="number" name="Nama" className="form-control" placeholder="NIK" value={nik} onChange={(e) => setNik(e.target.value)}/>
+                              </div>
+                            </div>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Menampilkan pesan error jika ada */}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Jenis Kelamin</h6>
+                                <select className="form-select" id="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
+                                  <option value="Select">Select</option>
+                                  <option value="Laki-laki">Laki-laki</option>
+                                  <option value="Perempuan">Perempuan</option>
+                                </select>
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Klinik</h6>
+                                <select className="form-select" id="klinik" value={klinik} onChange={(e) => setKlinik(e.target.value)}>
+                                  <option value="Select">Select</option>
+                                  <option value="Klinik Yoenie">Klinik Yoenie</option>
+                                  <option value="Klinik Medicore">Klinik Medicore</option>
+                                </select>
+                              </div>
+                            </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-            <button type="submit" className="btn btn-primary">Tambah Dokter</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-)}
-{showModal && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">No HP</h6>
+                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Alamat</h6>
+                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                              </div>
+                            </div>
 
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Email</h6>
+                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Role</h6>
+                                <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
+                                  <option value="Select">Select</option>
+                                  <option value="Super Admin">Super Admin</option>
+                                </select>
+                              </div>
+                            </div>
+                            
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Password</h6>
+                                <input type="password" name="Password" className="form-control" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Konfirmasi Password</h6>
+                                <input type="password" name="konfPassword" className="form-control" placeholder="Konfrimasi Password" value={konfPassword} onChange={(e) => setKonfPassword(e.target.value)} />
+                              </div>
+                            </div>
+                            
+                            <div className="row row-space">
+                              <div className="col-lg-12">
+                                <h6 className="fw-bold">Profile Picture</h6>
+                                <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>
+                              Tutup
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                              <i className="ti ti-playlist-add"></i> Simpan
+                            </button>
+                            {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                          </div>
+                        </form>
+
+
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {showModal && <div className="modal-backdrop fade show"></div>}
 
               </div>
             </div>

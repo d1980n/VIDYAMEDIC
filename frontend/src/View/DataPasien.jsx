@@ -10,9 +10,17 @@ import images2 from '../source/img2.png';
 
 const MedicalRecords = () => {
   const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filteredData, setFilteredData] = useState([]);
+  const [showDetail, setShowDetail] = useState(false);
+  const [selectedPatients, setSelectedPatients] = useState(null);
+
+  const handleShowDetail = (patients) => {
+    setSelectedPatients(patients);
+    setShowDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetail(!showDetail);
+  };
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -240,7 +248,9 @@ const MedicalRecords = () => {
                                         <td>{patients.namaLengkap}</td>
                                         <td>{patients.email}</td>
                                         <td>
-                                            <button type="button" className="btn btn-primary">Detail</button>
+                                          <button type="button" className="btn btn-primary m-1" onClick={() => handleShowDetail(patients)}>
+                                            Detail
+                                          </button>
                                         </td>
                                     </tr>
                                 ))
@@ -250,9 +260,6 @@ const MedicalRecords = () => {
                                 </tr>
                             )}
                           </tbody>
-
-
-
                           </table>
                         </div>
                       </div>
@@ -260,7 +267,66 @@ const MedicalRecords = () => {
                   </div>
                 </div>
 
-                
+                {/* Modal for showing details */}
+                {showDetail && (
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLabel">
+                          Detail Pasien
+                        </h5>
+                        <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
+                      </div>
+                      {selectedPatients && (
+                        <div className="modal-body">
+                          {/* Input pengukuran medis */}
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Nomor MR</h6>
+                              <p>{selectedPatients.nomorMR}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Nama</h6>
+                              <p>{selectedPatients.namaLengkap}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Jenis Kelamin</h6>
+                              <p>{selectedPatients.jenisKelamin}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Alamat</h6>
+                              <p>{selectedPatients.alamatLengkap}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">No HP</h6>
+                              <p>{selectedPatients.phone_number}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Email</h6>
+                              <p>{selectedPatients.email}</p>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      )}
+                        <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
+                            Tutup
+                          </button>
+                          {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
           </div>

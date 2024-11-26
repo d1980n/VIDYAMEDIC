@@ -47,6 +47,10 @@ const personSchema = new mongoose.Schema({
     poli: {
         required: false,
         type: String,
+    },
+    klinik: {
+        required: false,
+        type: String,
     }
 })
 const Person = mongoose.model("person", personSchema);

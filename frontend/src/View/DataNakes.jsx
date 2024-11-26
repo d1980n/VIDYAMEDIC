@@ -17,7 +17,6 @@ function DataNakes() {
   const [nama, setNama] = useState("");
   const [id, setId] = useState("");
   const [nik, setNik] = useState("");
-  // const [fotoKTP, setFotoKTP] = useState(null);
   const [jenisKelamin, setJenisKelamin] = useState('');
   const [alamat, setAlamat] = useState('');
   const [no_hp, setNoHp] = useState('');
@@ -654,7 +653,7 @@ const handleInputChange = (event) => {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                        </div>
                 {/* <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Dokter</button> */}
                
                  {/* ============================================================================================================================================================ */}
