@@ -38,48 +38,111 @@ const deletePerson = async(req, res, next) => {
 
 
 //   Update Person
-const updatePerson = async(req, res, next) => {
-    try {  
-        const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
-        if (!isValidId) {
-            return next(errorHandler(400, 'Invalid ID format'));
+// Fungsi untuk memperbarui data pengguna
+const updatePerson = async(req, res) => {
+    try {
+        const { id } = req.params; // ID pengguna yang ingin diperbarui
+        const { nama, nik, no_hp, role, email, password, tl, jenisKelamin, alamat, poli, klinik } = req.body;
+
+        // Debug: Log input data
+        console.log('--- Update Request ---');
+        console.log('Params ID:', id);
+        console.log('Request Body:', req.body);
+        console.log('Request Params:', req.params);
+
+        // Pastikan data yang diperlukan ada
+        if (!nama || !nik || !no_hp || !role || !email || !jenisKelamin || !alamat) {
+            console.log('Validation Failed: Missing required fields');
+            return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        if (req.user.id !== req.params.id)
-        return next(errorHandler(401, 'You can only update your own account!'));
+         // Role-specific validation
+         switch (role) {
+            case "Doctor":
+                if (!poli) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Doctor requires 'poli' and 'jenisKelamin' fields",
+                    });
+                }
+                break;
 
-        if (req.body.password) {
-            req.body.password = bcryptjs.hashSync(req.body.password, 10);
+            case "Super Admin":
+                if (!klinik) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Super Admin requires 'klinik' field",
+                    });
+                }
+                break;
+
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid role. Role must be 'Doctor', 'Nurse', or 'Admin'.",
+                });
         }
-        const updatedUser = await Person.findByIdAndUpdate(
-            req.params.id, {
-                $set: {
-                    nik: req.body.nik,
-                    nama: req.body.nama,
-                    email: req.body.email,
-                    role: req.body.role,
-                    poli: req.body.poli,
-                    no_hp: req.body.no_hp,
-                    password: req.body.password,
-                    alamat: req.body.alamat,
-                    jenisKelamin: req.body.jenisKelamin,
-                    tl: req.body.tl,
-                    profilePicture: req.body.profilePicture,
-                },
-            }, { new: true }
+
+        // Cek apakah email sudah terdaftar
+        console.log('Checking existing user for email:', email);
+        const existingUser = await Person.findOne({ email });
+        if (existingUser && existingUser._id.toString() !== id) {
+            console.log('Validation Failed: Email already in use');
+            return res.status(409).json({ success: false, message: "Email already in use by another user" });
+        }
+
+        // Jika password baru diberikan, hash password tersebut
+        let hashedPassword;
+        if (password) {
+            console.log('Hashing password:', password);
+            hashedPassword = await bcryptjs.hash(password, 12); // Use bcryptjs.hash instead of bcrypt.hash
+        }
+
+        // Menyusun data update dengan pengecekan opsional untuk `tl` dan `password`
+        const updateData = {
+            nama,
+            jenisKelamin,
+            alamat,
+            nik,
+            no_hp,
+            role,
+            poli,
+            email,
+            klinik,
+            password: hashedPassword || undefined,
+            tl: tl || null,
+        };
+
+        console.log('Update Data:', updateData);
+
+        // Update pengguna berdasarkan ID
+        const updatedUser = await Person.findOneAndUpdate({ _id: id },
+            updateData, { new: true } // Mengembalikan objek yang diperbarui
         );
 
+        console.log('Updated User:', updatedUser);
+
         if (!updatedUser) {
-            return next(errorHandler(404, 'User not found'));
+            console.log('User not found for ID:', id);
+            return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        const { password, ...rest } = updatedUser._doc;
-
-        res.status(200).json(rest);
+        res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            data: updatedUser,
+        });
     } catch (error) {
-        next(error);
+        console.error("Error during update:", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
     }
 };
+
+
+
+
+
+
 
 module.exports = {
     getPerson,

@@ -11,11 +11,7 @@ import images2 from '../source/img2.png';
 
 function DataNakes() {
   const [showModal, setShowModal] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  const [nama, setNama] = useState("");
-  const [id, setId] = useState("");
+    const [nama, setNama] = useState("");
   const [nik, setNik] = useState("");
   const [jenisKelamin, setJenisKelamin] = useState('');
   const [alamat, setAlamat] = useState('');
@@ -32,139 +28,56 @@ function DataNakes() {
   const [currentRole, setCurrentRole] = useState("Doctor");
   const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const roles = ["Doctor", "Suster", "Antrian"];
-  const toggleModal = (selectedPerson = null) => {
-    if (selectedPerson) {
-      // Edit mode: populate form with existing data
-      setId(selectedPerson._id);
-      setNama(selectedPerson.nama);
-      setNik(selectedPerson.nik);
-      setJenisKelamin(selectedPerson.jenisKelamin);
-      setPoli(selectedPerson.poli);
-      setNoHp(selectedPerson.no_hp);
-      setAlamat(selectedPerson.alamat);
-      setRole(selectedPerson.role);
-      setEmail(selectedPerson.email);
-      setPassword(''); // Clear password field
-      setKonfPassword('');
-    } else {
-      // Add mode: clear form
-      setId('');
-      setNama('');
-      setNik('');
-      setJenisKelamin('');
-      setPoli('');
-      setNoHp('');
-      setAlamat('');
-      setRole('');
-      setEmail('');
-      setPassword('');
-      setKonfPassword('');
-    }
-    setShowDetail(false); // Close the detail modal
-    setShowModal(!showModal);
-  };
-
-  const handleShowDetail = (person) => {
-    setSelectedPerson(person);
-    setShowDetail(true);
-  };
-
-  const handleCloseDetail = () => {
-    setShowDetail(!showDetail);
-  };
-
-//   const handleChange = (e) => {
-//     setFormData({
-//       ...formData,
-//       [e.target.id]: e.target.value,
-//     });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     // Remove the window.confirm line
-//     const formData = {
-//       namaLengkap,
-//       jenisKelamin,
-//       alamatLengkap,
-//       phone_number,
-//       email,
-//       password,
-//       role,
-//       poli
-//     };
-
-//     try {
-//       const response = await fetch("http://localhost:3000/medical/tambah", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(formData),
-//       });
-
-//       console.log("Response Status:", response.status);
-//       const contentType = response.headers.get("content-type");
-
-//       if (contentType && contentType.includes("application/json")) {
-//         const data = await response.json();
-//         console.log("Response Data:", data);
-
-//         // Reset form dan refresh daftar pasien setelah berhasil
-
-//         setShowModal(false); // Tutup modal setelah sukses
-//         resetForm(); // Reset input
-//         fetchDaftarDokter();
-//         console.log("well");
-//         window.location.reload();
-//       } else {
-//         const text = await response.text();
-//         console.error("Error: Response is not JSON. Response text:", text);
-//       }
-//     } catch (error) {
-//       console.error("Error:", error.message);
-//     }
-// };
-
-//   const fetchDaftarDokter = async () => {
-//     try {
-//         const response = await fetch('http://localhost:3000/doctor');
-//         const data = await response.json();
-
-//         if (response.ok) { // Check if the response is successful
-//           const data = await response.json();
-//           console.log("Response Data:", data);
-//             // Save the filtered patients to state
-//         } else {
-//             console.error('Failed to fetch dokter:', data.message);
-//         }
-//     } catch (error) {
-//         console.error('Error fetching dokter:', error);
-//         // Handle error appropriately, e.g., displaying an error message to the user
-//     }
-// };
+  const [selectedPerson, setSelectedPerson] = useState(null); // State untuk menyimpan data person yang dipilih
+  const [showDetail, setShowDetail] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   
-//   useEffect(() => {
-//     fetchDaftarDokter();
-//   }, []);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+    setShowDetail(false);
+    setIsEdit(false);
+    setSelectedPerson(null);
+  };
 
+const fetchPersonData = async () => {
+  try {
+      const response = await fetch("http://localhost:3000/person");
+      const data = await response.json();
 
-
-// Fungsi untuk membuat kode dokter otomatis dengan awalan "D" dan 3 angka acak
-// const generateKodeDokter = () => {
-//   const randomNumber = Math.floor(100 + Math.random() * 900); // Menghasilkan angka acak antara 100 dan 999
-//   return `D${randomNumber}`;
-// };
+      if (data.success) {
+          setPersonList(data.person); // Menyimpan semua data person
+      } else {
+          console.error("Failed to fetch persons:", data.message);
+      }
+  } catch (error) {
+      console.error("Error fetching persons:", error);
+  }
+};
 
 
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Menyusun data form
+  // Validasi input
+  if (!nama || !nik || !jenisKelamin || !poli || !no_hp || !alamat || !email) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Semua field wajib diisi!',
+    });
+    return;
+  }
+
+  if (password !== konfPassword) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Password dan konfirmasi password tidak sesuai!',
+    });
+    return;
+  }
+
   const formData = {
-    id,
     nama,
     nik,
     jenisKelamin,
@@ -173,85 +86,110 @@ const handleSubmit = async (e) => {
     alamat,
     role,
     email,
-    password,
-    tl,
+    password: password || null,
+    tl: tl || null, // Null jika tidak diisi
   };
 
-  setFormData(formData);
-
-  // Log data untuk memeriksa
+  // Log data yang akan dikirim
   console.log('Form Data:', formData);
 
-  if (password !== konfPassword) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Gagal!',
-      text: 'Password dan konfirmasi password tidak sesuai!',
-    });
-    return; // Berhenti jika validasi gagal
-  }
-
-  // Tampilkan konfirmasi sebelum submit
   Swal.fire({
-    title: id ? 'Simpan perubahan?' : 'Tambahkan Data baru?',
-    text: id
-    ? "Perubahan pada Data akan isimpan"
-    : "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+    title: 'Apakah Anda yakin?',
+    text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, kirim data!',
     cancelButtonText: 'Batal',
   }).then(async (result) => {
     if (result.isConfirmed) {
-      // Jika pengguna mengkonfirmasi, lanjutkan dengan pengiriman data
       try {
-        const url = id
-          ? `http://localhost:3000/person/update/${id}` // Endpoint for editing
-          : "http://localhost:3000/auth/signup"; // Endpoint for adding
+        let response;
 
-        const method = "POST"; // PUT for edit, POST for add
+        if (selectedPerson && selectedPerson._id ) {
+          // Log data untuk update
+            console.log('Selected Person:', selectedPerson);
+            console.log('Updating person with ID:', selectedPerson._id);
+            console.log('Sending Data to Backend:', formData);
 
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          console.log('result : ',result )
+
+          response = await fetch(`http://localhost:3000/person/update/${selectedPerson._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+        } else {
+          // Log data untuk penambahan
+          console.log('Creating new person...');
+          console.log('Sending Data to Backend:', formData);
+
+          response = await fetch('http://localhost:3000/auth/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+        }
+
+        const responseBody = await response.text(); // Mengambil respons sebagai teks
+        console.log('Raw Response:', responseBody);
+        
+        if (!response.ok) {
+          throw new Error(responseBody.message || 'Gagal mengirim data ke server.');
+        }
+        
+        try {
+          const parsedResponse = JSON.parse(responseBody); // Try parsing as JSON
+          console.log('Parsed Response:', parsedResponse);
+        } catch (error) {
+          console.error('Error parsing response:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'There was an error processing the response from the server.',
+          });
+        }
+        // Log response dari server
+        console.log('Response Status:', response.status);
+        // console.log('Response Body:', responseBody);
+
+
+        // Reset form setelah berhasil
+        setNama('');
+        setJenisKelamin('');
+        setNik('');
+        setPoli('');
+        setAlamat('');
+        setNoHp('');
+        setEmail('');
+        setPassword('');
+        setKonfPassword('');
+        setRole('');
+        setShowModal(false);
+        setIsEdit(false);
+        setSelectedPerson(null);
+
+        Swal.fire({
+          icon: 'success',
+          title: selectedPerson ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!',
+          text: `${role} ${nama} ${selectedPerson ? 'berhasil diperbarui.' : 'berhasil ditambahkan.'}`,
         });
 
-        const data = await response.json();
-        console.log("Response Data:", data);
-
-      // Reset form setelah pengiriman berhasil
-      setNama('');
-      setJenisKelamin('');
-      setNik('');
-      setPoli('');
-      setAlamat('');
-      setNoHp('');
-      setEmail('');
-      setPassword('');
-      setKonfPassword('');
-      setRole('');
-      setShowModal(false);
-      setIsEdit(false);
-  
-       // Tampilkan SweetAlert sukses dengan nama dokter
-       Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: id
-        ? `Data ${role} ${nama} berhasil diperbarui.`
-        : `Data ${role} ${nama} berhasil ditambahkan.`,
-      });
-
-        // Fetch data again after adding a new patient
+        // Refresh data
         fetchPersonData();
       } catch (error) {
-        console.error("Error:", error.message);
+        console.error('Error in handleSubmit:', error.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: `Terjadi kesalahan: ${error.message}`,
+        });
       }
     } else {
-      // Jika pengguna membatalkan, tidak ada tindakan lebih lanjut
+      console.log('Submission cancelled by user.');
       Swal.fire({
         icon: 'info',
         title: 'Dibatalkan',
@@ -261,10 +199,12 @@ const handleSubmit = async (e) => {
   });
 };
 
-const handleEdit = (selectedPerson) => {
-  setFormData(selectedPerson);
-  setIsEdit(true);
-};
+
+
+
+
+
+
 
 
   // ===============================================================================================================================
@@ -272,8 +212,8 @@ const handleEdit = (selectedPerson) => {
 
 
   // Gunakan useEffect untuk memanggil fetchDaftarDokter saat komponen dimuat
-
-
+  
+  
   // ===============================================================================================================================
   
 
@@ -366,20 +306,6 @@ const handleDelete = async (id) => {
 };
 
 
-const fetchPersonData = async () => {
-  try {
-      const response = await fetch("http://localhost:3000/person");
-      const data = await response.json();
-
-      if (data.success) {
-          setPersonList(data.person); // Menyimpan semua data person
-      } else {
-          console.error("Failed to fetch persons:", data.message);
-      }
-  } catch (error) {
-      console.error("Error fetching persons:", error);
-  }
-};
 
 // Fetch once on component mount
 useEffect(() => {
@@ -435,6 +361,42 @@ const handleInputChange = (event) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+
+  const toggleModalDua = (id) => {
+    const personDetail = personList.find((person) => person._id === id);
+    console.log('Selected Person Detail:', personDetail); // Log person detail
+    setSelectedPerson(personDetail);
+    setShowDetail(true);
+  };
+  
+  
+
+  // Fungsi untuk menutup modal
+  const handleCloseDetail = () => {
+    setShowDetail(false);
+    setSelectedPerson(null);
+  };
+
+  
+
+  const handleEdit = () => {
+    // Mengisi nilai form dengan data dari selectedPerson
+    setNama(selectedPerson.nama);
+    setNik(selectedPerson.nik);
+    setJenisKelamin(selectedPerson.jenisKelamin);
+    setPoli(selectedPerson.poli);
+    setNoHp(selectedPerson.no_hp);
+    setAlamat(selectedPerson.alamat);
+    setEmail(selectedPerson.email);
+    setRole(selectedPerson.role);
+    setPassword(''); // Tidak perlu mengisi password saat edit
+    setKonfPassword(''); // Tidak perlu mengisi konfirmasi password saat edit
+    setShowModal(true); // Tampilkan modal untuk edit
+    setIsEdit(true);
+    setShowDetail(false);
+  };
+  
 
   return (
     <html className="Admin">
@@ -629,7 +591,7 @@ const handleInputChange = (event) => {
                                                   <td>{person.nama}</td>
                                                   <td>{person.email}</td>
                                                   <td>
-                                                    <button type="button" className="btn btn-primary m-1" onClick={() => handleShowDetail(person)}>
+                                                    <button type="button" className="btn btn-primary m-1" onClick={() => toggleModalDua(person._id)}>
                                                       Detail
                                                     </button>
                                                     <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(person._id)}>
@@ -661,88 +623,85 @@ const handleInputChange = (event) => {
                      {/* ============================================================================================================================================================ */}
                        {/* ============================================================================================================================================================ */}
                          {/* ============================================================================================================================================================ */}
-
                  {/* Modal for showing details */}
-                {showDetail && (
-                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
-                  <div className="modal-dialog">
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <h5 className="modal-title" id="exampleModalLabel">
-                        {`Detail ${currentRole}`}
-                        </h5>
-                        <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
-                      </div>
-                      {selectedPerson && (
-                        <div className="modal-body">
-                          {/* Input pengukuran medis */}
-                          <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Nama</h6>
-                              <p>{selectedPerson.nama}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">NIK</h6>
-                              <p>{selectedPerson.nik}</p>
-                            </div>
-                          </div>
-
-                          <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Jenis Kelamin</h6>
-                              <p>{selectedPerson.jenisKelamin}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Poli</h6>
-                              <p>{selectedPerson.poli}</p>
-                            </div>
-                          </div>
-
-                          <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">No HP</h6>
-                              <p>{selectedPerson.no_hp}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Alamat</h6>
-                              <p>{selectedPerson.alamat}</p>
-                            </div>
-                          </div>
-
-                          <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Email</h6>
-                              <p>{selectedPerson.email}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Role</h6>
-                              <p>{selectedPerson.role}</p>
-                            </div>
-                          </div>
-                          
-                        </div>
-                      )}
-                        <div className="modal-footer">
-                          <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
-                            Tutup
-                          </button>
-                          <button type="submit" className="btn btn-primary"  onClick={() => toggleModal(selectedPerson)}>
-                            <i className="ti ti-playlist-add"></i> Edit
-                          </button>
-                          {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
-                        </div>
-                      </div>
-                    </div>
+      {showDetail && selectedPerson && (
+        <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">
+                  {`Detail ${currentRole}`}
+                </h5>
+                <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
+              </div>
+              <div className="modal-body">
+                <div className="row row-space">
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Nama</h6>
+                    <p>{selectedPerson.nama}</p>
                   </div>
-                )}
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">NIK</h6>
+                    <p>{selectedPerson.nik}</p>
+                  </div>
+                </div>
 
+                <div className="row row-space">
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Jenis Kelamin</h6>
+                    <p>{selectedPerson.jenisKelamin}</p>
+                  </div>
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Poli</h6>
+                    <p>{selectedPerson.poli}</p>
+                  </div>
+                </div>
+
+                <div className="row row-space">
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">No HP</h6>
+                    <p>{selectedPerson.no_hp}</p>
+                  </div>
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Alamat</h6>
+                    <p>{selectedPerson.alamat}</p>
+                  </div>
+                </div>
+
+                <div className="row row-space">
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Email</h6>
+                    <p>{selectedPerson.email}</p>
+                  </div>
+                  <div className="col-lg-6">
+                    <h6 className="fw-bold">Role</h6>
+                    <p>{selectedPerson.role}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
+                  Tutup
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handleEdit}>
+                    <i className="ti ti-playlist-add"></i> Edit
+                  </button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDetail && <div className="modal-backdrop fade show"></div>}         
+                
+                
                 {showModal && (
                   <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
                     <div className="modal-dialog">
                       <div className="modal-content">
                         <div className="modal-header">
                           <h5 className="modal-title" id="exampleModalLabel">
-                            { isEdit ? `Edit ${currentRole}` : `Tambah ${currentRole}` }
+                            {isEdit ? "Edit User" : "Tambah User"}
                           </h5>
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
@@ -799,7 +758,7 @@ const handleInputChange = (event) => {
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Role</h6>
-                                <select className="form-select" id="role" value={currentRole} onChange={(e) => setRole(e.target.value)}>
+                                <select className="form-select" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
                                   <option value="Select">Select</option>
                                   <option value="Doctor">Doctor</option>
                                   <option value="Antrian">Antrian</option>
@@ -807,7 +766,7 @@ const handleInputChange = (event) => {
                                 </select>
                               </div>
                             </div>
-                            
+
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Password</h6>

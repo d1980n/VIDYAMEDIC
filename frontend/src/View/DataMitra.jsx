@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
+import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
@@ -10,22 +11,33 @@ import images2 from '../source/img2.png';
 
 function DataSuperAdmin() {
   const [showModal, setShowModal] = useState(false);
-  const [namaLengkap, setNamaLengkap] = useState('');
-  // const [fotoKTP, setFotoKTP] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [nama, setNama] = useState('');
+  const [nik, setNik] = useState('');
   const [jenisKelamin, setJenisKelamin] = useState('');
-  const [alamatLengkap, setAlamatLengkap] = useState('');
-  const [phone_number, setPhoneNumber] = useState('');
+  const [alamat, setAlamat] = useState('');
+  const [no_hp, setNoHp] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [ttl, setTtl] = useState('');
-  const [poli, setPoli] = useState('');
+  const [konfPassword, setKonfPassword] = useState('');
   const [role, setRole] = useState('');
-  const [formData, setFormData] = useState({});
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [dokters, setDokters] = useState([]);
-  const toggleModal = () => {
-    setShowModal(!showModal);
+  const [klinik, setKlinik] = useState('');
+  const [tl, setTl] = useState('');
+  const [profilePict, setProfilePict] = useState('');
+  const [personList, setPersonList] = useState([]);
+  const [currentRole, setCurrentRole] = useState("Klinik");
+  const [filteredList, setFilteredList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const handleShowDetail = (klinik) => {
+    setSelectedPerson(klinik);
+    setShowDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetail(!showDetail);
+    setSelectedPerson(null);
   };
 
   // ===============================================================================================================================
@@ -49,6 +61,280 @@ function DataSuperAdmin() {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsOpen(false);
     }
+  };
+
+  
+  const resetForm = () => {
+    setNama('');
+    setJenisKelamin('');
+    setNik('');
+    setAlamat('');
+    setNoHp('');
+    setEmail('');
+    setPassword('');
+    setKonfPassword('');
+    setRole('');
+    setKlinik('');
+  }
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
+    resetForm();
+    setIsEdit(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Validasi input
+    if (!nama || !nik || !jenisKelamin || !klinik || !no_hp || !alamat || !email) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Semua field wajib diisi!',
+      });
+      return;
+    }
+  
+    if (password !== konfPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Password dan konfirmasi password tidak sesuai!',
+      });
+      return;
+    }
+  
+    const formData = {
+      nama,
+      nik,
+      jenisKelamin,
+      no_hp,
+      alamat,
+      role,
+      klinik,
+      email,
+      password: password || null,
+      tl: tl || null, // Null jika tidak diisi
+    };
+
+    // Log data yang akan dikirim
+    console.log('Form Data:', formData);
+  
+    Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, kirim data!',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          let response;
+  
+          if (selectedPerson && selectedPerson._id ) {
+            // Log data untuk update
+              console.log('Selected Person:', selectedPerson);
+              console.log('Updating person with ID:', selectedPerson._id);
+              console.log('Sending Data to Backend:', formData);
+  
+            console.log('result : ',result )
+  
+            response = await fetch(`http://localhost:3000/person/update/${selectedPerson._id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData),
+            });
+          } else {
+            // Log data untuk penambahan
+            console.log('Creating new person...');
+            console.log('Sending Data to Backend:', formData);
+  
+            response = await fetch('http://localhost:3000/auth/signup', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData),
+            });
+          }
+  
+          const responseBody = await response.text(); // Mengambil respons sebagai teks
+          console.log('Raw Response:', responseBody);
+          
+          if (!response.ok) {
+            throw new Error(responseBody.message || 'Gagal mengirim data ke server.');
+          }
+          
+          try {
+            const parsedResponse = JSON.parse(responseBody); // Try parsing as JSON
+            console.log('Parsed Response:', parsedResponse);
+          } catch (error) {
+            console.error('Error parsing response:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'There was an error processing the response from the server.',
+            });
+          }
+          // Log response dari server
+          console.log('Response Status:', response.status);
+          // console.log('Response Body:', responseBody);
+  
+  
+          // Reset form setelah berhasil
+          setShowModal(false);
+          setShowDetail(false);
+          setIsEdit(false);
+          setSelectedPerson(null);  
+          resetForm();
+  
+          Swal.fire({
+            icon: 'success',
+            title: selectedPerson ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!',
+            text: `${role} ${nama} ${selectedPerson ? 'berhasil diperbarui.' : 'berhasil ditambahkan.'}`,
+          });
+  
+          // Refresh data
+          fetchPersonData();
+        } catch (error) {
+          console.error('Error in handleSubmit:', error.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: `Terjadi kesalahan: ${error.message}`,
+          });
+        }
+      } else {
+        console.log('Submission cancelled by user.');
+        Swal.fire({
+          icon: 'info',
+          title: 'Dibatalkan',
+          text: 'Pengiriman data dibatalkan.',
+        });
+      }
+    });
+  };
+
+  // Event listener untuk mendeteksi klik di luar dropdown
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const fetchPersonData = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+  
+        if (data.success) {
+            setPersonList(data.person); // Menyimpan semua data person
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching persons:", error);
+    }
+  };
+  
+  // Fetch once on component mount
+  useEffect(() => {
+    const filterDataByRole = () => {
+        const filtered = personList.filter(person => person.role === currentRole);
+        setFilteredList(filtered); // Menyimpan data yang sudah difilter ke state
+    };
+    filterDataByRole();
+  }, [currentRole, personList]); // Akan merender ulang ketika currentRole atau personList berubah
+  
+  // Fetch data pada saat komponen dimuat
+  useEffect(() => {
+    fetchPersonData();
+  }, []);
+  
+  useEffect(() => {
+    // Filter data by role and search query
+    const filterData = () => {
+        const filtered = personList
+            .filter(person => person.role === currentRole)
+            .filter(person => 
+                person.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                person.email.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        setFilteredList(filtered);
+    };
+    filterData();
+  }, [currentRole, personList, searchQuery]);
+
+  const handleInputChange = (event) => {
+    setSearchQuery(event.target.value); // Update search query
+      };
+
+  const handleDelete = async (id) => {
+    // Konfirmasi sebelum menghapus dengan SweetAlert
+    Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Anda tidak dapat mengembalikan data yang sudah dihapus!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Lakukan penghapusan setelah konfirmasi
+          const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
+            method: 'DELETE',
+          });
+          if (!response.ok) {
+            throw new Error('HTTP error! Status: ' + response.status);
+          }
+  
+          // Tampilkan pesan sukses setelah penghapusan
+          Swal.fire(
+            'Terhapus!',
+            'Data berhasil dihapus.',
+            'success'
+          ).then(() => {
+            // Reload halaman setelah SweetAlert sukses
+            window.location.reload();
+          });
+  
+        } catch (error) {
+          console.error('Error deleting person:', error);
+  
+          // Tampilkan pesan error jika gagal menghapus
+          Swal.fire(
+            'Gagal!',
+            'Terjadi kesalahan saat menghapus data.',
+            'error'
+          );
+        }
+      }
+    });
+  };
+
+  const handleEdit = () => {
+    // Mengisi nilai form dengan data dari selectedPerson
+    setNama(selectedPerson.nama);
+    setNik(selectedPerson.nik);
+    setJenisKelamin(selectedPerson.jenisKelamin);
+    setKlinik(selectedPerson.klinik);
+    setNoHp(selectedPerson.no_hp);
+    setAlamat(selectedPerson.alamat);
+    setEmail(selectedPerson.email);
+    setRole(selectedPerson.role);
+    setPassword(''); // Tidak perlu mengisi password saat edit
+    setKonfPassword(''); // Tidak perlu mengisi konfirmasi password saat edit
+    setShowModal(true); // Tampilkan modal untuk edit
+    setIsEdit(true);
+    setShowDetail(true);
   };
 
   // Event listener untuk mendeteksi klik di luar dropdown
@@ -180,150 +466,229 @@ function DataSuperAdmin() {
             <div className="container-fluid">
               <body className="login"></body>
               <div>
-                <button className="btn btn-primary mb-3" onClick={toggleModal}>Tambah Admin</button>
-                <div className="row">
-                  <div className="col-lg-8 d-flex align-items-stretch" style={{ width: '100%' }}>
-                    <div className="card w-100">
-                      <div className="card-body p-4 width">
-                        <div style={{ display: 'flex', gap: '20px', marginBottom: '5vh' }}>
-                          <h5 className="card-title fw-semibold" style={{ width: '15%', alignItems: 'center', display: 'flex' }}>Data Mitra</h5>
-                          <input
-                                type="text"
-                                id="search-input"
-                                className="form-sels"
-                                placeholder="Masukkan nama atau email"
-                                style={{ width: '67%' }}
-                                // Memanggil fungsi pencarian saat pengguna mengetik
-                              />
-                              
-                              <button 
-                                type="button" 
-                                className="btn btn-secondary m-1" 
-                              >
-                                Update Antri
-                              </button>
-                        </div>
+              <div className="row">
+                <div className="col-lg-8 d-flex align-items-stretch" style={{ width: "100%" }}>
+                  <div className="card w-100">
+                    <div className="card-body p-4 width">
+                      <div className="table-responsive">
+                        <div className="tabs d-flex mb-4 row-tabss  ">
+                          {" "}
+                          {/* Menambahkan kelas d-flex dan flex-column */}
+                          <div className="row-tabs">
 
-                        <div className="table-responsive">
-                          <table className="table text-nowrap mb-0 align-middle">
-                            <thead className="text-dark fs-4">
-                              <tr>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">No</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Logo</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Nama Klinik</h6>
-                                </th>
-                                <th className="border-bottom-0">
-                                  <h6 className="fw-semibold mb-0">Alamat</h6>
-                                </th>
-                                <th style={{width: '10rem'}} className="border-bottom-0">
-                                  <h6 style={{maxWidth: '5rem', minWidth: '5rem'}} className="fw-semibold mb-0">Action</h6>
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            {dokters.map((dokter, index) => (
-                                <tr key={dokter.kode_dok}>
+                            <div className="d-flex">
+                              {" "}
+                              {/* Mengatur kolom untuk input dan label */}
+                              <input type="radio" name="tabs" id="tabSuperAdmin" checked={currentRole === "Klinik"} onChange={() => setCurrentRole("Klinik")} />
+                              <label htmlFor="tabSuperAdmin"  style={{height:"40px",}}>Data Klinik</label>
+                            </div>
+
+                          </div>
+                          <div clasName="d-flex justify-content-end ms-auto tabs-suster">
+                            <button className="btn btn-primary mb-3" style={{marginRight: "0.75rem",}} onClick={toggleModal}>
+                              Tambah Data
+                            </button>
+                          </div>
+                        </div>
+                        <div className="tab-content">
+                          <div style={{ display: "flex", gap: "20px", marginBottom: "5vh" }}>
+                            <h5 className="card-title fw-semibold" style={{ width: "15%", alignItems: "center", display: "flex" }}>
+                              {`Data ${currentRole}`}
+                            </h5>
+                            <input type="text" id="search-input" className="form-sels" placeholder="Masukkan nama atau email" style={{ width: "67%" }} onChange={handleInputChange} />
+                          </div>
+
+                          <div className="table-responsive">
+                            <table className="table text-nowrap mb-0 align-middle">
+                              <thead className="text-dark fs-4">
+                                <tr>
+                                  <th className="border-bottom-0">
+                                    <h6 className="fw-semibold mb-0">No</h6>
+                                  </th>
+                                  <th className="border-bottom-0">
+                                    <h6 className="fw-semibold mb-0">Logo</h6>
+                                  </th>
+                                  <th className="border-bottom-0">
+                                    <h6 className="fw-semibold mb-0">Nama {currentRole}</h6>
+                                  </th>
+                                  <th className="border-bottom-0">
+                                    <h6 className="fw-semibold mb-0">Alamat</h6>
+                                  </th>
+                                  <th className="border-bottom-0" style={{ width: "10rem" }}>
+                                    <h6 className="fw-semibold mb-0">Action</h6>
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              {filteredList.length > 0 ? (
+                              filteredList.map((index) => (
+                                <tr key="">
                                   <td>{index + 1}</td>
-                                  <td className="border-bottom-0">
-                                    <p className="mb-0 fw-normal">{dokter.namaLengkap}</p>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2"> 
-                                      <span className="fw-normal">{dokter.email}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <div className="d-flex align-items-center gap-2">
-                                      <span className="fw-normal">{dokter.password}</span>
-                                    </div>
-                                  </td>
-                                  <td className="border-bottom-0">
-                                    <button type="button" className="btn btn-success m-1">Detail</button>
-                                    <button type="button" className="btn btn-danger m-1" onClick="">Delete</button>
+                                  <td>Logo</td>
+                                  <td>Klinik Yoenie</td>
+                                  <td>Jl. in aja dulu</td>
+                                  <td>
+                                    <button type="button" className="btn btn-primary m-1" onClick="">
+                                      Detail
+                                    </button>
+                                    <button type="button" className="btn btn-danger m-1" onClick="">
+                                      Hapus
+                                    </button>
                                   </td>
                                 </tr>
-                            ))}
-
-                        </tbody>
-
-
-                          </table>
+                              ))
+                              ) : (
+                                <tr>
+                                  <td colSpan="4" className="text-center">
+                                    Tidak ada data untuk ditampilkan
+                                  </td>
+                                </tr>
+                              )}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Modal for showing details */}
+              {showDetail && (
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLabel">
+                        {`Detail ${currentRole}`}
+                        </h5>
+                        <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
+                      </div>
+                      {selectedPerson && (
+                        <div className="modal-body">
+                          {/* Input pengukuran medis */}
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Nama</h6>
+                              <p>{selectedPerson.nama}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">NIK</h6>
+                              <p>{selectedPerson.nik}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Jenis Kelamin</h6>
+                              <p>{selectedPerson.jenisKelamin}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Klinik</h6>
+                              <p>{selectedPerson.klinik}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">No HP</h6>
+                              <p>{selectedPerson.no_hp}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Alamat</h6>
+                              <p>{selectedPerson.alamat}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Email</h6>
+                              <p>{selectedPerson.email}</p>
+                            </div>
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Role</h6>
+                              <p>{selectedPerson.role}</p>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      )}
+                        <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" onClick={handleCloseDetail}>
+                            Tutup
+                          </button>
+                          <button type="submit" className="btn btn-primary"  onClick={handleEdit}>
+                            <i className="ti ti-playlist-add"></i> Edit
+                          </button>
+                          {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {showDetail && <div className="modal-backdrop fade show"></div>}
 
                 {showModal && (
-  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: 'block', zIndex: 1050 }}>
-    <div className="modal-dialog">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title" id="exampleModalLabel">Tambah Dokter</h5>
-          <button type="button" className="btn-close" onClick={toggleModal}></button>
-        </div>
-        <form onSubmit="">
-          <div className="modal-body">
-            <div className="mb-3">
-              <label htmlFor="namaLengkap" className="form-label">Nama Lengkap</label>
-              <input type="text" className="form-control" id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} autoFocus />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="jenisKelamin" className="form-label">Jenis Kelamin</label>
-              <select className="form-select" id="jenisKelamin" name="jenisKelamin" value={jenisKelamin} onChange={(e) => setJenisKelamin(e.target.value)}>
-                <option value="Select">Select</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
-              </select>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="alamatLengkap" className="form-label">Alamat Lengkap</label>
-              <textarea className="form-control" id="alamatLengkap" name="alamat" rows="3" value={alamatLengkap} onChange={(e) => setAlamatLengkap(e.target.value)}></textarea>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="phone_number" className="form-label">Nomor Telepon</label>
-              <input type="text" className="form-control" id="phone_number" name="no_hp" value={phone_number} onChange={(e) => setPhoneNumber(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">Alamat Email</label>
-              <input type="text" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="ttl" className="form-label">Tanggal Lahir</label>
-              <input type="date" className="form-control" id="ttl" name="ttl" value={ttl} onChange={(e) => setTtl(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="poli" className="form-label">Poli</label>
-              <input type="text" className="form-control" id="poli" name="poli" value={poli} onChange={(e) => setPoli(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
-              <input type="password" className="form-control" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password</label>
-              <input type="password" className="form-control" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            </div>
-          </div>
+                  <div className="modal fade show" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: "block" }}>
+                    <div className="modal-dialog">
+                      <div className="modal-content">
+                        <div className="modal-header">
+                          <h5 className="modal-title" id="exampleModalLabel">
+                            { isEdit ? `Edit ${currentRole}` : `Tambah ${currentRole}` }
+                          </h5>
+                          <button type="button" className="btn-close" onClick={toggleModal}></button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                          <div className="modal-body">
+                            {/* Input pengukuran medis */}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Nama Klinik</h6>
+                                <input type="text" name="Nama" className="form-control" placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)}/>
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Alamat</h6>
+                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                              </div>
+                            </div>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Menampilkan pesan error jika ada */}
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">No HP</h6>
+                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                              </div>
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Email</h6>
+                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                              </div>
+                            </div>
+                            
+                            <div className="row row-space">
+                              <div className="col-lg-12">
+                                <h6 className="fw-bold">Logo Klinik</h6>
+                                <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
+                              </div>
+                            </div>
+                          </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={toggleModal}>Tutup</button>
-            <button type="submit" className="btn btn-primary">Tambah Dokter</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-)}
-{showModal && <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>}
+                          <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={toggleModal}>
+                              Tutup
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                              <i className="ti ti-playlist-add"></i> Simpan
+                            </button>
+                            {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
+                          </div>
+                        </form>
 
+
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {showModal && <div className="modal-backdrop fade show"></div>}
 
               </div>
             </div>
