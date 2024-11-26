@@ -14,7 +14,7 @@ function DataSuperAdmin() {
   const [showDetail, setShowDetail] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
-  const [nama, setNama] = useState('');
+  const [namaKlinik, setNamaKlinik] = useState('');
   const [nik, setNik] = useState('');
   const [jenisKelamin, setJenisKelamin] = useState('');
   const [alamat, setAlamat] = useState('');
@@ -30,16 +30,37 @@ function DataSuperAdmin() {
   const [currentRole, setCurrentRole] = useState("Klinik");
   const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMitra, setSelectedMitra] = useState(null);
+  const [mitraList, setMitraList] = useState([]);
   const handleShowDetail = (klinik) => {
     setSelectedPerson(klinik);
     setShowDetail(true);
   };
 
+  const fetchMitraData = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/mitra');
+      const data = await response.json();
+      setMitraList(data);
+    } catch (error) {
+      console.error('Error fetching mitra data:', error.message);
+    }
+  };
+
+
   const handleCloseDetail = () => {
     setShowDetail(!showDetail);
     setSelectedPerson(null);
   };
-
+  useEffect(() => {
+    // Isi form jika mode edit
+    if (selectedMitra) {
+      setNamaKlinik(selectedMitra.namaKlinik || '');
+      setNoHp(selectedMitra.no_hp || '');
+      setAlamat(selectedMitra.alamat || '');
+      setEmail(selectedMitra.email || '');
+    }
+  }, [selectedMitra]);
   // ===============================================================================================================================
 
   const [activePage, setActivePage] = useState('');
@@ -65,7 +86,7 @@ function DataSuperAdmin() {
 
   
   const resetForm = () => {
-    setNama('');
+    setNamaKlinik('');
     setJenisKelamin('');
     setNik('');
     setAlamat('');
@@ -82,12 +103,13 @@ function DataSuperAdmin() {
     resetForm();
     setIsEdit(false);
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Validasi input
-    if (!nama || !nik || !jenisKelamin || !klinik || !no_hp || !alamat || !email) {
+    if (!namaKlinik || !no_hp || !alamat || !email) {
       Swal.fire({
         icon: 'error',
         title: 'Gagal!',
@@ -95,35 +117,17 @@ function DataSuperAdmin() {
       });
       return;
     }
-  
-    if (password !== konfPassword) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal!',
-        text: 'Password dan konfirmasi password tidak sesuai!',
-      });
-      return;
-    }
-  
+
     const formData = {
-      nama,
-      nik,
-      jenisKelamin,
+      namaKlinik,
       no_hp,
       alamat,
-      role,
-      klinik,
       email,
-      password: password || null,
-      tl: tl || null, // Null jika tidak diisi
     };
 
-    // Log data yang akan dikirim
-    console.log('Form Data:', formData);
-  
     Swal.fire({
       title: 'Apakah Anda yakin?',
-      text: "Data yang Anda masukkan akan dikirimkan untuk diproses.",
+      text: selectedMitra ? 'Data akan diperbarui.' : 'Data akan ditambahkan.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Ya, kirim data!',
@@ -132,16 +136,10 @@ function DataSuperAdmin() {
       if (result.isConfirmed) {
         try {
           let response;
-  
-          if (selectedPerson && selectedPerson._id ) {
-            // Log data untuk update
-              console.log('Selected Person:', selectedPerson);
-              console.log('Updating person with ID:', selectedPerson._id);
-              console.log('Sending Data to Backend:', formData);
-  
-            console.log('result : ',result )
-  
-            response = await fetch(`http://localhost:3000/person/update/${selectedPerson._id}`, {
+
+          if (selectedMitra && selectedMitra._id) {
+            // Edit Mitra
+            response = await fetch(`http://localhost:3000/mitra/editMitra/${selectedMitra._id}`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
@@ -149,11 +147,8 @@ function DataSuperAdmin() {
               body: JSON.stringify(formData),
             });
           } else {
-            // Log data untuk penambahan
-            console.log('Creating new person...');
-            console.log('Sending Data to Backend:', formData);
-  
-            response = await fetch('http://localhost:3000/auth/signup', {
+            // Add Mitra
+            response = await fetch('http://localhost:3000/mitra/addMitra', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -161,45 +156,30 @@ function DataSuperAdmin() {
               body: JSON.stringify(formData),
             });
           }
-  
-          const responseBody = await response.text(); // Mengambil respons sebagai teks
-          console.log('Raw Response:', responseBody);
-          
+
+          const responseBody = await response.json();
+
           if (!response.ok) {
             throw new Error(responseBody.message || 'Gagal mengirim data ke server.');
           }
-          
-          try {
-            const parsedResponse = JSON.parse(responseBody); // Try parsing as JSON
-            console.log('Parsed Response:', parsedResponse);
-          } catch (error) {
-            console.error('Error parsing response:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'There was an error processing the response from the server.',
-            });
-          }
-          // Log response dari server
-          console.log('Response Status:', response.status);
-          // console.log('Response Body:', responseBody);
-  
-  
-          // Reset form setelah berhasil
+
+          // Reset form dan modal
+          setNamaKlinik('');
+          setNoHp('');
+          setAlamat('');
+          setEmail('');
           setShowModal(false);
-          setShowDetail(false);
           setIsEdit(false);
-          setSelectedPerson(null);  
-          resetForm();
-  
+          setSelectedMitra(null);
+
           Swal.fire({
             icon: 'success',
-            title: selectedPerson ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!',
-            text: `${role} ${nama} ${selectedPerson ? 'berhasil diperbarui.' : 'berhasil ditambahkan.'}`,
+            title: selectedMitra ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!',
+            text: `Mitra ${namaKlinik} ${selectedMitra ? 'berhasil diperbarui.' : 'berhasil ditambahkan.'}`,
           });
-  
+
           // Refresh data
-          fetchPersonData();
+          fetchMitraData();
         } catch (error) {
           console.error('Error in handleSubmit:', error.message);
           Swal.fire({
@@ -209,7 +189,6 @@ function DataSuperAdmin() {
           });
         }
       } else {
-        console.log('Submission cancelled by user.');
         Swal.fire({
           icon: 'info',
           title: 'Dibatalkan',
@@ -218,6 +197,7 @@ function DataSuperAdmin() {
       }
     });
   };
+
 
   // Event listener untuk mendeteksi klik di luar dropdown
   useEffect(() => {
@@ -262,7 +242,7 @@ function DataSuperAdmin() {
         const filtered = personList
             .filter(person => person.role === currentRole)
             .filter(person => 
-                person.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                person.namaKlinik.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 person.email.toLowerCase().includes(searchQuery.toLowerCase())
             );
         setFilteredList(filtered);
@@ -322,16 +302,11 @@ function DataSuperAdmin() {
 
   const handleEdit = () => {
     // Mengisi nilai form dengan data dari selectedPerson
-    setNama(selectedPerson.nama);
-    setNik(selectedPerson.nik);
-    setJenisKelamin(selectedPerson.jenisKelamin);
+    setNamaKlinik(selectedPerson.namaKlinik);
     setKlinik(selectedPerson.klinik);
     setNoHp(selectedPerson.no_hp);
     setAlamat(selectedPerson.alamat);
     setEmail(selectedPerson.email);
-    setRole(selectedPerson.role);
-    setPassword(''); // Tidak perlu mengisi password saat edit
-    setKonfPassword(''); // Tidak perlu mengisi konfirmasi password saat edit
     setShowModal(true); // Tampilkan modal untuk edit
     setIsEdit(true);
     setShowDetail(true);
@@ -570,8 +545,8 @@ function DataSuperAdmin() {
                           {/* Input pengukuran medis */}
                           <div className="row row-space">
                             <div className="col-lg-6">
-                              <h6 className="fw-bold">Nama</h6>
-                              <p>{selectedPerson.nama}</p>
+                              <h6 className="fw-bold">Nama Klinik</h6>
+                              <p>{selectedPerson.namaKlinik}</p>
                             </div>
                             <div className="col-lg-6">
                               <h6 className="fw-bold">NIK</h6>
@@ -645,7 +620,7 @@ function DataSuperAdmin() {
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Nama Klinik</h6>
-                                <input type="text" name="Nama" className="form-control" placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)}/>
+                                <input type="text" name="NamaKlinik" className="form-control" placeholder="Nama Klinik" value={namaKlinik} onChange={(e) => setNamaKlinik(e.target.value)}/>
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Alamat</h6>

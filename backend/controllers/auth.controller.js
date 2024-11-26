@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Person = require("../models/person.model");
+const Mitra = require("../models/mitra.model");
 
 const signin = async(req, res) => {
     try {
@@ -40,9 +40,9 @@ const signup = async(req, res) => {
     try {
         const { nama, nik, no_hp, role, email, password, tl, jenisKelamin, alamat, poli, klinik } = req.body;
 
-    if (!nama || !nik || !no_hp || !role || !email || !password) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
-    }
+        if (!nama || !nik || !no_hp || !role || !email || !password) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
+        }
 
         const existingUser = await Person.findOne({ email });
         if (existingUser) {

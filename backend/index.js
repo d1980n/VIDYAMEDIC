@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 // Import your models
 const Medical = require('./models/medicalrecord.model');
 const Person = require('./models/person.model');
+const Mitra = require('./models/mitra.model');
 
 require('dotenv').config({ path: __dirname + '/../.env' })
 
@@ -20,6 +21,7 @@ const DashboardRoute = require('./routes/dashboard.route');
 const MedicalRoute = require('./routes/medical.router');
 const DoctorRoute = require('./routes/doctor.router');
 const patientRoutes = require('./routes/patients.routes');
+const MitraRoutes = require('./routes/mitra.routes');
 // const MRroutes = require('./routes/medical.router');
 // Connect to mongo
 mongoose.connect(process.env.MONGO_URI)
@@ -40,6 +42,8 @@ app.use('/dashboard', DashboardRoute);
 app.use('/medical', MedicalRoute);
 app.use('/doctor', DoctorRoute);
 app.use('/patients', patientRoutes);
+app.use('/doctor', DoctorRoute);
+app.use('/mitra', MitraRoutes);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000!');
@@ -75,6 +79,14 @@ app.get('/person', async(req, res) => {
     try {
         const person = await Person.find();
         res.json({ success: true, person });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+app.get('/mitra', async(req, res) => {
+    try {
+        const mitra = await Mitra.find();
+        res.json({ success: true, mitra });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
