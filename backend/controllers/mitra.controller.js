@@ -2,7 +2,7 @@ const Mitra = require('../models/mitra.model');
 
 const addMitra = async(req, res) => {
     try {
-        const { namaKlinik, no_hp, alamat, email } = req.body;
+        const { namaKlinik, no_hp, alamat, email, link } = req.body;
 
         // Validasi input
         if (!namaKlinik || !no_hp || !alamat || !email) {
@@ -21,6 +21,7 @@ const addMitra = async(req, res) => {
             no_hp,
             alamat,
             email,
+            link,
         });
 
         await newMitra.save();
@@ -44,7 +45,7 @@ const editMitra = async(req, res) => {
 
         // Update data mitra
         const updatedMitra = await Mitra.findByIdAndUpdate(
-            id, { namaKlinik, no_hp, alamat, email }, { new: true } // Mengembalikan data yang sudah diperbarui
+            id, { namaKlinik, no_hp, alamat, email, link }, { new: true } // Mengembalikan data yang sudah diperbarui
         );
 
         if (!updatedMitra) {

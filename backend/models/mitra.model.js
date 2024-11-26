@@ -18,6 +18,10 @@ const mitraSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    link: {
+        type: String,
+        require: false,
+    }
 });
 
 const Mitra = mongoose.model("mitra", mitraSchema);

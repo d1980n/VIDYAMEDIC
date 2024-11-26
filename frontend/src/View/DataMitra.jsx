@@ -31,6 +31,7 @@ function DataSuperAdmin() {
   const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMitra, setSelectedMitra] = useState(null);
+  const [link, setLink] = useState("");
   const [mitraList, setMitraList] = useState([]);
   const handleShowDetail = (klinik) => {
     setSelectedPerson(klinik);
@@ -59,6 +60,7 @@ function DataSuperAdmin() {
       setNoHp(selectedMitra.no_hp || '');
       setAlamat(selectedMitra.alamat || '');
       setEmail(selectedMitra.email || '');
+      setLink(selectedMitra.link || '');
     }
   }, [selectedMitra]);
   // ===============================================================================================================================
@@ -93,6 +95,7 @@ function DataSuperAdmin() {
     setNoHp('');
     setEmail('');
     setPassword('');
+    setLink('');
     setKonfPassword('');
     setRole('');
     setKlinik('');
@@ -123,6 +126,7 @@ function DataSuperAdmin() {
       no_hp,
       alamat,
       email,
+      link,
     };
 
     Swal.fire({
@@ -167,6 +171,7 @@ function DataSuperAdmin() {
           setNamaKlinik('');
           setNoHp('');
           setAlamat('');
+          setLink('');
           setEmail('');
           setShowModal(false);
           setIsEdit(false);
@@ -638,6 +643,13 @@ function DataSuperAdmin() {
                                 <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                             </div>
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Link</h6>
+                                <input type="text" name="Link" className="form-control" placeholder="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+                              </div>
+                          
+                            </div>
                             
                             <div className="row row-space">
                               <div className="col-lg-12">
@@ -645,6 +657,7 @@ function DataSuperAdmin() {
                                 <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
                               </div>
                             </div>
+                            
                           </div>
 
                           <div className="modal-footer">
