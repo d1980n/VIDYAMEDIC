@@ -2,8 +2,8 @@ const Mitra = require('../models/mitra.model');
 
 const addMitra = async(req, res) => {
     try {
-        const { namaKlinik, no_hp, alamat, email } = req.body;
-
+        const { namaKlinik, no_hp, alamat, email, logo } = req.body;
+        // console.log(req.file, req.body)
         // Validasi input
         if (!namaKlinik || !no_hp || !alamat || !email) {
             return res.status(400).json({ success: false, message: "All fields are required" });
@@ -15,12 +15,15 @@ const addMitra = async(req, res) => {
             return res.status(409).json({ success: false, message: "Mitra already exists" });
         }
 
+        // const logoPath = req.file ? req.file.filename : null; // Nama file yang diunggah
+
         // Membuat data mitra baru
         const newMitra = new Mitra({
             namaKlinik,
             no_hp,
             alamat,
             email,
+            logo,
         });
 
         await newMitra.save();
@@ -77,4 +80,4 @@ const deleteMitra = async(req, res) => {
 };
 
 
-module.exports = { addMitra, deleteMitra, editMitra };
+module.exports = { addMitra, deleteMitra, editMitra, };

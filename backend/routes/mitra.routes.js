@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMitra, editMitra, deleteMitra } = require("../controllers/mitra.controller");
+const { addMitra, editMitra, deleteMitra, } = require("../controllers/mitra.controller");
 
 const router = express.Router();
 
