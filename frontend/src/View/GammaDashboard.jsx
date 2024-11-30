@@ -30,58 +30,6 @@ function GammaDashboard() {
       [e.target.id]: e.target.value,
     });
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Menyusun data form
-    const formData = {
-      namaLengkap,
-      jenisKelamin,
-      alamatLengkap,
-      email,
-      password,
-      konfpassword,
-      role,
-      phone_number,
-
-    };
-  
-    // Log data untuk memeriksa
-    console.log('Form Data:', formData);
-  
-
-
-    try {
-      const response = await fetch('http://localhost:3000/patients/tambah', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-  
-  
-      const data = await response.json();
-      console.log('Response Data:', data);
-  
-      // Reset form setelah pengiriman berhasil
-      setNamaLengkap('');
-      setJenisKelamin('');
-      setAlamatLengkap('');
-      setPhoneNumber('');
-      setEmail('');
-      setPassword('');
-      setKonfPassword('');
-      setRole('Admin');
-      setShowModal(false);
-  
-      // Fetch data again after adding a new patient
-      fetchDaftarPasien();
-    } catch (error) {
-      console.error('Error:', error.message);
-    }
-  };
   const fetchDaftarPasien = async () => {
     try {
         const response = await fetch('http://localhost:3000/patients');

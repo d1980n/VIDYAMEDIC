@@ -29,6 +29,7 @@ function DataMitra() {
   const [currentRole, setCurrentRole] = useState("Klinik");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMitra, setSelectedMitra] = useState(null);
+  const [link, setLink] = useState("");
   const [mitraList, setMitraList] = useState([]);
   const [isUploading, setIsUploading] = useState(true);
 
@@ -71,6 +72,7 @@ function DataMitra() {
       setNoHp(selectedMitra.no_hp || '');
       setAlamat(selectedMitra.alamat || '');
       setEmail(selectedMitra.email || '');
+      setLink(selectedMitra.link || '');
       setLogo(selectedMitra.logo || '');
     }
   }, [selectedMitra]);
@@ -103,6 +105,7 @@ function DataMitra() {
     setAlamat('');
     setNoHp('');
     setEmail('');
+    setLink('');
     setLogo(null);
   }
 
@@ -257,6 +260,7 @@ function DataMitra() {
     alamat,
     logo,
     email,
+      link,
   };
 
   console.log({formData})
@@ -306,6 +310,7 @@ function DataMitra() {
           setNamaKlinik('');
           setNoHp('');
           setAlamat('');
+          setLink('');
           setEmail('');
           setLogo(null);
           setOldLogo(null);
@@ -757,6 +762,13 @@ function DataMitra() {
                                 <input type="text" name="email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                             </div>
+                            <div className="row row-space">
+                              <div className="col-lg-6">
+                                <h6 className="fw-bold">Link</h6>
+                                <input type="text" name="Link" className="form-control" placeholder="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+                              </div>
+                          
+                            </div>
                             
                             <div className="row row-space">
                               <div className="col-lg-12">
@@ -764,6 +776,7 @@ function DataMitra() {
                                 <input type="file" name="logo" className="form-control" placeholder="Profile PIcture" accept="image/*" onChange={handleFileChange} />
                               </div>
                             </div>
+                            
                           </div>
 
                           <div className="modal-footer">
