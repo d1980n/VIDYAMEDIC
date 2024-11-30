@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
-import logo from '../source/logo.png';
+import logoo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
 import images from '../source/Picture1.png';
@@ -24,6 +24,7 @@ function DataMitra() {
   const [email, setEmail] = useState('');
   const [id, setId] = useState('');
   const [logo, setLogo] = useState(null);
+  const [oldLogo, setOldLogo] = useState(null);
   const [klinik, setKlinik] = useState('');
   const [currentRole, setCurrentRole] = useState("Klinik");
   const [searchQuery, setSearchQuery] = useState("");
@@ -113,55 +114,100 @@ function DataMitra() {
   
   const handleFileChange = (e) => {
     console.log(e.target.files[0]);
-    const file = e.target.files[0];
-    if (file) {
-      handleFileUpload(file); // Kirim ke fungsi handleFileUpload
+    const newImage = e.target.files[0];
+    if (newImage) {
+      handleFileUpload(newImage, oldLogo, setLogo, setIsUploading); // Kirim ke fungsi handleFileUpload
     } else {
       console.error("No file selected");
     }
-    console.log(URL.createObjectURL(file));
+    console.log(URL.createObjectURL(newImage));
   };
 
-  const handleFileUpload = async (image) => {
-    console.log("File received for upload:", image);
-  
-    if (!image) {
-      console.error("No file received");
-      return;
-    }
-  
-    if (!(image instanceof File)) {
-      console.error("Invalid file object:", image);
-      return;
-    }
-  
+  const handleFileUpload = async (newImage, oldLogo, setLogo, setIsUploading) => {
     try {
       const storage = getStorage(app);
-      const fileName = new Date().getTime() + "-" + image.name; // Pastikan nama file unik
-      const storageRef = ref(storage, `logos/${fileName}`); // Gunakan direktori khusus
-      const uploadTask = uploadBytesResumable(storageRef, image);
-
-      setIsUploading(true);
   
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log({newImage, oldLogo, setLogo, setIsUploading})
+      console.log("ok");
+      // **1. Cek jika ada file baru**
+      if (newImage) {
+        // Hapus file lama jika ada
+        if (newImage && oldLogo) {
+          console.log("Deleting old file...");
+          const decodedPath = decodeURIComponent(
+            oldLogo.split('/o/')[1].split('?alt=media')[0]
+          );
+          const oldFileRef = ref(storage, decodedPath);
+          await deleteObject(oldFileRef);
+          console.log("Old file deleted successfully");
+
+           // Unggah file baru
+        console.log("Uploading new file...");
+        const fileName = new Date().getTime() + "-" + newImage.name; // Nama file unik
+        const newFileRef = ref(storage, `${fileName}`); // Direktori khusus
+        const uploadTask = uploadBytesResumable(newFileRef, newImage);
+  
+        setIsUploading(true); // Mulai proses unggahan
+  
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             console.log(`Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error("Error during upload:", error);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log("Download URL:", downloadURL);
-          setLogo(downloadURL); // Simpan URL ke state
-          setIsUploading(false);
-        }
-      );
+          },
+          (error) => {
+            console.error("Error during upload:", error);
+            setIsUploading(false);
+          },
+          async () => {
+            const newDownloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log("New file uploaded successfully, URL:", newDownloadURL);
+  
+            // Simpan URL baru ke state
+            setLogo(newDownloadURL);
+            setIsUploading(false);
+          }
+        );
+          } else if (newImage && !oldLogo) {
+             // Unggah file baru
+        console.log("Uploading new file...");
+        const fileName = new Date().getTime() + "-" + newImage.name; // Nama file unik
+        const newFileRef = ref(storage, ` ${fileName}`); // Direktori khusus
+        const uploadTask = uploadBytesResumable(newFileRef, newImage);
+  
+        setIsUploading(true); // Mulai proses unggahan
+  
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+          },
+          (error) => {
+            console.error("Error during upload:", error);
+            setIsUploading(false);
+          },
+          async () => {
+            const newDownloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log("New file uploaded successfully, URL:", newDownloadURL);
+  
+            // Simpan URL baru ke state
+            setLogo(newDownloadURL);
+            setIsUploading(false);
+          }
+        );
+          } else {
+            console.log("No new file uploaded, logo remains unchanged.");
+            // Jika tidak ada file baru, pertahankan logo lama
+            setLogo(oldLogo);
+            setIsUploading(false);
+          }
+      }
     } catch (error) {
-      console.error("Error in handleFileUpload:", error);
+      console.error("Error in handleFileUploadOrEdit:", error);
+      setIsUploading(false);
     }
   };
   
@@ -262,6 +308,7 @@ function DataMitra() {
           setAlamat('');
           setEmail('');
           setLogo(null);
+          setOldLogo(null);
           setShowModal(false);
           setIsEdit(false);
           setSelectedMitra(null);
@@ -390,12 +437,12 @@ function DataMitra() {
   const handleEdit = () => {
     // Mengisi nilai form dengan data dari selectedPerson
     setNamaKlinik(selectedMitra.namaKlinik);
-    setLogo(selectedMitra.logo);
+    setOldLogo(selectedMitra.logo);
     setNoHp(selectedMitra.no_hp);
     setAlamat(selectedMitra.alamat);
     setEmail(selectedMitra.email);
     setShowModal(true); // Tampilkan modal untuk edit
-    setIsEdit(true);
+    setIsEdit(true);  
     setShowDetail(false);
   };
 
@@ -417,7 +464,7 @@ function DataMitra() {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                  <img src="" width="180" alt="" />
+                  <img src={logoo} width="180" alt="" />
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>
