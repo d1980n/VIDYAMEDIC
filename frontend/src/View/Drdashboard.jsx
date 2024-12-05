@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../source/logo.png";
+import logos from '../source/1.png'
 import "../css/login.css";
 import "../css/admindash.css";
 import Swal from "sweetalert2";
@@ -68,7 +69,7 @@ const DrDashboard = () => {
               <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                   <a href="./index.html" class="text-nowrap logo-img">
-                    <img src={logo} width="180" alt="" />
+                    <img src={logos} width="180" alt="" />
                   </a>
                   <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                     <i class="ti ti-x fs-8"></i>

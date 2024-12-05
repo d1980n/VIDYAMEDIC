@@ -3,6 +3,7 @@ import Login from './login.jsx'
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logologin from '../source/logologin.png';
+import logos from '../source/1.png'
 
 function Register() {
   const [formData, setFormData] = useState({});
@@ -48,10 +49,10 @@ function Register() {
                 <div className="card mb-0">
                   <div className="card-body">
                     <a href="/index.html" className="text-nowrap logo-img text-center d-block py-3 w-100">
-                      <img src={logologin} width="220" alt=""/>
+                      <img src={logos} width="220" alt=""/>
                     </a>
                     <p className="text-center">Sistem Informasi Manajemen Klinik</p>
-                    <p className="text-center mb-0 fw-bold black">Klinik Vidya Medic</p>
+                    <p className="text-center mb-0 fw-bold black">Klinik Medipal</p>
                     <form onSubmit={handleSubmit}>
                       <div className="mb-3">
                         <label htmlFor="nama" className="form-label">Name</label>

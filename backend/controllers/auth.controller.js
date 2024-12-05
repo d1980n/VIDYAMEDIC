@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Mitra = require("../models/mitra.model");
-
+const Person = require('../models/person.model');
 const signin = async(req, res) => {
     try {
         const { email, password } = req.body;

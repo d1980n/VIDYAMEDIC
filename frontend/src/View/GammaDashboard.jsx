@@ -3,6 +3,7 @@ import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
 import '../css/login.css';
 import '../css/admindash.css';
+import logos from '../source/1.png'
 import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
@@ -239,7 +240,7 @@ const susterAntri = async (index, nomorMR) => {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={logos} width="180" alt="" />
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>

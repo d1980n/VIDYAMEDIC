@@ -3,6 +3,7 @@ import axios from 'axios';
 import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
 import logo from '../source/logo.png';
+import logos from '../source/1.png'
 import '../css/login.css';
 import '../css/admindash.css';
 import images from '../source/Picture1.png';
@@ -335,7 +336,7 @@ function DataSuperAdmin() {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={logos} width="180" alt="" />
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>
