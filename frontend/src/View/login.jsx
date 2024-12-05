@@ -1,6 +1,6 @@
 import '../css/login.css';
 import { useState } from 'react';
-import logologin from '../source/logologin.png';
+import logo from '../source/logologin.png';
 import logos from '../source/1.png'
 import { useNavigate } from 'react-router-dom';
 import Signin from './Signin';
@@ -82,7 +82,7 @@ function Login() {
                 <div className="card mb-0">
                   <div className="card-body">
                     <a href="/index.html" className="text-nowrap logo-img text-center d-block py-3 w-100">
-                      <img src={logos} width="220" alt=""/>
+                      <img src={logo} width="220" alt=""/>
                     </a>
                     <p className="text-center">Sistem Informasi Manajemen Klinik</p>
                     <p className="text-center mb-0 fw-bold black">Klinik Medipal</p>
