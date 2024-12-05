@@ -31,6 +31,7 @@ function DataSuperAdmin() {
   const [currentRole, setCurrentRole] = useState("Beta");
   const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mitraList, setMitraList] = useState("");
 
   const handleShowDetail = (person) => {
     setSelectedPerson(person);
@@ -271,6 +272,26 @@ function DataSuperAdmin() {
     };
     filterData();
   }, [currentRole, personList, searchQuery]);
+
+  const fetchMitraData = async () => {
+    try {
+        const response = await fetch("http://localhost:3000/mitra");
+        const data = await response.json();
+  
+        if (data.success) {
+            setMitraList(data.mitra); // Menyimpan semua data person
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching persons:", error);
+    }
+  };
+
+  // Fetch data pada saat komponen dimuat
+  useEffect(() => {
+    fetchMitraData();
+  }, []);
 
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value); // Update search query
@@ -661,8 +682,14 @@ function DataSuperAdmin() {
                                 <h6 className="fw-bold">Klinik</h6>
                                 <select className="form-select" id="klinik" value={klinik} onChange={(e) => setKlinik(e.target.value)}>
                                   <option value="Select">Select</option>
-                                  <option value="Klinik Yoenie">Klinik Yoenie</option>
-                                  <option value="Klinik Medicore">Klinik Medicore</option>
+                                  {mitraList.length > 0 ? (
+                                    mitraList.map((data, _i) => {
+                                      return(
+                                        <option value={data.namaKlinik}>{data.namaKlinik}</option>
+                                      )
+                                    })
+                                  ) : null}
+                                  {/* <option value="Klinik Medicore">Klinik Medicore</option> */}
                                 </select>
                               </div>
                             </div>

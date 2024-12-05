@@ -9,51 +9,63 @@ import '../css/admindash.css';
 import images from '../source/Picture1.png';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
+import {getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject} from 'firebase/storage';
+import {app} from '../firebase.js';
 
-function DataSuperAdmin() {
+
+
+function DataMitra() {
   const [showModal, setShowModal] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [namaKlinik, setNamaKlinik] = useState('');
-  const [nik, setNik] = useState('');
-  const [jenisKelamin, setJenisKelamin] = useState('');
   const [alamat, setAlamat] = useState('');
   const [no_hp, setNoHp] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [konfPassword, setKonfPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [id, setId] = useState('');
+  const [logo, setLogo] = useState(null);
+  const [oldLogo, setOldLogo] = useState(null);
   const [klinik, setKlinik] = useState('');
-  const [tl, setTl] = useState('');
-  const [profilePict, setProfilePict] = useState('');
-  const [personList, setPersonList] = useState([]);
   const [currentRole, setCurrentRole] = useState("Klinik");
-  const [filteredList, setFilteredList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMitra, setSelectedMitra] = useState(null);
   const [link, setLink] = useState("");
   const [mitraList, setMitraList] = useState([]);
-  const handleShowDetail = (klinik) => {
-    setSelectedPerson(klinik);
+  const [isUploading, setIsUploading] = useState(true);
+
+  // const storage = getStorage();
+
+  const handleShowDetail = (mitra) => {
+    setSelectedMitra(mitra);
     setShowDetail(true);
   };
 
   const fetchMitraData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/mitra');
-      const data = await response.json();
-      setMitraList(data);
+        const response = await fetch("http://localhost:3000/mitra");
+        const data = await response.json();
+  
+        if (data.success) {
+            setMitraList(data.mitra); // Menyimpan semua data person
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
     } catch (error) {
-      console.error('Error fetching mitra data:', error.message);
+        console.error("Error fetching persons:", error);
     }
   };
 
+  // Fetch data pada saat komponen dimuat
+  useEffect(() => {
+    fetchMitraData();
+  }, []);
 
   const handleCloseDetail = () => {
     setShowDetail(!showDetail);
     setSelectedPerson(null);
   };
+
   useEffect(() => {
     // Isi form jika mode edit
     if (selectedMitra) {
@@ -62,6 +74,7 @@ function DataSuperAdmin() {
       setAlamat(selectedMitra.alamat || '');
       setEmail(selectedMitra.email || '');
       setLink(selectedMitra.link || '');
+      setLogo(selectedMitra.logo || '');
     }
   }, [selectedMitra]);
   // ===============================================================================================================================
@@ -90,16 +103,11 @@ function DataSuperAdmin() {
   
   const resetForm = () => {
     setNamaKlinik('');
-    setJenisKelamin('');
-    setNik('');
     setAlamat('');
     setNoHp('');
     setEmail('');
-    setPassword('');
     setLink('');
-    setKonfPassword('');
-    setRole('');
-    setKlinik('');
+    setLogo(null);
   }
 
   const toggleModal = () => {
@@ -108,6 +116,131 @@ function DataSuperAdmin() {
     setIsEdit(false);
   };
   
+  const handleFileChange = (e) => {
+    console.log(e.target.files[0]);
+    const newImage = e.target.files[0];
+    if (newImage) {
+      handleFileUpload(newImage, oldLogo, setLogo, setIsUploading); // Kirim ke fungsi handleFileUpload
+    } else {
+      console.error("No file selected");
+    }
+    console.log(URL.createObjectURL(newImage));
+  };
+
+  const handleFileUpload = async (newImage, oldLogo, setLogo, setIsUploading) => {
+    try {
+      const storage = getStorage(app);
+  
+      console.log({newImage, oldLogo, setLogo, setIsUploading})
+      console.log("ok");
+      // **1. Cek jika ada file baru**
+      if (newImage) {
+        // Hapus file lama jika ada
+        if (newImage && oldLogo) {
+          console.log("Deleting old file...");
+          const decodedPath = decodeURIComponent(
+            oldLogo.split('/o/')[1].split('?alt=media')[0]
+          );
+          const oldFileRef = ref(storage, decodedPath);
+          await deleteObject(oldFileRef);
+          console.log("Old file deleted successfully");
+
+           // Unggah file baru
+        console.log("Uploading new file...");
+        const fileName = new Date().getTime() + "-" + newImage.name; // Nama file unik
+        const newFileRef = ref(storage, `${fileName}`); // Direktori khusus
+        const uploadTask = uploadBytesResumable(newFileRef, newImage);
+  
+        setIsUploading(true); // Mulai proses unggahan
+  
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+          },
+          (error) => {
+            console.error("Error during upload:", error);
+            setIsUploading(false);
+          },
+          async () => {
+            const newDownloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log("New file uploaded successfully, URL:", newDownloadURL);
+  
+            // Simpan URL baru ke state
+            setLogo(newDownloadURL);
+            setIsUploading(false);
+          }
+        );
+          } else if (newImage && !oldLogo) {
+             // Unggah file baru
+        console.log("Uploading new file...");
+        const fileName = new Date().getTime() + "-" + newImage.name; // Nama file unik
+        const newFileRef = ref(storage, ` ${fileName}`); // Direktori khusus
+        const uploadTask = uploadBytesResumable(newFileRef, newImage);
+  
+        setIsUploading(true); // Mulai proses unggahan
+  
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+          },
+          (error) => {
+            console.error("Error during upload:", error);
+            setIsUploading(false);
+          },
+          async () => {
+            const newDownloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log("New file uploaded successfully, URL:", newDownloadURL);
+  
+            // Simpan URL baru ke state
+            setLogo(newDownloadURL);
+            setIsUploading(false);
+          }
+        );
+          } else {
+            console.log("No new file uploaded, logo remains unchanged.");
+            // Jika tidak ada file baru, pertahankan logo lama
+            setLogo(oldLogo);
+            setIsUploading(false);
+          }
+      }
+    } catch (error) {
+      console.error("Error in handleFileUploadOrEdit:", error);
+      setIsUploading(false);
+    }
+  };
+  
+
+  // const handleFileUpload = async (image) => {
+  //   const storage = getStorage(app);
+  //   const fileName = new Date().getTime() + image.name;
+  //   const storageRef = ref(storage, fileName);
+  //   const uploadTask = uploadBytesResumable(storageRef, image);
+  //   uploadTask.on(
+  //     'state_changed',
+  //     (snapshot) => {
+  //       // const progress =
+  //       //   (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+  //       // setImagePercent(Math.round(progress));
+  //     },
+  //     (error) => {
+  //       // setImageError(true);
+  //       console.log({error})
+  //     },
+  //     () => {
+  //       getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+  //         // setFormData({ ...formData, profilePicture: downloadURL })
+  //         setLogo(downloadURL);
+  //         console.log({downloadURL});
+  //     });
+  //     }
+  //   );
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,13 +255,19 @@ function DataSuperAdmin() {
       return;
     }
 
-    const formData = {
-      namaKlinik,
-      no_hp,
-      alamat,
-      email,
+  const formData = {
+    namaKlinik,
+    no_hp,
+    alamat,
+    logo,
+    email,
       link,
-    };
+  };
+
+  console.log({formData})
+
+  // Log data yang akan dikirim
+  console.log('Form Data:', formData);
 
     Swal.fire({
       title: 'Apakah Anda yakin?',
@@ -174,6 +313,8 @@ function DataSuperAdmin() {
           setAlamat('');
           setLink('');
           setEmail('');
+          setLogo(null);
+          setOldLogo(null);
           setShowModal(false);
           setIsEdit(false);
           setSelectedMitra(null);
@@ -213,54 +354,37 @@ function DataSuperAdmin() {
     };
   }, []);
 
-  const fetchPersonData = async () => {
-    try {
-        const response = await fetch("http://localhost:3000/person");
-        const data = await response.json();
-  
-        if (data.success) {
-            setPersonList(data.person); // Menyimpan semua data person
-        } else {
-            console.error("Failed to fetch persons:", data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching persons:", error);
-    }
-  };
-  
-  // Fetch once on component mount
-  useEffect(() => {
-    const filterDataByRole = () => {
-        const filtered = personList.filter(person => person.role === currentRole);
-        setFilteredList(filtered); // Menyimpan data yang sudah difilter ke state
-    };
-    filterDataByRole();
-  }, [currentRole, personList]); // Akan merender ulang ketika currentRole atau personList berubah
-  
-  // Fetch data pada saat komponen dimuat
-  useEffect(() => {
-    fetchPersonData();
-  }, []);
-  
-  useEffect(() => {
-    // Filter data by role and search query
-    const filterData = () => {
-        const filtered = personList
-            .filter(person => person.role === currentRole)
-            .filter(person => 
-                person.namaKlinik.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                person.email.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-        setFilteredList(filtered);
-    };
-    filterData();
-  }, [currentRole, personList, searchQuery]);
-
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value); // Update search query
       };
 
-  const handleDelete = async (id) => {
+  const handleDeleteLogo = async (downloadURL) => {
+    try {
+      const storage = getStorage();
+  
+      // Ekstrak file path dari downloadURL
+      const decodedPath = decodeURIComponent(
+        downloadURL.split('/o/')[1].split('?alt=media')[0]
+      );
+  
+      // Buat referensi ke file di Firebase Storage
+
+      console.log({decodedPath})
+      const fileRef = ref(storage, decodedPath);
+  
+      // Hapus file dari Firebase Storage
+      await deleteObject(fileRef);
+      console.log("File deleted successfully");
+
+    } catch (error) {
+      console.error("Error deleting logo:", {error});
+    }finally{
+      console.log("sukses");
+    }
+  };
+
+  const handleDelete = async (data) => {
+
     // Konfirmasi sebelum menghapus dengan SweetAlert
     Swal.fire({
       title: 'Apakah Anda yakin?',
@@ -273,11 +397,21 @@ function DataSuperAdmin() {
       cancelButtonText: 'Batal',
     }).then(async (result) => {
       if (result.isConfirmed) {
+
+        try{
+          await handleDeleteLogo(data.logo);
+        }catch(err){
+          console.log({err})
+        }
+
         try {
           // Lakukan penghapusan setelah konfirmasi
-          const response = await fetch(`http://localhost:3000/person/delete/${id}`, {
+
+          const response = await fetch(`http://localhost:3000/mitra/deleteMitra/${data._id}`, {
             method: 'DELETE',
           });
+
+
           if (!response.ok) {
             throw new Error('HTTP error! Status: ' + response.status);
           }
@@ -308,14 +442,14 @@ function DataSuperAdmin() {
 
   const handleEdit = () => {
     // Mengisi nilai form dengan data dari selectedPerson
-    setNamaKlinik(selectedPerson.namaKlinik);
-    setKlinik(selectedPerson.klinik);
-    setNoHp(selectedPerson.no_hp);
-    setAlamat(selectedPerson.alamat);
-    setEmail(selectedPerson.email);
+    setNamaKlinik(selectedMitra.namaKlinik);
+    setOldLogo(selectedMitra.logo);
+    setNoHp(selectedMitra.no_hp);
+    setAlamat(selectedMitra.alamat);
+    setEmail(selectedMitra.email);
     setShowModal(true); // Tampilkan modal untuk edit
-    setIsEdit(true);
-    setShowDetail(true);
+    setIsEdit(true);  
+    setShowDetail(false);
   };
 
   // Event listener untuk mendeteksi klik di luar dropdown
@@ -336,7 +470,7 @@ function DataSuperAdmin() {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={logoo} width="180" alt="" />
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>
@@ -501,18 +635,18 @@ function DataSuperAdmin() {
                                 </tr>
                               </thead>
                               <tbody>
-                              {filteredList.length > 0 ? (
-                              filteredList.map((index) => (
+                              {mitraList.length > 0 ? (
+                              mitraList.map((mitra, index) => (
                                 <tr key="">
                                   <td>{index + 1}</td>
-                                  <td>Logo</td>
-                                  <td>Klinik Yoenie</td>
-                                  <td>Jl. in aja dulu</td>
+                                  <td><img src={mitra.logo} alt="" width="80rem" /></td>
+                                  <td>{mitra.namaKlinik}</td>
+                                  <td>{mitra.alamat}</td>
                                   <td>
-                                    <button type="button" className="btn btn-primary m-1" onClick="">
+                                    <button type="button" className="btn btn-primary m-1" onClick={() => handleShowDetail(mitra)}>
                                       Detail
                                     </button>
-                                    <button type="button" className="btn btn-danger m-1" onClick="">
+                                    <button type="button" className="btn btn-danger m-1" onClick={() => handleDelete(mitra)}>
                                       Hapus
                                     </button>
                                   </td>
@@ -546,50 +680,35 @@ function DataSuperAdmin() {
                         </h5>
                         <button type="button" className="btn-close" onClick={handleCloseDetail}></button>
                       </div>
-                      {selectedPerson && (
+                      {selectedMitra && (
                         <div className="modal-body">
                           {/* Input pengukuran medis */}
                           <div className="row row-space">
                             <div className="col-lg-6">
                               <h6 className="fw-bold">Nama Klinik</h6>
-                              <p>{selectedPerson.namaKlinik}</p>
+                              <p>{selectedMitra.namaKlinik}</p>
                             </div>
                             <div className="col-lg-6">
-                              <h6 className="fw-bold">NIK</h6>
-                              <p>{selectedPerson.nik}</p>
-                            </div>
-                          </div>
-
-                          <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Jenis Kelamin</h6>
-                              <p>{selectedPerson.jenisKelamin}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Klinik</h6>
-                              <p>{selectedPerson.klinik}</p>
+                              <h6 className="fw-bold">Alamat</h6>
+                              <p>{selectedMitra.alamat}</p>
                             </div>
                           </div>
 
                           <div className="row row-space">
                             <div className="col-lg-6">
                               <h6 className="fw-bold">No HP</h6>
-                              <p>{selectedPerson.no_hp}</p>
+                              <p>{selectedMitra.no_hp}</p>
                             </div>
                             <div className="col-lg-6">
-                              <h6 className="fw-bold">Alamat</h6>
-                              <p>{selectedPerson.alamat}</p>
+                              <h6 className="fw-bold">Email</h6>
+                              <p>{selectedMitra.email}</p>
                             </div>
                           </div>
 
                           <div className="row row-space">
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Email</h6>
-                              <p>{selectedPerson.email}</p>
-                            </div>
-                            <div className="col-lg-6">
-                              <h6 className="fw-bold">Role</h6>
-                              <p>{selectedPerson.role}</p>
+                            <div className="col-lg-12">
+                              <h6 className="fw-bold">logo</h6>
+                              <p><img src={selectedMitra.logo} alt="" width='100rem' /></p>
                             </div>
                           </div>
                           
@@ -620,28 +739,28 @@ function DataSuperAdmin() {
                           </h5>
                           <button type="button" className="btn-close" onClick={toggleModal}></button>
                         </div>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} encType="multipart/form-data">
                           <div className="modal-body">
                             {/* Input pengukuran medis */}
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Nama Klinik</h6>
-                                <input type="text" name="NamaKlinik" className="form-control" placeholder="Nama Klinik" value={namaKlinik} onChange={(e) => setNamaKlinik(e.target.value)}/>
+                                <input type="text" name="namaKlinik" className="form-control" placeholder="Nama Klinik" value={namaKlinik} onChange={(e) => setNamaKlinik(e.target.value)}/>
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Alamat</h6>
-                                <input type="text" name="Alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+                                <input type="text" name="alamat" className="form-control" placeholder="Alamat" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
                               </div>
                             </div>
 
                             <div className="row row-space">
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">No HP</h6>
-                                <input type="number" name="No Hp" className="form-control" placeholder="No Hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
+                                <input type="number" name="no_hp" className="form-control" placeholder="No Hp" value={no_hp} onChange={(e) => setNoHp(e.target.value)} />
                               </div>
                               <div className="col-lg-6">
                                 <h6 className="fw-bold">Email</h6>
-                                <input type="text" name="Email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                <input type="text" name="email" className="form-control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
                               </div>
                             </div>
                             <div className="row row-space">
@@ -655,7 +774,7 @@ function DataSuperAdmin() {
                             <div className="row row-space">
                               <div className="col-lg-12">
                                 <h6 className="fw-bold">Logo Klinik</h6>
-                                <input type="file" name="Profile PIcture" className="form-control" placeholder="Profile PIcture" value={profilePict} onChange={(e) => setProfilePict(e.target.value)} />
+                                <input type="file" name="logo" className="form-control" placeholder="Profile PIcture" accept="image/*" onChange={handleFileChange} />
                               </div>
                             </div>
                             
@@ -665,8 +784,8 @@ function DataSuperAdmin() {
                             <button type="button" className="btn btn-secondary" onClick={toggleModal}>
                               Tutup
                             </button>
-                            <button type="submit" className="btn btn-primary">
-                              <i className="ti ti-playlist-add"></i> Simpan
+                            <button type="submit" className="btn btn-primary" disabled={isUploading || !logo}>
+                              <i className="ti ti-playlist-add"></i> {isUploading ? "Waiting for file" : "Simpan"}
                             </button>
                             {/* <button type="submit" className="btn btn-success" disabled={isConfirmed}>Masuk</button> */}
                           </div>
@@ -696,4 +815,4 @@ function DataSuperAdmin() {
   );
 }
 
-export default DataSuperAdmin;
+export default DataMitra;

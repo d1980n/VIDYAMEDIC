@@ -2,8 +2,8 @@ const Mitra = require('../models/mitra.model');
 
 const addMitra = async(req, res) => {
     try {
-        const { namaKlinik, no_hp, alamat, email, link } = req.body;
-
+        const { namaKlinik, no_hp, alamat, email, logo, link } = req.body;
+        // console.log(req.file, req.body)
         // Validasi input
         if (!namaKlinik || !no_hp || !alamat || !email) {
             return res.status(400).json({ success: false, message: "All fields are required" });
@@ -15,12 +15,15 @@ const addMitra = async(req, res) => {
             return res.status(409).json({ success: false, message: "Mitra already exists" });
         }
 
+        // const logoPath = req.file ? req.file.filename : null; // Nama file yang diunggah
+
         // Membuat data mitra baru
         const newMitra = new Mitra({
             namaKlinik,
             no_hp,
             alamat,
             email,
+            logo,
             link,
         });
 
@@ -36,7 +39,7 @@ const addMitra = async(req, res) => {
 const editMitra = async(req, res) => {
     try {
         const { id } = req.params; // ID mitra yang akan diedit
-        const { namaKlinik, no_hp, alamat, email } = req.body;
+        const { namaKlinik, no_hp, alamat, email, logo } = req.body;
 
         // Validasi input
         if (!namaKlinik || !no_hp || !alamat || !email) {
@@ -45,7 +48,7 @@ const editMitra = async(req, res) => {
 
         // Update data mitra
         const updatedMitra = await Mitra.findByIdAndUpdate(
-            id, { namaKlinik, no_hp, alamat, email, link }, { new: true } // Mengembalikan data yang sudah diperbarui
+            id, { namaKlinik, no_hp, alamat, email, logo, link }, { new: true } // Mengembalikan data yang sudah diperbarui
         );
 
         if (!updatedMitra) {
@@ -78,4 +81,4 @@ const deleteMitra = async(req, res) => {
 };
 
 
-module.exports = { addMitra, deleteMitra, editMitra };
+module.exports = { addMitra, deleteMitra, editMitra, };
