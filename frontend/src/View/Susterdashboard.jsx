@@ -8,6 +8,10 @@ import images from "../source/Picture1.png";
 import { NavLink } from "react-router-dom";
 import images2 from "../source/img2.png";
 import Swal from 'sweetalert2';
+import { useSelector } from "react-redux";
+import {  useLocation } from "react-router-dom";
+
+
 
 function Susterdashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -18,6 +22,11 @@ function Susterdashboard() {
   const [mergedData, setMergedData] = useState([]);
   const [activePage, setActivePage] = useState("");
   const [jumlahPasien, setJumlahPasien] = useState([]);
+  const userEmail = useSelector((state) => state.user.nama); //
+  const [clinicData, setClinicData] = useState(null);
+  const [error, setError] = useState(null); 
+  const location = useLocation();
+
 
 
   const toggleModal = (nomorMR) => {
@@ -175,6 +184,46 @@ useEffect(() => {
   fetchDaftarPasien();
 }, []);
 
+useEffect(() => {
+  const queryParams = new URLSearchParams(location.search);
+  const clinicId = queryParams.get("clinicId");
+
+  if (clinicId) {
+    const fetchClinicData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/mitra`);
+        const data = await response.json();
+
+        if (data.success) {
+          const clinic = data.mitra.find((mitra) => mitra._id === clinicId);
+          if (clinic) {
+            setClinicData(clinic);
+     
+
+          } else {
+            setClinicData({ namaKlinik: "Tidak ditemukan", logo: null });
+
+          }
+        } else {
+          setError("Failed to fetch clinic data.");
+        }
+      } catch (err) {
+        setError("Failed to load clinic data.");
+      }
+    };
+
+    fetchClinicData();
+  } else {
+    setClinicData({ namaKlinik: "Login As Gamma", logo: null });
+  }
+}, [location]);
+
+if (error) return <p>{error}</p>;
+
+if (!clinicData) {
+  return <p>Loading clinic data...</p>;
+}
+
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -187,7 +236,7 @@ useEffect(() => {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={clinicData.logo} width="180" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -257,7 +306,7 @@ useEffect(() => {
 
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Klinik VidyaMedic</h4>
+                          <h4 class="fw-semibold mb-3">{clinicData.namaKlinik} </h4>
 
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
@@ -279,7 +328,7 @@ useEffect(() => {
                       <h5 class="card-title mb-9 fw-semibold">Suster</h5>
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Perawat. Sarah Namban</h4>
+                          <h4 class="fw-semibold mb-3">Helo, Perawat. {userEmail}</h4>
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
                               <i class="ti ti-arrow-down-right text-danger"></i>

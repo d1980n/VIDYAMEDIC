@@ -46,7 +46,10 @@ function Antrian() {
   ]);
   const [loading, setLoading] = useState(false);
 
-
+  
+  const [clinicData, setClinicData] = useState(null);
+ 
+  
   
   const handleValidation = (message, index, nomorMR, namaLengkap) => {
     Swal.fire({
@@ -606,6 +609,45 @@ const susterAntri = async (index, nomorMR) => {
     };
   }, []);
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const clinicId = queryParams.get("clinicId");
+
+    if (clinicId) {
+      const fetchClinicData = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/mitra`);
+          const data = await response.json();
+
+          if (data.success) {
+            const clinic = data.mitra.find((mitra) => mitra._id === clinicId);
+            if (clinic) {
+              setClinicData(clinic);
+       
+
+            } else {
+              setClinicData({ namaKlinik: "Tidak ditemukan", logo: null });
+
+            }
+          } else {
+            setError("Failed to fetch clinic data.");
+          }
+        } catch (err) {
+          setError("Failed to load clinic data.");
+        }
+      };
+
+      fetchClinicData();
+    } else {
+      setClinicData({ namaKlinik: "Login As Gamma", logo: null });
+    }
+  }, [location]);
+
+  if (error) return <p>{error}</p>;
+
+  if (!clinicData) {
+    return <p>Loading clinic data...</p>;
+  }
 
   return (
     <html className='Admin'>
@@ -617,11 +659,8 @@ const susterAntri = async (index, nomorMR) => {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                {/* {clientData.image ? (
-        <img src={`http://localhost:3008/${clientData.image}`} alt={clientData.nama} />
-      ) : (
-        <div>Image not found</div>
-      )} */}
+                <img src={clinicData.logo} width="220" alt=""/>
+
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>

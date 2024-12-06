@@ -7,7 +7,7 @@ import "../css/admindash.css";
 import images from "../source/Picture1.png";
 import { NavLink } from "react-router-dom";
 import images2 from "../source/img2.png";
-
+import { useSelector } from "react-redux";
 function SuperAdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +26,7 @@ function SuperAdminDashboard() {
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
+  const userEmail = useSelector((state) => state.user.nama); //
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -310,7 +311,7 @@ function SuperAdminDashboard() {
                       <h5 class="card-title mb-9 fw-semibold">Admin</h5>
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Petugas. Udin Simanjuntak</h4>
+                          <h4 class="fw-semibold mb-3">Helo, Petugas. {userEmail}</h4>
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
                               <i class="ti ti-arrow-down-right text-danger"></i>

@@ -9,6 +9,8 @@ import images from "../source/Picture1.png";
 import { NavLink, useLocation } from "react-router-dom";
 import images2 from "../source/img2.png";
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+
 const DrDashboard = () => {
   const [activePage, setActivePage] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
@@ -16,6 +18,14 @@ const DrDashboard = () => {
 
   const [isDisabled, setIsDisabled] = useState(false); // Contoh inisialisasi
   const location = useLocation();
+  const userEmail = useSelector((state) => state.user.nama); //
+  const [loading, setLoading] = useState(false);
+
+  
+  const [clinicData, setClinicData] = useState(null);
+  const [error, setError] = useState(null); 
+
+  
   const handleSetActivePage = (page) => {
     setActivePage(page);
   };
@@ -56,6 +66,46 @@ const DrDashboard = () => {
     fetchDaftarPasien();
   }, []);
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const clinicId = queryParams.get("clinicId");
+
+    if (clinicId) {
+      const fetchClinicData = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/mitra`);
+          const data = await response.json();
+
+          if (data.success) {
+            const clinic = data.mitra.find((mitra) => mitra._id === clinicId);
+            if (clinic) {
+              setClinicData(clinic);
+       
+
+            } else {
+              setClinicData({ namaKlinik: "Tidak ditemukan", logo: null });
+
+            }
+          } else {
+            setError("Failed to fetch clinic data.");
+          }
+        } catch (err) {
+          setError("Failed to load clinic data.");
+        }
+      };
+
+      fetchClinicData();
+    } else {
+      setClinicData({ namaKlinik: "Login As Gamma", logo: null });
+    }
+  }, [location]);
+
+  if (error) return <p>{error}</p>;
+
+  if (!clinicData) {
+    return <p>Loading clinic data...</p>;
+  }
+
   return (
     <>
       <html className="Admin">
@@ -69,7 +119,7 @@ const DrDashboard = () => {
               <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                   <a href="./index.html" class="text-nowrap logo-img">
-                    <img src={logo} width="180" alt="" />
+                    <img src={clinicData.logo} width="180" alt="" />
                   </a>
                   <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                     <i class="ti ti-x fs-8"></i>
@@ -140,7 +190,7 @@ const DrDashboard = () => {
 
                         <div class="row align-items-center">
                           <div class="col-8">
-                            <h4 class="fw-semibold mb-3">Klinik VidyaMedic</h4>
+                            <h4 class="fw-semibold mb-3">{clinicData.namaKlinik}</h4>
 
                             <div class="d-flex align-items-center pb-1">
                               <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
@@ -162,7 +212,7 @@ const DrDashboard = () => {
                         <h5 class="card-title mb-9 fw-semibold">Dokter</h5>
                         <div class="row align-items-center">
                           <div class="col-8">
-                            <h4 class="fw-semibold mb-3">Helo, Dr. Santoso Sutetjo</h4>
+                            <h4 class="fw-semibold mb-3">Helo, Dr. {userEmail}</h4>
                           </div>
                         </div>
                       </div>

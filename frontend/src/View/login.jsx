@@ -1,14 +1,73 @@
 import '../css/login.css';
-import { useState } from 'react';
+import { useState, useEffect  } from 'react';
 import logo from '../source/logologin.png';
 import logos from '../source/1.png'
+import logologin from '../source/logologin.png';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { storeEmail } from '../redux/userSlice';
+import { storeMitra } from '../redux/userSlice';
+
 import Signin from './Signin';
 function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
+  // Untuk membaca query parameter
+ const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const [clinicData, setClinicData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const clinicId = queryParams.get("clinicId");
+  const dispatch = useDispatch();
+
+
+ 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const clinicId = queryParams.get("clinicId");
+
+    if (clinicId) {
+      const fetchClinicData = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/mitra`);
+          const data = await response.json();
+
+          if (data.success) {
+            const clinic = data.mitra.find((mitra) => mitra._id === clinicId);
+            if (clinic) {
+              setClinicData(clinic);
+         dispatch(storeMitra(data.namaKlinik));
+
+            } else {
+              setClinicData({ namaKlinik: "Tidak ditemukan", logo: null });
+
+            }
+          } else {
+            setError("Failed to fetch clinic data.");
+          }
+        } catch (err) {
+          setError("Failed to load clinic data.");
+        }
+      };
+
+      fetchClinicData();
+    } else {
+      setClinicData({ namaKlinik: "Login As Gamma", logo: null });
+    }
+  }, [location]);
+
+  if (error) return <p>{error}</p>;
+
+  if (!clinicData) {
+    return <p>Loading clinic data...</p>;
+  }
+
+  if (error) return <p>{error}</p>;
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -19,16 +78,21 @@ function Login() {
   const handleRoleNavigation = (role) => {
     switch (role) {
       case 'Antrian':
-        navigate('/antrian');
+        window.location.href = `http://localhost:3001/antrian?clinicId=${clinicId}`;
         break;
       case 'Doctor':
-        navigate('/Drdashboard');
+        window.location.href = `http://localhost:3001/drdashboard?clinicId=${clinicId}`;
+        
         break;
       case 'Suster':
-        navigate('/Susterdashboard');
+        window.location.href = `http://localhost:3001/susterdashboard?clinicId=${clinicId}`;
+      
         break;
-      case 'Beta':
+      case 'Super Admin':
         navigate('/SuperAdmin');
+        break;
+      case 'Gamma':
+        navigate('/DashboardGamma');
         break;
       default:
         navigate('/');
@@ -65,6 +129,7 @@ function Login() {
 
       // Successful login, navigate based on role
       handleRoleNavigation(data.role);
+      dispatch(storeEmail(data.nama));
       
     } catch (error) {
       console.error('Error:', error.message);
@@ -83,9 +148,10 @@ function Login() {
                   <div className="card-body">
                     <a href="/index.html" className="text-nowrap logo-img text-center d-block py-3 w-100">
                       <img src={logo} width="220" alt=""/>
+                      <img src={clinicData.logo} width="220" alt=""/>
                     </a>
                     <p className="text-center">Sistem Informasi Manajemen Klinik</p>
-                    <p className="text-center mb-0 fw-bold black">Klinik Medipal</p>
+                    <p className="text-center mb-0 fw-bold black"> {clinicData.namaKlinik}</p>
                     <form onSubmit={handleSubmit}>
                       <div className="mb-3">
                         <label htmlFor="email" className="form-label">Email</label>
