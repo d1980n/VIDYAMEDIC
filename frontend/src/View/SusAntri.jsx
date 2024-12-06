@@ -29,6 +29,7 @@ function SusAntri() {
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [mergedData, setMergedData] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -359,15 +360,11 @@ function SusAntri() {
       try {
         const response = await fetch("http://localhost:3000/patients");
         const data = await response.json();
-  
+
         if (data.success) {
-          const newPatients = data.patients.filter(
-            (patient) => patient.antrianStatus.susterAntriStatus === true
-          );
+          const newPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
           setDaftarPasien((prevDaftarPasien) => {
-            const uniquePatients = newPatients.filter(
-              (newPatient) => !prevDaftarPasien.some((patient) => patient.nomorMR === newPatient.nomorMR)
-            );
+            const uniquePatients = newPatients.filter((newPatient) => !prevDaftarPasien.some((patient) => patient.nomorMR === newPatient.nomorMR));
             return [...prevDaftarPasien, ...uniquePatients];
           });
         }
@@ -375,10 +372,23 @@ function SusAntri() {
         console.error("Error fetching new patients:", error);
       }
     }, 5000); // Polling setiap 5 detik
-  
+
     return () => clearInterval(interval); // Bersihkan interval saat komponen dibongkar
   }, []);
-  
+
+  useEffect(() => {
+    // Fetch data dari API
+    fetch("http://localhost:3000/person")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Filter data hanya untuk dokter
+          const doctorData = data.person.filter((person) => person.role === "Doctor");
+          setDoctors(doctorData);
+        }
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
@@ -545,60 +555,73 @@ function SusAntri() {
                                 <div className="modal-body">
                                   {/* Input pengukuran medis */}
                                   <div className="row" style={{ padding: "0px" }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tekanan Darah Sistolik</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Tekanan Darah Sistolik</h6>
                                       <input type="text" name="TDS" className="form-control" placeholder="mmHg" value={TDS} onChange={(e) => setTekananDarahSistolik(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tekanan Darah Diastolik</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Tekanan Darah Diastolik</h6>
                                       <input type="text" name="TDD" className="form-control" placeholder="mmHg" value={TDD} onChange={(e) => setTekanandarahDiastolik(e.target.value)} />
                                     </div>
                                   </div>
 
                                   <div className="row" style={{ padding: "0px" }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Temperatur</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Temperatur</h6>
                                       <input type="text" name="Temperatur" className="form-control" placeholder="C" value={Temperatur} onChange={(e) => setTemperatur(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Nadi</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Nadi</h6>
                                       <input type="text" name="Nadi" className="form-control" placeholder="Nadi" value={Nadi} onChange={(e) => setNadi(e.target.value)} />
                                     </div>
                                   </div>
 
                                   <div className="row" style={{ padding: "0px" }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Laju Pernafasan</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Laju Pernafasan</h6>
                                       <input type="text" name="LP" className="form-control" placeholder="LP" value={LP} onChange={(e) => setLajuPernafasan(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Presentase SpO2</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Presentase SpO2</h6>
                                       <input type="text" name="Spot" className="form-control" placeholder="SpO2" value={Spot} onChange={(e) => setSpot(e.target.value)} />
                                     </div>
                                   </div>
 
                                   <div className="row" style={{ padding: "0px" }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Tinggi Badan</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Tinggi Badan</h6>
                                       <input type="text" name="TB" className="form-control" placeholder="Cm" value={TB} onChange={(e) => setTinggiBadan(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Berat Badan</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Berat Badan</h6>
                                       <input type="text" name="BB" className="form-control" placeholder="Kg" value={BB} onChange={(e) => setBeratBadan(e.target.value)} />
                                     </div>
                                   </div>
 
                                   <div className="row" style={{ padding: "0px" }}>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">LILA</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">LILA</h6>
                                       <input type="text" name="LILA" className="form-control" placeholder="LILA" value={LILA} onChange={(e) => setLILA(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">AVPU</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">AVPU</h6>
                                       <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
                                     </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Keluhan</h6>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Poli</h6>
+                                      <select className="form-select" id="jenisKelamin">
+                                        <option value="">Select</option>
+                                        {doctors.map((doctor) => (
+                                          <option key={doctor._id} value={doctor.nama}>
+                                           <div className="">
+                                           {doctor.nama} - {doctor.poli}
+                                           </div>
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Keluhan</h6>
                                       <textarea type="text" name="Keluhan" placeholder="Keluhan" className="form-sels" value={Keluhan} onChange={(e) => setKeluhan(e.target.value)} />
                                     </div>
                                   </div>
