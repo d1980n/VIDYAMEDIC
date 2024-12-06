@@ -20,6 +20,7 @@ import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import DataMitra from './View/DataMitra.jsx';
+import ProtectedRoute from './protectedRoute.js'; // Import komponen ProtectedRoute
 import { store } from './redux/store.js';
 import { Provider } from 'react-redux';
 import {PersistGate} from "redux-persist/integration/react";
@@ -52,67 +53,131 @@ const router = createBrowserRouter([
   },
   {
     path: "/Drmonitor",
-    element: <Drmonitor/>
+    element: (
+      <ProtectedRoute>
+        <Drmonitor />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/RiwayatMedis",
-    element: <RiwayatMedis/>
+    element: (
+      <ProtectedRoute>
+        <RiwayatMedis />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Faktorresiko",
-    element: <Faktorresiko/>
+    element: (
+      <ProtectedRoute>
+        <Faktorresiko />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Prediksiresiko",
-    element: <Prediksiresiko/>
+    element: (
+      <ProtectedRoute>
+        <Prediksiresiko />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Riwayatdeteksi",
-    element: <Riwayatdeteksi/>
+    element: (
+      <ProtectedRoute>
+        <Riwayatdeteksi />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Treatment",
-    element: <Treatment/>
+    element: (
+      <ProtectedRoute>
+        <Treatment />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Rekomendasi",
-    element: <Rekomendasi/>
+    element: (
+      <ProtectedRoute>
+        <Rekomendasi />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DrAntri",
-    element: <DrAntri/>
+    element: (
+      <ProtectedRoute>
+        <DrAntri />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Susterdashboard",
-    element: <Susterdashboard/>
+    element: (
+      <ProtectedRoute>
+        <Susterdashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/SusAntri",
-    element: <SusAntri/>
+    element: (
+      <ProtectedRoute>
+        <SusAntri />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Antrian",
-    element: <Antrian/>
+    element: (
+      <ProtectedRoute>
+        <Antrian />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DataPasien",
-    element: <DataPasien/>
+    element: (
+      <ProtectedRoute>
+        <DataPasien />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/SuperAdmin",
-    element: <SuperAdminDashboard/>
+    element: (
+      <ProtectedRoute>
+        <SuperAdminDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DataNakes",
-    element: <DataNakes/>
+    element: (
+      <ProtectedRoute>
+        <DataNakes />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Target",
-    element: <Target/>
+    element: (
+      <ProtectedRoute>
+        <Target />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DrDashboard",
-    element: <DrDashboard/>
+    element: (
+      <ProtectedRoute>
+        <DrDashboard/>
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DashboardGamma",

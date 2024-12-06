@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Mitra = require("../models/mitra.model");
-const Person = require("../models/person.model")
+const Person = require("../models/person.model");
 
 const signin = async(req, res) => {
     try {
@@ -24,14 +24,31 @@ const signin = async(req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
-            console.log({user})
-        res.status(200).json({
-            success: true,
-            message: "Login successful",
-            token,
-            role: user.role,
-            nama: user.nama,
-        });
+            console.log({user});
+            const klinik = user.klinik;
+            const mitra = await Mitra.findOne({ namaKlinik: klinik });
+        if(user) {
+            res.status(200).json({
+                success: true,
+                message: "Login successful",
+                token,
+                role: user.role,
+                nama: user.nama,
+                user: {
+                    username: user.nama,
+                    jenisKelamin: user.jenisKelamin,
+                    email: user.email,
+                    no_hp: user.no_hp,
+                    role: user.role,
+                    alamat: user.alamat,
+                  },
+                  mitra: {
+                    idKlinik: mitra._id,
+                    namaKlinik: mitra.namaKlinik,
+                    logoKlinik: mitra.logo,
+                  }
+            });
+        }
     } catch (error) {
         console.error("Error during signin:", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
