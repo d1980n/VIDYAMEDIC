@@ -20,7 +20,10 @@ import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import DataMitra from './View/DataMitra.jsx';
-
+import { store } from './redux/store.js';
+import { Provider } from 'react-redux';
+import {PersistGate} from "redux-persist/integration/react";
+import { persistor } from './redux/store';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -130,6 +133,10 @@ const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <RouterProvider router={router}/>
+     <Provider store={store}>
+  <PersistGate persistor={persistor} loading={null}>
+ <RouterProvider router={router}/>
+ </PersistGate>
+  </Provider>
   </StrictMode>
 );
