@@ -1008,40 +1008,63 @@ const handleSaveXrayData = () => {
                                       </summary>
                                     );
                                   })}
-                                   {filteredRecordsNew && filteredRecordsNew.length > 0 ? (
+                                 {filteredRecordsNew && filteredRecordsNew.length > 0 ? (
   <div>
     {/* Iterasi untuk setiap record yang ada */}
     {filteredRecordsNew.map((medicalRec) => {
       return (
-        <div key={medicalRec._id}>
+        <div key={medicalRec._id} style={{ boxShadow: 'none' }}>
+          {/* Pemeriksaan Tanda Vital */}
           <h5>Pemeriksaan Tanda Vital</h5>
-          <h6>
-            Tekanan Darah Sistolik: <h8 className="fw-light">{medicalRec.TDS}</h8>
-          </h6>
-          <h6>
-            Tekanan Darah Diastolik: <h8 className="fw-light">{medicalRec.TDD}</h8>
-          </h6>
-          <h6>
-            Temperatur: <h8 className="fw-light">{medicalRec.Temperatur}</h8>
-          </h6>
-          <h6>
-            Laju Pernafasan: <h8 className="fw-light">{medicalRec.LP}</h8>
-          </h6>
-          <h6>
-            Presentase SpO2: <h8 className="fw-light">{medicalRec.Spot}</h8>
-          </h6>
-          <h6>
-            Tinggi Badan: <h8 className="fw-light">{medicalRec.TB}</h8>
-          </h6>
-          <h6>
-            Berat Badan: <h8 className="fw-light">{medicalRec.BB}</h8>
-          </h6>
-          <h6>
-            LILA: <h8 className="fw-light">{medicalRec.LILA}</h8>
-          </h6>
-          <h6>
-            AVPU: <h8 className="fw-light">{medicalRec.AVPU}</h8>
-          </h6>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)', // Maksimal 3 kolom per baris
+              gap: '15px', // Jarak antar elemen
+              marginBottom: '20px',
+               boxShadow: 'none'
+            }}
+          >
+             <h6 style={{marginTop:"21px"}}>
+              Tekanan Darah Sistolik: <span className="fw-light">{medicalRec.TDS}</span>
+            </h6>
+            <h6>
+              Tekanan Darah Diastolik: <span className="fw-light">{medicalRec.TDD}</span>
+            </h6>
+            <h6>
+              Temperatur: <span className="fw-light">{medicalRec.Temperatur}</span>
+            </h6>
+            <h6>
+              Laju Pernafasan: <span className="fw-light">{medicalRec.LP}</span>
+            </h6>
+            <h6>
+              Presentase SpO2: <span className="fw-light">{medicalRec.Spot}</span>
+            </h6>
+          </div>
+
+          {/* Pemeriksaan Fisik */}
+          <h5>Pemeriksaan Fisik</h5>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)', // Maksimal 3 kolom per baris
+              gap: '15px', // Jarak antar elemen
+               boxShadow: 'none'
+            }}
+          >
+            <h6 style={{marginTop:"21px"}}>
+              Tinggi Badan: <span className="fw-light">{medicalRec.TB}</span>
+            </h6>
+            <h6>
+              Berat Badan: <span className="fw-light">{medicalRec.BB}</span>
+            </h6>
+            <h6>
+              LILA: <span className="fw-light">{medicalRec.LILA}</span>
+            </h6>
+            <h6>
+              AVPU: <span className="fw-light">{medicalRec.AVPU}</span>
+            </h6>
+          </div>
         </div>
       );
     })}
@@ -1049,6 +1072,8 @@ const handleSaveXrayData = () => {
 ) : (
   <p>No medical record with statusMRPeriksa: true found.</p>
 )}
+
+
 
                                   </details>
                                 </div>

@@ -30,6 +30,8 @@ function SusAntri() {
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [mergedData, setMergedData] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState("");
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -384,6 +386,32 @@ function SusAntri() {
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/person");
+      const data = await response.json();
+
+      if (data.success) {
+        const filteredDoctors = data.persons.filter((person) => person.role === "Doctor");
+        setDoctors(filteredDoctors);
+      } else {
+        console.error("Failed to fetch doctors:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const handleSelectDoctor = (e) => {
+    setSelectedDoctor(e.target.value);
+    console.log("Dokter yang dipilih:", e.target.value);
+  };
+
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -601,6 +629,21 @@ function SusAntri() {
                                     <div className="col-lg-6">
                                       <h6 className="fw-bold">Keluhan</h6>
                                       <textarea type="text" name="Keluhan" placeholder="Keluhan" className="form-sels" value={Keluhan} onChange={(e) => setKeluhan(e.target.value)} />
+                                    </div>
+                                    <div className="col-lg-6">
+                                      <h6 className="fw-bold">Pilih Dokter</h6>
+                                      <select
+                                        className="form-select"
+                                        value={selectedDoctor}
+                                        onChange={(e) => setSelectedDoctor(e.target.value)}
+                                      >
+                                        <option value="">Select</option>
+                                        {doctors.map((doctor) => (
+                                          <option key={doctor._id} value={doctor._id}>
+                                            {doctor.nama} - {doctor.poli}
+                                          </option>
+                                        ))}
+                                      </select>
                                     </div>
                                   </div>
                                 </div>

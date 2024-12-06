@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
-import logo from '../source/logo.png';
+import logoo from '../source/logo.png';
 import logos from '../source/1.png'
 import '../css/login.css';
 import '../css/admindash.css';
