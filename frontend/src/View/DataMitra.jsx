@@ -260,7 +260,7 @@ function DataMitra() {
     alamat,
     logo,
     email,
-      link,
+    link,
   };
 
   console.log({formData})
@@ -446,6 +446,7 @@ function DataMitra() {
     setNoHp(selectedMitra.no_hp);
     setAlamat(selectedMitra.alamat);
     setEmail(selectedMitra.email);
+    setLink(selectedMitra.link);
     setShowModal(true); // Tampilkan modal untuk edit
     setIsEdit(true);  
     setShowDetail(false);
@@ -701,6 +702,13 @@ function DataMitra() {
                             <div className="col-lg-6">
                               <h6 className="fw-bold">Email</h6>
                               <p>{selectedMitra.email}</p>
+                            </div>
+                          </div>
+
+                          <div className="row row-space">
+                            <div className="col-lg-6">
+                              <h6 className="fw-bold">Link</h6>
+                              <p>{selectedMitra.link}</p>
                             </div>
                           </div>
 
