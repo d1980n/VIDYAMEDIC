@@ -31,7 +31,6 @@ function SuperAdminDashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem('user'));
   const mitra = JSON.parse(sessionStorage.getItem('mitra'));
-  console.log(user);
 
   const handleLogout = () => {
     const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
@@ -89,56 +88,6 @@ function SuperAdminDashboard() {
     setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (window.confirm("Apakah Anda sudah yakin?")) {
-        const formData = {
-            nomorMR: selectedNomorMR,
-            TDS,
-            TDD,
-            Temperatur,
-            Nadi,
-            LP,
-            Spot,
-            TB,
-            BB,
-            LILA,
-            AVPU,
-        };
-
-        try {
-            const response = await fetch('http://localhost:3000/medical/tambah', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            console.log('Response Status:', response.status); 
-            const contentType = response.headers.get('content-type');
-
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                console.log('Response Data:', data);
-                // Reset form dan refresh daftar pasien setelah berhasil
-                if (data.success) {
-                    setShowModal(false); // Tutup modal setelah sukses
-                    resetForm(); // Reset input
-                    setIsConfirmed(false); // Set konfirmasi
-                    fetchDaftarPasien();
-                }
-            } else {
-                const text = await response.text(); 
-                console.error('Error: Response is not JSON. Response text:', text);
-            }
-        } catch (error) {
-            console.error('Error:', error.message);
-        }
-    }
-};
 
   const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
   const dropdownRef = useRef(null); // Referensi untuk dropdown

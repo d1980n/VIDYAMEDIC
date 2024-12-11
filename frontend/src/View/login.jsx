@@ -139,9 +139,6 @@ function Login() {
         return;
       }
 
-      console.log(clinicData.namaKlinik);
-      console.log(data.klinik);
-
       // Validasi nama klinik
       if (data.mitra.namaKlinik !== clinicData.namaKlinik) {
         // Tampilkan error menggunakan SweetAlert

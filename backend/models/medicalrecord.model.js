@@ -6,6 +6,7 @@ const medicalRecordSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    umur: String,
     TDS: String,
     TDD: String,
     Temp: String,
@@ -37,6 +38,12 @@ const medicalRecordSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
         required: true,
+    },
+    riwayatDokter: {
+        type: [String],
+    },
+    riwayatKlinik: {
+        type: [String],
     },
 });
 const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);

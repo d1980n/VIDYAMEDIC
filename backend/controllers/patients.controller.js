@@ -8,7 +8,7 @@ const tambahPasien = async(req, res, next) => {
         alamatLengkap,
         email,
         phone_number,
-
+        currentKlinik,
     } = req.body;
 
     try {
@@ -19,7 +19,7 @@ const tambahPasien = async(req, res, next) => {
             alamatLengkap,
             email,
             phone_number,
-
+            currentKlinik,
         });
 
         const savedPasien = await newPasien.save();
@@ -40,6 +40,7 @@ const generateNomorMR = () => {
     }
     return result;
 };
+
 const getAllPatients = async(req, res, next) => {
     try {
         const patients = await Patient.find();
@@ -183,7 +184,7 @@ const dokterPeriksa = async(req, res) => {
 
 
 
-const statusSelesai = async(req, res) => {
+const statusSelesai = async (req, res) => {
     console.log('Request diterima di /statusSelesai', req.body); // Menambahkan log ini
     try {
         // Cek apakah statusMRPeriksa === true dikirim
@@ -198,19 +199,41 @@ const statusSelesai = async(req, res) => {
             // Ekstrak semua nomorMR dari hasil pencarian rekam medis
             const nomorMR = medicalRecords.map(record => record.nomorMR);
 
-            // Update status pasien berdasarkan nomorMR yang ditemukan
-            const updatedPatients = await Patient.updateMany({ nomorMR: { $in: nomorMR } }, {
-                $set: {
-                    'antrianStatus.status': false,
-                    'antrianStatus.susterAntriStatus': false,
-                    'antrianStatus.dokterAntriStatus': false,
-                    'antrianStatus.dokterPeriksaStatus': false,
-                }
-            }, { new: true });
+            // Cari semua pasien berdasarkan nomorMR
+            const patients = await Patient.find({ nomorMR: { $in: nomorMR } });
 
-            // Cek apakah ada pasien yang diperbarui
-            if (updatedPatients.matchedCount === 0) {
+            if (patients.length === 0) {
                 return res.status(404).json({ message: 'Tidak ada pasien yang ditemukan untuk diperbarui' });
+            }
+
+            // Update status antrian dan pindahkan currentKlinik ke riwayatKlinik, serta tambah riwayatDokter pada MedicalRecord
+            for (const patient of patients) {
+                if (patient.currentKlinik) {
+                    // Hapus currentKlinik pada pasien
+                    patient.currentKlinik = undefined;
+                    // Hapus currentDokter pada pasien
+                    patient.currentDokter = undefined;
+                    await patient.save();
+                }
+
+                // Update status antrian
+                patient.antrianStatus.status = false;
+                patient.antrianStatus.susterAntriStatus = false;
+                patient.antrianStatus.dokterAntriStatus = false;
+                patient.antrianStatus.dokterPeriksaStatus = false;
+
+                // Simpan perubahan pada pasien
+                await patient.save();
+            }
+
+            // Cek apakah ada pasien yang berhasil diperbarui
+            const updatedPatients = await Patient.updateMany(
+                { nomorMR: { $in: nomorMR } },
+                { $set: { 'antrianStatus.status': false, 'antrianStatus.susterAntriStatus': false, 'antrianStatus.dokterAntriStatus': false, 'antrianStatus.dokterPeriksaStatus': false } }
+            );
+
+            if (updatedPatients.matchedCount === 0) {
+                return res.status(404).json({ message: 'Tidak ada pasien yang diperbarui' });
             }
 
             // Update statusMRPeriksa dan statusMR di MedicalRecord
@@ -219,7 +242,7 @@ const statusSelesai = async(req, res) => {
                     statusMR: "",
                     statusMRPeriksa: ""
                 }
-            }, { new: true });
+            });
 
             // Cek apakah rekam medis berhasil diperbarui
             if (updatedMedicalRecords.matchedCount === 0) {
@@ -237,6 +260,9 @@ const statusSelesai = async(req, res) => {
         res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui status', error: error.message });
     }
 };
+
+
+
 
 
 
@@ -301,11 +327,18 @@ const searchPatients = async(req, res) => {
 // Update Status Antrian Pasien Berdasarkan Nomor MR
 const updateAntrianStatus = async(req, res) => {
     const { nomorMR } = req.params;
-    const { antrianStatus } = req.body; // Ini digunakan jika ada pembaruan lain di dalam `antrianStatus`
+    const { antrianStatus, klinik } = req.body; // Ini digunakan jika ada pembaruan lain di dalam `antrianStatus`
 
     try {
-        const pasien = await Patient.findOneAndUpdate({ nomorMR: nomorMR }, { $set: { 'antrianStatus.status': true } }, // Update properti status
-            { new: true } // Mengembalikan data yang sudah diupdate
+        const pasien = await Patient.findOneAndUpdate(
+            { nomorMR: nomorMR }, // Filter berdasarkan nomorMR
+            {
+                $set: {
+                    'antrianStatus.status': true, // Memperbarui status antrian
+                    'currentKlinik': klinik // Memperbarui klinik (ganti namaKlinikBaru dengan variabel klinik baru)
+                }
+            },
+            { new: true } // Mengembalikan data yang sudah diperbarui
         );
 
         if (!pasien) {
@@ -342,8 +375,45 @@ const panggilStatus = async(req, res) => {
     }
 };
 
+const getAllPatientsWithMedicalRecords = async (req, res) => {
+    try {
+        // Gunakan aggregate untuk menggabungkan koleksi patients dan medicalrecords
+        const patients = await Patient.aggregate([
+            {
+                $lookup: {
+                    from: "medicalrecords", // Nama koleksi medicalrecords
+                    localField: "nomorMR", // Field pada koleksi patients
+                    foreignField: "nomorMR", // Field pada koleksi medicalrecords
+                    as: "medicalData", // Nama field baru yang berisi data medis
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    namaLengkap: 1,
+                    nomorMR: 1,
+                    jenisKelamin: 1,
+                    phone_number: 1,
+                    alamatLengkap: 1,
+                    email: 1,
+                    antrianStatus: 1,
+                    medicalData: { $ifNull: ["$medicalData", []] }, // Jika tidak ada data medis, berikan array kosong
+                },
+            },
+        ]);
 
+        // Jika tidak ada pasien, kirim respons 404
+        if (!patients || patients.length === 0) {
+            return res.status(404).json({ success: false, message: "Tidak ada pasien ditemukan." });
+        }
 
+        // Kirimkan data pasien beserta data medisnya
+        res.status(200).json({ success: true, patients });
+    } catch (error) {
+        console.error("Error fetching patients with medical records:", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
 
 
 
@@ -359,4 +429,5 @@ module.exports = {
     dokterPeriksa,
     statusSelesai,
     panggilStatus,
+    getAllPatientsWithMedicalRecords,
 };

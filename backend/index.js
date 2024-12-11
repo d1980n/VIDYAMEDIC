@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const Medical = require('./models/medicalrecord.model');
 const Person = require('./models/person.model');
 const Mitra = require('./models/mitra.model');
+const Patients = require('./models/patient.model');
 
 require('dotenv').config({ path: __dirname + '/../.env' })
 
@@ -51,7 +52,7 @@ app.listen(3000, () => {
 
 app.get('/patients', async(req, res) => {
     try {
-        const patients = await patients.find();
+        const patients = await Patients.find();
         res.json({ success: true, patients });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

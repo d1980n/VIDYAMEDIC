@@ -8,8 +8,9 @@ import Swal from 'sweetalert2';
 import { NavLink } from 'react-router-dom';
 import images2 from '../source/img2.png';
 
-const MedicalRecords = () => {
+const DataPasien = () => {
   const [patients, setPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
   const [showDetail, setShowDetail] = useState(false);
   const [selectedPatients, setSelectedPatients] = useState(null);
   const user = JSON.parse(sessionStorage.getItem('user'));
@@ -31,30 +32,40 @@ const MedicalRecords = () => {
     setShowDetail(!showDetail);
   };
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/patients");
-        const data = await response.json();
-        if (data.success) {
-            // Menyimpan semua person ke dalam state
-            setPatients(data.patients);
-            
-            // Filter untuk Suster
-            const filteredPatients = data.patients.filter(item => item.nomorMR);
-            
-            // Jika ingin menyimpan filteredSuster ke dalam state terpisah, bisa menggunakan setSusterList
-            setPatients(filteredPatients); // Pastikan Anda mendefinisikan state setSusterList sebelumnya
-        } else {
-            console.error("Failed to fetch persons:", data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching persons:", error);
-    }
-    };
+  const fetchAllPatients = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/patients/patients-with-medical-records");
+      const data = await response.json();
+      if (data.success) {
+          // Menyimpan semua person ke dalam state
+          setPatients(data.patients);
+      } else {
+          console.error("Failed to fetch persons:", data.message);
+      }
+  } catch (error) {
+      console.error("Error fetching persons:", error);
+  }
+  };
 
-    fetchPatients();
+  const filterPatientsByClinic = (patients) => {
+    const namaKlinik = mitra ? mitra.namaKlinik : '';
+
+    return patients.filter(patient => {
+        const { medicalData } = patient;
+        return medicalData.some(record => record.riwayatKlinik.includes(namaKlinik));
+    });
+  };
+
+  useEffect(() => {
+    fetchAllPatients();
   }, []);
+
+  useEffect(() => {
+    if (patients.length > 0) {
+        const filtered = filterPatientsByClinic(patients);
+        setFilteredPatients(filtered);
+    }
+}, [patients]);  
 
   const [activePage, setActivePage] = useState('');
 
@@ -247,8 +258,8 @@ const MedicalRecords = () => {
                               </tr>
                             </thead>
                             <tbody>
-                            {patients.length > 0 ? (
-                                patients.map((patients) => (
+                            {filteredPatients.length > 0 ? (
+                                filteredPatients.map((patients) => (
                                     <tr key={patients.nomorMR}>
                                         <td>{patients.nomorMR}</td>
                                         <td>{patients.namaLengkap}</td>
@@ -363,4 +374,4 @@ const MedicalRecords = () => {
   );
 };
 
-export default MedicalRecords;
+export default DataPasien;

@@ -36,6 +36,7 @@ function DataNakes() {
   const user = JSON.parse(sessionStorage.getItem('user'));
   const mitra = JSON.parse(sessionStorage.getItem('mitra'));
   console.log(user);
+  console.log(mitra);
 
   const handleLogout = () => {
     const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
@@ -101,7 +102,7 @@ const handleSubmit = async (e) => {
     alamat,
     role,
     email,
-    klinik: user.namaKlinik,
+    klinik: mitra.namaKlinik,
     password: password || null,
     tl: tl || null, // Null jika tidak diisi
   };

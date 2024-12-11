@@ -20,6 +20,7 @@ import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import DataMitra from './View/DataMitra.jsx';
+import Forbidden from './View/forbidden.jsx';
 import ProtectedRoute from './protectedRoute.js'; // Import komponen ProtectedRoute
 import { store } from './redux/store.js';
 import { Provider } from 'react-redux';
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
   {
     path: "/Drmonitor",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Drmonitor />
       </ProtectedRoute>
     ),
@@ -62,7 +63,7 @@ const router = createBrowserRouter([
   {
     path: "/RiwayatMedis",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <RiwayatMedis />
       </ProtectedRoute>
     ),
@@ -70,7 +71,7 @@ const router = createBrowserRouter([
   {
     path: "/Faktorresiko",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Faktorresiko />
       </ProtectedRoute>
     ),
@@ -78,7 +79,7 @@ const router = createBrowserRouter([
   {
     path: "/Prediksiresiko",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Prediksiresiko />
       </ProtectedRoute>
     ),
@@ -86,7 +87,7 @@ const router = createBrowserRouter([
   {
     path: "/Riwayatdeteksi",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Riwayatdeteksi />
       </ProtectedRoute>
     ),
@@ -94,7 +95,7 @@ const router = createBrowserRouter([
   {
     path: "/Treatment",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Treatment />
       </ProtectedRoute>
     ),
@@ -102,7 +103,7 @@ const router = createBrowserRouter([
   {
     path: "/Rekomendasi",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <Rekomendasi />
       </ProtectedRoute>
     ),
@@ -110,7 +111,7 @@ const router = createBrowserRouter([
   {
     path: "/DrAntri",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <DrAntri />
       </ProtectedRoute>
     ),
@@ -118,7 +119,7 @@ const router = createBrowserRouter([
   {
     path: "/Susterdashboard",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Suster"]}>
         <Susterdashboard />
       </ProtectedRoute>
     ),
@@ -126,7 +127,7 @@ const router = createBrowserRouter([
   {
     path: "/SusAntri",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Suster"]}>
         <SusAntri />
       </ProtectedRoute>
     ),
@@ -134,7 +135,7 @@ const router = createBrowserRouter([
   {
     path: "/Antrian",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Antrian"]}>
         <Antrian />
       </ProtectedRoute>
     ),
@@ -142,7 +143,7 @@ const router = createBrowserRouter([
   {
     path: "/DataPasien",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
         <DataPasien />
       </ProtectedRoute>
     ),
@@ -150,7 +151,7 @@ const router = createBrowserRouter([
   {
     path: "/SuperAdmin",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
         <SuperAdminDashboard />
       </ProtectedRoute>
     ),
@@ -158,7 +159,7 @@ const router = createBrowserRouter([
   {
     path: "/DataNakes",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
         <DataNakes />
       </ProtectedRoute>
     ),
@@ -166,7 +167,7 @@ const router = createBrowserRouter([
   {
     path: "/Target",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Antrian"]}>
         <Target />
       </ProtectedRoute>
     ),
@@ -174,7 +175,7 @@ const router = createBrowserRouter([
   {
     path: "/DrDashboard",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["Doctor"]}>
         <DrDashboard/>
       </ProtectedRoute>
     ),
@@ -190,7 +191,11 @@ const router = createBrowserRouter([
   {
     path: "/DataMitra",
     element: <DataMitra/>
-  }
+  },
+  {
+      path: "/403",
+      element: <Forbidden />,
+  },
 ]);
 
 const rootElement = document.getElementById('root');

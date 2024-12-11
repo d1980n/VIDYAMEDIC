@@ -63,6 +63,13 @@ const patientSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        required: true,
+    },
+    currentKlinik: {
+        type: String,
+    },
+    currentDokter: {
+        type: String,
     },
     antrianStatus: {
         type: antrianStatusSchema,

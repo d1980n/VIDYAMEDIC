@@ -51,6 +51,15 @@ function Drmonitor() {
 
   const navigate = useNavigate();
 
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
+
   const handleLabChange = (e) => {
     const value = e.target.value;
     const checked = e.target.checked;
@@ -250,8 +259,11 @@ const handleSaveXrayData = () => {
       RTP,
       DiagnosaICD11,
       Lab: labData,
+      riwayatDokter: user.id,
+      riwayatKlinik: mitra.namaKlinik
     };
-    console.log("Form Data:", formData); 
+    console.log("Form Data:", formData);
+    
     const result = await Swal.fire({
       title: "Apakah Anda yakin?",
       text: "Data akan diperbarui, pastikan semua informasi sudah benar.",
@@ -321,12 +333,15 @@ const handleSaveXrayData = () => {
 
     if (result.isConfirmed) {
       try {
+
         const response = await fetch("http://localhost:3000/patients/statusSelesai", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ statusMRPeriksa: true }), // Kirim hanya statusMRPeriksa ke backend
+          body: JSON.stringify({
+            statusMRPeriksa: true
+          }), // Kirim hanya statusMRPeriksa ke backend
         });
 
         // Periksa apakah respons adalah JSON
@@ -511,7 +526,7 @@ const handleSaveXrayData = () => {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -552,7 +567,7 @@ const handleSaveXrayData = () => {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>
@@ -603,7 +618,7 @@ const handleSaveXrayData = () => {
                               </tr>
                               <tr class="infos">
                                 <th>Usia: </th>
-                                <td>82 Tahun</td>
+                                <td>{filteredPatient.umur}</td>
                               </tr>
                               <tr class="infos">
                                 <th>Alamat: </th>

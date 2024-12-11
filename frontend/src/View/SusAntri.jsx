@@ -22,6 +22,8 @@ function SusAntri() {
   const [LILA, setLILA] = useState("");
   const [AVPU, setAVPU] = useState("");
   const [Keluhan, setKeluhan] = useState("");
+  const [currentDokter, setCurrentDokter] = useState("");
+  const [umur, setUmur] = useState("");
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [selectedNomorMR, setSelectedNomorMR] = useState("");
   const [isInputDisabled, setIsInputDisabled] = useState(false);
@@ -29,7 +31,16 @@ function SusAntri() {
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [mergedData, setMergedData] = useState([]);
+  const [personList, setPersonList] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -40,9 +51,10 @@ function SusAntri() {
     try {
       const response = await fetch("http://localhost:3000/patients");
       const data = await response.json();
+      const namaKlinik = mitra.namaKlinik;
 
       if (data.success) {
-        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true && patient.currentKlinik === namaKlinik);
         console.log("filteredPatients: ", filteredPatients); // Log untuk melihat hasil filter
 
         setDaftarPasien(filteredPatients);
@@ -105,6 +117,8 @@ function SusAntri() {
     setLILA("");
     setAVPU("");
     setKeluhan("");
+    setCurrentDokter("");
+    setUmur("");
   };
 
   const isFormEmpty = () => {
@@ -178,53 +192,119 @@ function SusAntri() {
   //     }
   // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const fetchPersonData = async () => {
+    try {
+        // Ambil namaKlinik dari sessionStorage
+        const userKlinik = mitra.namaKlinik;
 
-    const formData = {
-      nomorMR: selectedNomorMR,
-      TDS,
-      TDD,
-      Temperatur,
-      Nadi,
-      LP,
-      Spot,
-      TB,
-      BB,
-      LILA,
-      AVPU,
-      Keluhan,
+        if (!userKlinik) {
+            console.error("Nama klinik tidak ditemukan di sessionStorage");
+            return;
+        }
+
+        const response = await fetch("http://localhost:3000/person");
+        const data = await response.json();
+
+        if (data.success) {
+            // Filter data person berdasarkan role = doctor dan nama klinik
+            const filteredPersons = data.person.filter(
+                (person) => person.role === "Doctor" && person.klinik === userKlinik
+            );
+            console.log(filteredPersons);
+
+            setDoctors(filteredPersons); // Simpan data yang sudah difilter
+        } else {
+            console.error("Failed to fetch persons:", data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching persons:", error);
+    }
+};
+
+// Panggil fetchMedical saat komponen di-mount
+useEffect(() => {
+  fetchPersonData();
+}, []);
+
+const updateCurrentDokter = async (nomorMR, currentDokter) => {
+  try {
+    const tempDokter = {
+      nomorMR, // nomorMR untuk referensi pasien
+      currentDokter, // currentDokter dari sessionStorage atau state
     };
 
-    // Tampilkan alert konfirmasi sebelum submit
-    Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Data akan disimpan, pastikan semua informasi sudah benar.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Ya, simpan!",
-      cancelButtonText: "Batal",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await fetch("http://localhost:3000/medical/tambah", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          });
+    // Kirim permintaan ke API /patients/dokterAntri
+    const dokterResponse = await fetch(`http://localhost:3000/patients/updateCurrentDokter/${nomorMR}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(tempDokter),
+    });
 
-          console.log("Response Status:", response.status);
-          const contentType = response.headers.get("content-type");
+    if (dokterResponse.ok) {
+      console.log("Dokter Data Response:", await dokterResponse.json());
+      return true; // Berhasil memperbarui currentDokter
+    } else {
+      console.error("Failed to update currentDokter");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error updating currentDokter:", error.message);
+    return false;
+  }
+};
 
-          if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            console.log("Response Data:", data);
 
-            // Tampilkan alert sukses setelah submit berhasil
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = {
+    nomorMR: selectedNomorMR,
+    TDS,
+    TDD,
+    Temperatur,
+    Nadi,
+    LP,
+    Spot,
+    TB,
+    BB,
+    LILA,
+    AVPU,
+    Keluhan,
+    umur,
+  };
+
+  console.log("Form Data:", formData);
+
+  Swal.fire({
+    title: "Apakah Anda yakin?",
+    text: "Data akan disimpan, pastikan semua informasi sudah benar.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Ya, simpan!",
+    cancelButtonText: "Batal",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // Kirim data ke API /medical/tambah
+        const medicalResponse = await fetch("http://localhost:3000/medical/tambah", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (medicalResponse.ok) {
+          console.log("Medical Data Response:", await medicalResponse.json());
+
+          // Panggil fungsi updateCurrentDokter setelah data medical berhasil disimpan
+          const updateResult = await updateCurrentDokter(selectedNomorMR, currentDokter);
+
+          if (updateResult) {
             Swal.fire({
               title: "Success!",
               text: "Data berhasil disimpan!",
@@ -232,30 +312,31 @@ function SusAntri() {
               confirmButtonText: "OK",
             });
 
-            // Reset form dan refresh daftar pasien setelah berhasil
-            setShowModal(false); // Tutup modal setelah sukses
-            resetForm(); // Reset input
+            // Reset form dan refresh daftar pasien
+            setShowModal(false);
+            resetForm();
             fetchDaftarPasien();
-            console.log("well");
             window.location.reload();
           } else {
-            const text = await response.text();
-            console.error("Error: Response is not JSON. Response text:", text);
+            throw new Error("Gagal memperbarui currentDokter");
           }
-        } catch (error) {
-          console.error("Error:", error.message);
-
-          // Jika terjadi error, tampilkan alert error
-          Swal.fire({
-            title: "Error!",
-            text: "Gagal menyimpan data, coba lagi!",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+        } else {
+          throw new Error("Gagal menyimpan data medical record");
         }
+      } catch (error) {
+        console.error("Error:", error.message);
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal menyimpan data, coba lagi!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
-    });
-  };
+    }
+  });
+};
+
+
 
   useEffect(() => {
     const mergeData = () => {
@@ -286,12 +367,6 @@ function SusAntri() {
       console.error("Error fetching patients:", error);
     }
   };
-
-  // Panggil fetchMedical saat komponen di-mount
-  useEffect(() => {
-    fetchMedical();
-    fetchDaftarPasien();
-  }, []);
 
   // ... kode lainnya ...
 
@@ -376,20 +451,6 @@ function SusAntri() {
     return () => clearInterval(interval); // Bersihkan interval saat komponen dibongkar
   }, []);
 
-  useEffect(() => {
-    // Fetch data dari API
-    fetch("http://localhost:3000/person")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Filter data hanya untuk dokter
-          const doctorData = data.person.filter((person) => person.role === "Doctor");
-          setDoctors(doctorData);
-        }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
-
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
@@ -405,7 +466,7 @@ function SusAntri() {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -445,7 +506,7 @@ function SusAntri() {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>
@@ -608,11 +669,11 @@ function SusAntri() {
                                       <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
                                     </div>
                                     <div className="col-lg-6 ">
-                                      <h6 className="fw-bold marbot">Poli</h6>
-                                      <select className="form-select" id="jenisKelamin">
+                                      <h6 className="fw-bold marbot">Dokter</h6>
+                                      <select className="form-select" id="doctor" value={currentDokter} onChange={(e) => setCurrentDokter(e.target.value)}>
                                         <option value="">Select</option>
                                         {doctors.map((doctor) => (
-                                          <option key={doctor._id} value={doctor.nama}>
+                                          <option key={doctor._id} value={doctor._id}>
                                            <div className="">
                                            {doctor.nama} - {doctor.poli}
                                            </div>
@@ -623,6 +684,13 @@ function SusAntri() {
                                     <div className="col-lg-6 ">
                                       <h6 className="fw-bold marbot">Keluhan</h6>
                                       <textarea type="text" name="Keluhan" placeholder="Keluhan" className="form-sels" value={Keluhan} onChange={(e) => setKeluhan(e.target.value)} />
+                                    </div>
+                                  </div>
+
+                                  <div className="row" style={{ padding: "0px" }}>
+                                    <div className="col-lg-6 ">
+                                      <h6 className="fw-bold marbot">Usia</h6>
+                                      <input type="text" name="usia" className="form-control" placeholder="Usia" value={umur} onChange={(e) => setUmur(e.target.value)} />
                                     </div>
                                   </div>
                                 </div>
