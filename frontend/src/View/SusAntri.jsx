@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import profiles from "../source/user-1.jpg";
 import logo from "../source/logo.png";
-import logos from '../source/1.png'
 import "../css/login.css";
 import "../css/admindash.css";
 import Swal from "sweetalert2";
@@ -394,28 +393,6 @@ function SusAntri() {
   const handleTambahMRClick = () => {
     setIsModalVisible(true);
   };
-
-  const fetchDoctors = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/person");
-      const data = await response.json();
-
-      if (data.success) {
-        const filteredDoctors = data.persons.filter((person) => person.role === "Doctor");
-        setDoctors(filteredDoctors);
-      } else {
-        console.error("Failed to fetch doctors:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching doctors:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
-
-
   return (
     <html className="Admin">
       <link rel="stylesheet" href="https://icdcdn.azureedge.net/embeddedct/icd11ect-1.1.css"></link>
@@ -631,7 +608,7 @@ function SusAntri() {
                                       <input type="text" name="AVPU" className="form-control" placeholder="AVPU" value={AVPU} onChange={(e) => setAVPU(e.target.value)} />
                                     </div>
                                     <div className="col-lg-6 ">
-                                      <h6 className="fw-bold marbot">Poli</h6>
+                                      <h6 className="fw-bold marbot">Poli Klinik</h6>
                                       <select className="form-select" id="jenisKelamin">
                                         <option value="">Select</option>
                                         {doctors.map((doctor) => (
@@ -646,21 +623,6 @@ function SusAntri() {
                                     <div className="col-lg-6 ">
                                       <h6 className="fw-bold marbot">Keluhan</h6>
                                       <textarea type="text" name="Keluhan" placeholder="Keluhan" className="form-sels" value={Keluhan} onChange={(e) => setKeluhan(e.target.value)} />
-                                    </div>
-                                    <div className="col-lg-6">
-                                      <h6 className="fw-bold">Pilih Dokter</h6>
-                                      <select
-                                        className="form-select"
-                                        value={selectedDoctor}
-                                        onChange={(e) => setSelectedDoctor(e.target.value)}
-                                      >
-                                        <option value="">Select</option>
-                                        {doctors.map((doctor) => (
-                                          <option key={doctor._id} value={doctor._id}>
-                                            {doctor.nama} - {doctor.poli}
-                                          </option>
-                                        ))}
-                                      </select>
                                     </div>
                                   </div>
                                 </div>
