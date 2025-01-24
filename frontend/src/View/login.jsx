@@ -3,6 +3,7 @@ import { useState, useEffect  } from 'react';
 import logo from '../source/logologin.png';
 import logos from '../source/1.png'
 import logologin from '../source/logologin.png';
+import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 import { useDispatch } from 'react-redux';
@@ -89,7 +90,7 @@ function Login() {
       
         break;
       case 'Super Admin':
-        navigate('/SuperAdmin');
+        window.location.href = `http://localhost:3001/superadmin?clinicId=${clinicId}`;
         break;
       case 'Gamma':
         navigate('/DashboardGamma');
@@ -103,7 +104,20 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(''); // Reset error message
+    const queryParams = new URLSearchParams(location.search);
+    const clinicId = queryParams.get("clinicId");
+
+    if (!clinicId) {
+      Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Clinic ID is missing in the URL.',
+      });
+      return;
+  }
+
     try {
+
       const response = await fetch('http://localhost:3000/auth/signin', {
         method: 'POST',
         headers: {
@@ -127,9 +141,24 @@ function Login() {
         return;
       }
 
+      // Validasi nama klinik
+      if (data.mitra.namaKlinik !== clinicData.namaKlinik) {
+        // Tampilkan error menggunakan SweetAlert
+        Swal.fire({
+        icon: 'error',
+        title: 'Unauthorized',
+        text: 'Clinic name does not match the URL clinic.',
+      });
+      return;
+    }
+
       // Successful login, navigate based on role
       handleRoleNavigation(data.role);
       dispatch(storeEmail(data.nama));
+      // Simpan data pengguna di session storage
+      sessionStorage.setItem('user', JSON.stringify(data.user));
+      // Simpan data pengguna di session storage
+      sessionStorage.setItem('mitra', JSON.stringify(data.mitra));
       
     } catch (error) {
       console.error('Error:', error.message);
@@ -191,6 +220,9 @@ function Login() {
                       <div className="d-flex align-items-center justify-content-center">
                         <p className="fs-4 mb-0 fw-bold">Belum memiliki akun?</p>
                         <a className="text-primary fw-bold ms-2" href="/register">Buat akun</a>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <a className="text-primary fw-bold ms-2" href="http://localhost:3002/ClinicYoenie">Kembali ke halaman klinik</a>
                       </div>
                     </form>
                   </div>

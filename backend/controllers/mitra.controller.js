@@ -39,7 +39,7 @@ const addMitra = async(req, res) => {
 const editMitra = async(req, res) => {
     try {
         const { id } = req.params; // ID mitra yang akan diedit
-        const { namaKlinik, no_hp, alamat, email, logo } = req.body;
+        const { namaKlinik, no_hp, alamat, email, logo, link } = req.body;
 
         // Validasi input
         if (!namaKlinik || !no_hp || !alamat || !email) {

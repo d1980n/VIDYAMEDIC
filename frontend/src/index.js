@@ -20,6 +20,8 @@ import DataSuperAdmin from './View/DataSuperAdmin.jsx'
 import DashboardGamma from './View/GammaDashboard.jsx'
 import SuperAdminDashboard from './View/SuperAdminDashboard.jsx';
 import DataMitra from './View/DataMitra.jsx';
+import Forbidden from './View/forbidden.jsx';
+import ProtectedRoute from './protectedRoute.js'; // Import komponen ProtectedRoute
 import { store } from './redux/store.js';
 import { Provider } from 'react-redux';
 import {PersistGate} from "redux-persist/integration/react";
@@ -52,67 +54,131 @@ const router = createBrowserRouter([
   },
   {
     path: "/Drmonitor",
-    element: <Drmonitor/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Drmonitor />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/RiwayatMedis",
-    element: <RiwayatMedis/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <RiwayatMedis />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Faktorresiko",
-    element: <Faktorresiko/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Faktorresiko />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Prediksiresiko",
-    element: <Prediksiresiko/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Prediksiresiko />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Riwayatdeteksi",
-    element: <Riwayatdeteksi/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Riwayatdeteksi />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Treatment",
-    element: <Treatment/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Treatment />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Rekomendasi",
-    element: <Rekomendasi/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <Rekomendasi />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DrAntri",
-    element: <DrAntri/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <DrAntri />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Susterdashboard",
-    element: <Susterdashboard/>
+    element: (
+      <ProtectedRoute allowedRoles={["Suster"]}>
+        <Susterdashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/SusAntri",
-    element: <SusAntri/>
+    element: (
+      <ProtectedRoute allowedRoles={["Suster"]}>
+        <SusAntri />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Antrian",
-    element: <Antrian/>
+    element: (
+      <ProtectedRoute allowedRoles={["Antrian"]}>
+        <Antrian />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DataPasien",
-    element: <DataPasien/>
+    element: (
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
+        <DataPasien />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/SuperAdmin",
-    element: <SuperAdminDashboard/>
+    element: (
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
+        <SuperAdminDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DataNakes",
-    element: <DataNakes/>
+    element: (
+      <ProtectedRoute allowedRoles={["Super Admin"]}>
+        <DataNakes />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Target",
-    element: <Target/>
+    element: (
+      <ProtectedRoute allowedRoles={["Antrian"]}>
+        <Target />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DrDashboard",
-    element: <DrDashboard/>
+    element: (
+      <ProtectedRoute allowedRoles={["Doctor"]}>
+        <DrDashboard/>
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DashboardGamma",
@@ -125,7 +191,11 @@ const router = createBrowserRouter([
   {
     path: "/DataMitra",
     element: <DataMitra/>
-  }
+  },
+  {
+      path: "/403",
+      element: <Forbidden />,
+  },
 ]);
 
 const rootElement = document.getElementById('root');

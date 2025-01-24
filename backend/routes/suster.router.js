@@ -7,5 +7,4 @@ router.post('/tambah', tambahMR);
 router.get('/medical/:nomorMR', susterController.getRekamMedisByNomorMR);
 router.put('/updateMR', updateMedicalRecord);
 
-
 module.exports = router;

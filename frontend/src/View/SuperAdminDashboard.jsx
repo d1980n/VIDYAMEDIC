@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import profiles from "../source/user-1.jpg";
 import logo from "../source/logo.png";
-import logos from '../source/1.png'
+import { useNavigate } from 'react-router-dom';
 import "../css/login.css";
 import "../css/admindash.css";
 import images from "../source/Picture1.png";
@@ -27,6 +27,16 @@ function SuperAdminDashboard() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false); // State untuk konfirmasi
   const userEmail = useSelector((state) => state.user.nama); //
+  const userKlinik = useSelector((state) => state.user.namaKlinik); //
+  const navigate = useNavigate();
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
 
   const toggleModal = (nomorMR) => {
     setShowModal(!showModal);
@@ -78,56 +88,6 @@ function SuperAdminDashboard() {
     setActivePage(page);
   };
   const [showOverlay, setShowOverlay] = useState(false);
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (window.confirm("Apakah Anda sudah yakin?")) {
-        const formData = {
-            nomorMR: selectedNomorMR,
-            TDS,
-            TDD,
-            Temperatur,
-            Nadi,
-            LP,
-            Spot,
-            TB,
-            BB,
-            LILA,
-            AVPU,
-        };
-
-        try {
-            const response = await fetch('http://localhost:3000/medical/tambah', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            console.log('Response Status:', response.status); 
-            const contentType = response.headers.get('content-type');
-
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                console.log('Response Data:', data);
-                // Reset form dan refresh daftar pasien setelah berhasil
-                if (data.success) {
-                    setShowModal(false); // Tutup modal setelah sukses
-                    resetForm(); // Reset input
-                    setIsConfirmed(false); // Set konfirmasi
-                    fetchDaftarPasien();
-                }
-            } else {
-                const text = await response.text(); 
-                console.error('Error: Response is not JSON. Response text:', text);
-            }
-        } catch (error) {
-            console.error('Error:', error.message);
-        }
-    }
-};
 
   const [isOpen, setIsOpen] = useState(false); // State untuk menyimpan status dropdown
   const dropdownRef = useRef(null); // Referensi untuk dropdown
@@ -167,7 +127,7 @@ function SuperAdminDashboard() {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -205,7 +165,7 @@ function SuperAdminDashboard() {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>
@@ -289,7 +249,7 @@ function SuperAdminDashboard() {
 
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Klinik VidyaMedic</h4>
+                          <h4 class="fw-semibold mb-3">{mitra.namaKlinik}</h4>
 
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
@@ -311,7 +271,7 @@ function SuperAdminDashboard() {
                       <h5 class="card-title mb-9 fw-semibold">Admin</h5>
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Petugas. {userEmail}</h4>
+                          <h4 class="fw-semibold mb-3">Helo, Petugas. {user.username}</h4>
                           <div class="d-flex align-items-center pb-1">
                             <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
                               <i class="ti ti-arrow-down-right text-danger"></i>

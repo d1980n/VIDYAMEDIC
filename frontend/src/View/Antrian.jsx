@@ -19,6 +19,7 @@ function Antrian() {
   const [alamatLengkap, setAlamatLengkap] = useState('');
   const [phone_number, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [currentKlinik, setCurrentKlinik] = useState('');
   const [daftarPasien, setDaftarPasien] = useState([]);
   const [formData, setFormData] = useState({});
   const [antrianStatus, setAntrianStatus] = useState(false);
@@ -48,6 +49,15 @@ function Antrian() {
 
   
   const [clinicData, setClinicData] = useState(null);
+
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
  
   
   
@@ -140,7 +150,9 @@ function Antrian() {
       alamatLengkap,
       email,
       phone_number,
+      currentKlinik: mitra.namaKlinik,
     };
+    console.log(formData);
   
     // Show SweetAlert with the user's input data for confirmation
     Swal.fire({
@@ -221,6 +233,7 @@ function Antrian() {
           setAlamatLengkap('');
           setPhoneNumber('');
           setEmail('');
+          setCurrentKlinik('');
           setShowModal(false);
   
           // Fetch data again after adding a new patient
@@ -249,12 +262,14 @@ function Antrian() {
     try {
         const response = await fetch('http://localhost:3000/patients');
         const data = await response.json();
+        const namaKlinik = mitra.namaKlinik;
 
         if (response.ok) { // Check if the response is successful
             const filteredPatients = data.patients.filter(patient => 
                 patient.antrianStatus && 
-                patient.antrianStatus.status === true && 
-                patient.is_active !== true // Exclude patients with is_active = true
+                patient.antrianStatus.status === true &&
+                patient.is_active !== true && // Exclude patients with is_active = true 
+                patient.currentKlinik === namaKlinik
             );
             
             // filter pasien yang ada di suster
@@ -323,6 +338,11 @@ function Antrian() {
 
   const updateAntrianStatus = async () => {
     console.log(selectedPatient); // Gunakan selectedPatient di sini
+
+    const formData = {
+      antrianStatus: { status: true },
+      klinik: mitra.namaKlinik,
+  };
   
     // Pastikan selectedPatient sudah dipilih
     if (selectedPatient) {
@@ -332,7 +352,7 @@ function Antrian() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ antrianStatus: { status: true } }), // Sesuai dengan backend
+          body: JSON.stringify(formData), // Sesuai dengan backend
         });
 
         const data = await response.json();
@@ -659,7 +679,7 @@ const susterAntri = async (index, nomorMR) => {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                <img src={clinicData.logo} width="220" alt=""/>
+                <img src={clinicData.logo} width="100" alt=""/>
 
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
@@ -692,7 +712,7 @@ const susterAntri = async (index, nomorMR) => {
                       className={`sidebar-link ${activePage === 'Log Out' ? 'active' : ''}`} 
                       to="/" 
                       aria-expanded="false" 
-                      onClick={() => handleSetActivePage('Log Out')}
+                      onClick={handleLogout}
                     >
                       <span><i className="ti ti-login"></i></span>
                       <span className="hide-menu">Log Out</span>

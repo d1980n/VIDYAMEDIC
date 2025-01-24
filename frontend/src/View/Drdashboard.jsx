@@ -25,6 +25,14 @@ const DrDashboard = () => {
   const [clinicData, setClinicData] = useState(null);
   const [error, setError] = useState(null); 
 
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
   
   const handleSetActivePage = (page) => {
     setActivePage(page);
@@ -44,8 +52,12 @@ const DrDashboard = () => {
       const data = await response.json();
       console.log("response : ", response);
       console.log("data pasien: ", data.patients);
+
+      const currentKlinik = mitra.namaKlinik;
+      const currentDokter = user.id;
+
       if (data.success) {
-        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true && patient.antrianStatus.dokterPeriksaStatus === false);
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true && patient.antrianStatus.dokterPeriksaStatus === false && patient.currentKlinik === currentKlinik && patient.currentDokter === currentDokter);
 
         // Menghitung jumlah pasien yang sesuai dengan filter
         const jumlahPasien = filteredPatients.length;
@@ -119,7 +131,7 @@ const DrDashboard = () => {
               <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                   <a href="./index.html" class="text-nowrap logo-img">
-                    <img src={clinicData.logo} width="180" alt="" />
+                    <img src={mitra.logoKlinik} width="100" alt="" />
                   </a>
                   <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                     <i class="ti ti-x fs-8"></i>
@@ -160,7 +172,7 @@ const DrDashboard = () => {
                       <span className="hide-menu">AUTH</span>
                     </li>
                     <li className="sidebar-item">
-                      <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                      <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                         <span>
                           <i className="ti ti-login"></i>
                         </span>
@@ -190,17 +202,7 @@ const DrDashboard = () => {
 
                         <div class="row align-items-center">
                           <div class="col-8">
-                            <h4 class="fw-semibold mb-3">{clinicData.namaKlinik}</h4>
-
-                            <div class="d-flex align-items-center pb-1">
-                              <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                                <i class="ti ti-arrow-down-right text-danger"></i>
-                              </span>
-
-                              <p class="fs-3 mb-0">
-                                <p class="text-dark me-1 fs-3 mb-0">Alamat:</p> JL. Jamaludinsurak jawa barat, andalan 12 nomor 19 rw 12
-                              </p>
-                            </div>
+                            <h4 class="fw-semibold mb-3">{mitra.namaKlinik}</h4>
                           </div>
                         </div>
                       </div>
@@ -212,7 +214,7 @@ const DrDashboard = () => {
                         <h5 class="card-title mb-9 fw-semibold">Dokter</h5>
                         <div class="row align-items-center">
                           <div class="col-8">
-                            <h4 class="fw-semibold mb-3">Helo, Dr. {userEmail}</h4>
+                            <h4 class="fw-semibold mb-3">Helo, {user.username}</h4>
                           </div>
                         </div>
                       </div>

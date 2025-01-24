@@ -26,7 +26,16 @@ function Susterdashboard() {
   const [clinicData, setClinicData] = useState(null);
   const [error, setError] = useState(null); 
   const location = useLocation();
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+  console.log(user);
+  console.log(mitra);
 
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
 
 
   const toggleModal = (nomorMR) => {
@@ -39,8 +48,11 @@ function Susterdashboard() {
       const response = await fetch("http://localhost:3000/patients");
       const data = await response.json();
       console.log("response : ", response);
+
+      const currentKlinik = mitra.namaKlinik
+
       if (data.success) {
-        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true);
+        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.susterAntriStatus === true && patient.currentKlinik === currentKlinik);
         console.log("filteredPatients: ", filteredPatients); // Log untuk melihat hasil filter
 
         // Menghitung jumlah pasien yang sesuai dengan filter
@@ -198,7 +210,6 @@ useEffect(() => {
           const clinic = data.mitra.find((mitra) => mitra._id === clinicId);
           if (clinic) {
             setClinicData(clinic);
-     
 
           } else {
             setClinicData({ namaKlinik: "Tidak ditemukan", logo: null });
@@ -236,7 +247,7 @@ if (!clinicData) {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={clinicData.logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -276,7 +287,7 @@ if (!clinicData) {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>
@@ -306,17 +317,7 @@ if (!clinicData) {
 
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">{clinicData.namaKlinik} </h4>
-
-                          <div class="d-flex align-items-center pb-1">
-                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                              <i class="ti ti-arrow-down-right text-danger"></i>
-                            </span>
-
-                            <p class="fs-3 mb-0">
-                              <p class="text-dark me-1 fs-3 mb-0">Alamat:</p> JL. Jamaludinsurak jawa barat, andalan 12 nomor 19 rw 12
-                            </p>
-                          </div>
+                          <h4 class="fw-semibold mb-3">{mitra.namaKlinik} </h4>
                         </div>
                       </div>
                     </div>
@@ -328,17 +329,7 @@ if (!clinicData) {
                       <h5 class="card-title mb-9 fw-semibold">Suster</h5>
                       <div class="row align-items-center">
                         <div class="col-8">
-                          <h4 class="fw-semibold mb-3">Helo, Perawat. {userEmail}</h4>
-                          <div class="d-flex align-items-center pb-1">
-                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                              <i class="ti ti-arrow-down-right text-danger"></i>
-                            </span>
-                            <p class="fs-3 mb-0" style={{ marginLeft: "10px" }}>
-                              <p class="text-dark me-1 fs-5 mb-0">
-                                Jumlah Antrian: <p class="text-dark me-1 fs-4 mb-0">5</p>
-                              </p>
-                            </p>
-                          </div>
+                          <h4 class="fw-semibold mb-3">Helo, Perawat. {user.username}</h4>
                         </div>
                       </div>
                     </div>

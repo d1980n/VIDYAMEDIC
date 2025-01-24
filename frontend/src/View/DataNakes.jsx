@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from "sweetalert2";
 import profiles from '../source/user-1.jpg';
@@ -23,6 +24,7 @@ function DataNakes() {
   const [konfPassword, setKonfPassword] = useState('');
   const [poli, setPoli] = useState('');
   const [role, setRole] = useState('');
+  const [klinik, setKlinik] = useState('');
   const [profilePict, setProfilePict] = useState('');
   const [formData, setFormData] = useState({});
   const [personList, setPersonList] = useState([]);
@@ -32,6 +34,16 @@ function DataNakes() {
   const [selectedPerson, setSelectedPerson] = useState(null); // State untuk menyimpan data person yang dipilih
   const [showDetail, setShowDetail] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+  console.log(user);
+  console.log(mitra);
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
   
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -46,7 +58,11 @@ const fetchPersonData = async () => {
       const data = await response.json();
 
       if (data.success) {
-          setPersonList(data.person); // Menyimpan semua data person
+          // Filter person berdasarkan namaKlinik
+          const filteredPersons = data.person.filter(person => person.klinik === mitra.namaKlinik);
+
+          // Simpan hasil filter ke state
+          setPersonList(filteredPersons);
       } else {
           console.error("Failed to fetch persons:", data.message);
       }
@@ -87,6 +103,7 @@ const handleSubmit = async (e) => {
     alamat,
     role,
     email,
+    klinik: mitra.namaKlinik,
     password: password || null,
     tl: tl || null, // Null jika tidak diisi
   };
@@ -169,6 +186,7 @@ const handleSubmit = async (e) => {
         setPassword('');
         setKonfPassword('');
         setRole('');
+        setKlinik('');
         setShowModal(false);
         setIsEdit(false);
         setSelectedPerson(null);
@@ -408,7 +426,7 @@ const handleInputChange = (event) => {
             <div>
               <div className="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" className="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i className="ti ti-x fs-8"></i>
@@ -445,7 +463,7 @@ const handleInputChange = (event) => {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>

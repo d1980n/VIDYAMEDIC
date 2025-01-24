@@ -17,6 +17,14 @@ function DrAntri() {
   const navigate = useNavigate();
   const [isDisabled, setIsDisabled] = useState(false); // Contoh inisialisasi
   const location = useLocation();
+  const user = JSON.parse(sessionStorage.getItem('user'));
+  const mitra = JSON.parse(sessionStorage.getItem('mitra'));
+
+  const handleLogout = () => {
+    const clinicId = mitra.idKlinik || ''; // Pastikan ID klinik ada
+    sessionStorage.removeItem('user'); // Hapus session user
+    window.location.href = `http://localhost:3001/?clinicId=${clinicId}`; // Navigasi ke URL target
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +51,13 @@ function DrAntri() {
       console.log("response : ", response);
       console.log("data pasien: ", data.patients);
       if (data.success) {
-        const filteredPatients = data.patients.filter((patient) => patient.antrianStatus.dokterAntriStatus === true && patient.antrianStatus.dokterPeriksaStatus === false);
+        const filteredPatients = data.patients.filter(
+          (patient) =>
+          patient.currentKlinik === mitra.namaKlinik &&
+          patient.currentDokter === user.id &&
+          patient.antrianStatus.dokterAntriStatus === true &&
+          patient.antrianStatus.dokterPeriksaStatus === false
+          );
         setDaftarPasien(filteredPatients);
       } else {
         console.error("Failed to fetch patients:", data.message);
@@ -200,6 +214,7 @@ function DrAntri() {
 
             // Cek apakah patientsData adalah array
             if (Array.isArray(patientsData.patients)) {
+
               // Mencari pasien dengan nomor MR yang cocok dari rekaman medis
               const matchedPatient = patientsData.patients.find((patient) => patient.nomorMR === medicalRecord.nomorMR);
               console.log("Matched Patient:", matchedPatient); // Lihat jika pasien ditemukan
@@ -235,7 +250,10 @@ function DrAntri() {
   
         if (data.success) {
           const newPatients = data.patients.filter(
-            (patient) => patient.antrianStatus.dokterAntriStatus === true
+            (patient) =>
+            patient.currentKlinik === mitra.namaKlinik &&
+            patient.currentDokter === user.id &&
+            patient.antrianStatus.dokterAntriStatus === true
           );
           setDaftarPasien((prevDaftarPasien) => {
             const uniquePatients = newPatients.filter(
@@ -264,7 +282,7 @@ function DrAntri() {
             <div>
               <div class="brand-logo d-flex align-items-center justify-content-between">
                 <a href="./index.html" class="text-nowrap logo-img">
-                  <img src={logo} width="180" alt="" />
+                  <img src={mitra.logoKlinik} width="100" alt="" />
                 </a>
                 <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                   <i class="ti ti-x fs-8"></i>
@@ -326,7 +344,7 @@ function DrAntri() {
                     <span className="hide-menu">AUTH</span>
                   </li>
                   <li className="sidebar-item">
-                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={() => handleSetActivePage("Log Out")}>
+                    <NavLink className={`sidebar-link ${activePage === "Log Out" ? "active" : ""}`} to="/" aria-expanded="false" onClick={handleLogout}>
                       <span>
                         <i className="ti ti-login"></i>
                       </span>
